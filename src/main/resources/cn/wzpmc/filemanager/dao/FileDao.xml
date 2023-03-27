@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzpmc.filemanager.dao.FileDao">
+
+    <select id="getFileCount" resultType="java.lang.Long">
+        select count(*) from `files`;
+    </select>
+    <select id="getFiles" resultType="cn.wzpmc.filemanager.entities.FileObject">
+        select * from `files` limit #{id}, 20
+    </select>
+</mapper>
