@@ -7,7 +7,7 @@ plugins {
 
 group = "cn.wzpmc.filemanager"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_20
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 configurations {
     compileOnly {
@@ -21,12 +21,23 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.0")
-    compileOnly("org.projectlombok:lombok")
+    implementation("org.springframework.boot:spring-boot-starter-web"){
+        exclude("org.springframework.book", "spring-boot-starter-json")
+    }
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.1")
+    // https://mvnrepository.com/artifact/com.auth0/java-jwt
+    implementation("com.auth0:java-jwt:4.3.0")
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    implementation("commons-codec:commons-codec:1.15")
+    compileOnly("org.projectlombok:lombok:1.18.26")
     runtimeOnly("com.mysql:mysql-connector-j")
-    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok:1.18.26")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation(project("FFMpegJ"))
+    // https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2
+    implementation("com.alibaba.fastjson2:fastjson2:2.0.28")
+    // https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension
+    implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.28")
 }
 
 tasks.withType<Test> {
