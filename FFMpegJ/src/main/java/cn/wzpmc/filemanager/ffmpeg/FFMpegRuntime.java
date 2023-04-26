@@ -40,7 +40,7 @@ public class FFMpegRuntime {
             if (contentType == null || !contentType.startsWith("video")) {
                 return null;
             }
-            ProcessBuilder processBuilder = new ProcessBuilder("ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file.getAbsolutePath());
+            ProcessBuilder processBuilder = new ProcessBuilder(this.ffprobePath, "-v", "quiet", "-print_format", "json", "-show_streams", file.getAbsolutePath());
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder stringBuilder = new StringBuilder();

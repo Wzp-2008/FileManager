@@ -2,9 +2,13 @@ package cn.wzpmc.filemanager.service;
 
 import cn.wzpmc.filemanager.dao.FileDao;
 import cn.wzpmc.filemanager.entities.CountableList;
+import cn.wzpmc.filemanager.entities.EncodingThreadInfo;
 import cn.wzpmc.filemanager.entities.FileObject;
 import cn.wzpmc.filemanager.entities.User;
+import cn.wzpmc.filemanager.enums.EncodingStatus;
 import cn.wzpmc.filemanager.ffmpeg.FFMpegRuntime;
+import cn.wzpmc.filemanager.ffmpeg.enums.VideoEncoder;
+import cn.wzpmc.filemanager.ffmpeg.threads.TranscodingFileThread;
 import cn.wzpmc.filemanager.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
@@ -19,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -44,6 +50,8 @@ public class FileService {
             log.info("成功创建保存文件夹！");
         }
         this.runtime = new FFMpegRuntime();
+        DaemonThread daemonThread = new DaemonThread();
+        daemonThread.start();
     }
 
     public Long getFileCount() {
@@ -88,12 +96,21 @@ public class FileService {
     }
     @SneakyThrows
     public FileObject uploadFile(String token, MultipartFile file) {
+        String fullName = file.getOriginalFilename();
+        assert fullName != null;
+        File tempFile = File.createTempFile(fullName, "");
+        FileOutputStream fileOutputStream = new FileOutputStream(tempFile);
+        StreamUtils.copy(file.getInputStream(), fileOutputStream);
+        fileOutputStream.close();
+        return uploadFile(token, tempFile, fullName);
+    }
+    public FileObject uploadFile(String token, File file, String fullName){
         Optional<User> user = jwtUtils.getUser(token);
         if (user.isEmpty()) {
             return null;
         }
         User requestUser = user.get();
-        String fullName = file.getOriginalFilename();
+
         assert fullName != null;
         int i = fullName.lastIndexOf('.');
         String name = fullName.substring(0, i);
@@ -102,20 +119,26 @@ public class FileService {
         FileObject fileObject = new FileObject();
         fileObject.setFileName(name);
         fileObject.setFileFormat(format);
-        fileObject.setFileSize(file.getSize());
+        fileObject.setFileSize(file.length());
         fileObject.setUploader(requestUser.getUsername());
         fileObject.setMd5(md5);
         File saveFile = new File(this.savePath, md5);
-        if (!saveFile.exists()) {
-            StreamUtils.copy(file.getInputStream(), new FileOutputStream(saveFile));
+        try {
+            Files.move(file.toPath(), saveFile.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.warn("移动文件失败！, File={}", fileObject);
+            return null;
         }
         dao.uploadFile(fileObject);
         return fileObject;
     }
     @SneakyThrows
-    private static String getFileMd5(MultipartFile file){
+    private static String getFileMd5(File file){
         MessageDigest MD5 = MessageDigest.getInstance("MD5");
-        MD5.digest(file.getBytes());
+        FileInputStream fileInputStream = new FileInputStream(file);
+        MD5.digest(fileInputStream.readAllBytes());
+        fileInputStream.close();
         return new String(Hex.encodeHex(MD5.digest()));
     }
 
@@ -165,5 +188,59 @@ public class FileService {
             log.warn("服务端缺少FFMpeg环境（FFMpeg和FFProbe），会影响某些功能使用！");
         }
         return result;
+    }
+    private final Map<Integer, TranscodingFileThread> transcodingFileThreadMap = new Hashtable<>();
+    private final Map<String, EncodingStatus> statusMap = new Hashtable<>();
+    @SneakyThrows
+    public Object encoding(FileObject fileObject, VideoEncoder outputEnc, String token){
+        if (!runtime.check()) {
+            log.warn("服务端缺少FFMpeg环境（FFMpeg和FFProbe），会影响某些功能使用！");
+        }
+        if (transcodingFileThreadMap.containsKey(fileObject.getId())){
+            return "文件存在，无法转码！";
+        }
+        File outputTempFile = File.createTempFile("video-encoding-" + fileObject.getMd5(), ".mp4");
+        File inputFile = new File(savePath, fileObject.getMd5());
+        TranscodingFileThread transcodingFileThread = new TranscodingFileThread(inputFile, outputEnc, outputTempFile, (thread) -> {
+            statusMap.put(thread.getName(), EncodingStatus.END);
+            this.uploadFile(token, thread.getOutput(), fileObject.getFileName() + "-" + thread.getOutputEncoder().name + ".mp4");
+        }, runtime);
+        statusMap.put(transcodingFileThread.getName(), EncodingStatus.WAITING);
+        transcodingFileThreadMap.put(fileObject.getId(), transcodingFileThread);
+        return transcodingFileThreadMap.hashCode();
+    }
+
+    public List<EncodingThreadInfo> getEncodingInfo() {
+        List<EncodingThreadInfo> result = new ArrayList<>();
+        for (Map.Entry<Integer, TranscodingFileThread> entry : transcodingFileThreadMap.entrySet()) {
+            Integer fileId = entry.getKey();
+            TranscodingFileThread value = entry.getValue();
+            FileObject fullFileInfo = dao.getFullFileInfo(fileId);
+            result.add(new EncodingThreadInfo(statusMap.get(value.getName()), fullFileInfo, value.getProgress(), value.getTotalFrames(), value.getFrames(), value.getFps()));
+        }
+        return result;
+    }
+    private class DaemonThread extends Thread {
+        @SneakyThrows
+        @Override
+        public void run() {
+            while (true){
+                for (TranscodingFileThread value : FileService.this.transcodingFileThreadMap.values()) {
+                    String name = value.getName();
+                    EncodingStatus status = FileService.this.statusMap.get(name);
+                    if (status.equals(EncodingStatus.RUNNING)){
+                        break;
+                    }
+                    if (status.equals(EncodingStatus.END)){
+                        continue;
+                    }
+                    value.start();
+                    FileService.this.statusMap.put(name, EncodingStatus.RUNNING);
+                    break;
+                }
+                Thread.sleep(1000);
+            }
+
+        }
     }
 }

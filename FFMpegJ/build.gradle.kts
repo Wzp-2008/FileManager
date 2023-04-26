@@ -21,7 +21,9 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     // https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2
     implementation("com.alibaba.fastjson2:fastjson2:2.0.26")
-    implementation("org.apache.tika:tika-core:2.7.0")
+    implementation(
+
+            "org.apache.tika:tika-core:2.7.0")
 }
 
 tasks.withType<Test> {

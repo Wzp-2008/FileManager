@@ -5,44 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b1988503-f417-4c69-ad49-94239747bbea" name="变更" comment="feat: adding get files">
-      <change afterPath="$PROJECT_DIR$/.idea/modules/FFMpegJ/FileManager.FFMpegJ.main.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules/FFMpegJ/FileManager.FFMpegJ.test.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/FFMpegRuntime.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FileManager/src/entities/FileDetailsInfo.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/enums/VideoEncoder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/threads/TranscodingFileThread.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/application.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/CountableList.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/ResponseResult.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/enums/SearchType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/utils/JwtUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/FileManager.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/FileManager.main.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FileManager.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FileManager/components.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/components.d.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FileManager/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FileManager/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FileManager/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/src/App.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FileManager/src/requester/Requester.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/src/requester/Requester.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/config/GlobalWebMvcConfig.java" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/EncodingThreadInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/enums/EncodingStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFMpegJ/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/FFMpegJ/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/FFMpegRuntime.java" beforeDir="false" afterPath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/FFMpegRuntime.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/FileManagerApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/FileManagerApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/FileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/FileController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/dao/FileDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/dao/FileDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/dao/UserDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/dao/UserDao.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/FileService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/FileService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/dao/FileDao.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/dao/FileDao.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/dao/UserDao.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/dao/UserDao.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,8 +63,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="TypeScript File" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -97,7 +72,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="jar:///server/JAVA_HOME/17/lib/src.zip!/java.base/java/util/regex/Pattern.java" root0="SKIP_INSPECTION" />
     <setting file="jar:///server/JAVA_HOME/20/lib/src.zip!/java.base/java/util/Date.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.26/f43db6c43d481ab766a496c86dc43c145e3c9df4/lombok-1.18.26-sources.jar!/lombok/extern/slf4j/XSlf4j.java" root0="SKIP_INSPECTION" />
   </component>
   <component name="HttpClientSelectedEnvironments">
     <file url="jar://$APPLICATION_HOME_DIR$/plugins/restClient/lib/restClient.jar!/com/intellij/ws/rest/client/requests/collection/post-requests.http" environment="test" />
@@ -151,28 +128,29 @@
       <window_info id="Commit_Guest" show_stripe_button="false" />
       <window_info id="Pull Requests" />
       <window_info id="Learn" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.32734376" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23818277" />
       <window_info id="Commit" order="1" weight="0.32734376" />
       <window_info id="Structure" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Database Changes" />
       <window_info anchor="bottom" id="TypeScript" />
-      <window_info anchor="bottom" id="Profiler" />
-      <window_info active="true" anchor="bottom" id="Messages" visible="true" weight="0.32994187" />
+      <window_info anchor="bottom" id="Profiler" weight="0.32994187" />
+      <window_info anchor="bottom" id="Messages" weight="0.32994187" />
       <window_info anchor="bottom" id="Java Enterprise" weight="0.33251953" />
       <window_info anchor="bottom" id="File Transfer" />
       <window_info anchor="bottom" id="Run" weight="0.32994187" />
       <window_info anchor="bottom" id="Dependency Checker" />
-      <window_info anchor="bottom" id="Version Control" order="0" weight="0.32994187" />
-      <window_info anchor="bottom" id="Problems View" order="1" weight="0.33284885" />
-      <window_info anchor="bottom" id="Terminal" order="2" weight="0.32994187" />
-      <window_info anchor="bottom" id="Build" order="3" weight="0.33284885" />
-      <window_info anchor="bottom" id="Services" order="4" weight="0.32994187" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="0" visible="true" weight="0.34228516" />
+      <window_info anchor="bottom" id="Problems View" order="1" weight="0.3396318" />
+      <window_info anchor="bottom" id="Terminal" order="2" weight="0.34190106" />
+      <window_info anchor="bottom" id="Build" order="3" weight="0.32994187" />
+      <window_info anchor="bottom" id="Debug" order="4" show_stripe_button="false" weight="0.32994187" />
+      <window_info anchor="bottom" id="Services" order="5" weight="0.34228516" />
       <window_info anchor="right" id="Endpoints" />
       <window_info anchor="right" id="Beans" />
       <window_info anchor="right" id="Meet New UI" show_stripe_button="false" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Notifications" order="0" weight="0.25" />
       <window_info anchor="right" id="Database" order="1" weight="0.25" />
-      <window_info anchor="right" id="Gradle" order="2" visible="true" weight="0.32734376" />
+      <window_info anchor="right" id="Gradle" order="2" weight="0.23619792" />
     </layout>
   </component>
   <component name="RecentsManager">
@@ -346,8 +324,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.FileManager [clean]" />
         <item itemvalue="Gradle.CheckTest.onTest" />
+        <item itemvalue="Gradle.FileManager [clean]" />
         <item itemvalue="Gradle.CheckTest" />
         <item itemvalue="Gradle.FileManager [nativeRun]" />
       </list>
@@ -378,7 +356,9 @@
       <workItem from="1680618003149" duration="219000" />
       <workItem from="1680932900587" duration="28000" />
       <workItem from="1681528254816" duration="55000" />
-      <workItem from="1681825747684" duration="988000" />
+      <workItem from="1681825747684" duration="2853000" />
+      <workItem from="1682258664381" duration="2743000" />
+      <workItem from="1682426315842" duration="7659000" />
     </task>
     <task id="LOCAL-00001" summary="feat: adding get files">
       <created>1679928730544</created>
@@ -387,7 +367,21 @@
       <option name="project" value="LOCAL" />
       <updated>1679928730544</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="feat: adding get files">
+      <created>1681826752728</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1681826752728</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feat: adding get files">
+      <created>1681826809345</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1681826809345</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
