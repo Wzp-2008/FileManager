@@ -29,15 +29,16 @@ dependencies {
     implementation("com.auth0:java-jwt:4.3.0")
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
     implementation("commons-codec:commons-codec:1.15")
-    compileOnly("org.projectlombok:lombok:1.18.26")
-    runtimeOnly("com.mysql:mysql-connector-j")
-    annotationProcessor("org.projectlombok:lombok:1.18.26")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation(project("FFMpegJ"))
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     // https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2
     implementation("com.alibaba.fastjson2:fastjson2:2.0.28")
     // https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension
     implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.28")
+    implementation("com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.28")
+    compileOnly("org.projectlombok:lombok:1.18.26")
+    runtimeOnly("com.mysql:mysql-connector-j")
+    annotationProcessor("org.projectlombok:lombok:1.18.26")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.withType<Test> {

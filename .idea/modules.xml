@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/FFMpegJ/FileManager.FFMpegJ.main.iml" filepath="$PROJECT_DIR$/.idea/modules/FFMpegJ/FileManager.FFMpegJ.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/FFMpegJ/FileManager.FFMpegJ.test.iml" filepath="$PROJECT_DIR$/.idea/modules/FFMpegJ/FileManager.FFMpegJ.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/FileManager.main.iml" filepath="$PROJECT_DIR$/.idea/modules/FileManager.main.iml" />
     </modules>
   </component>

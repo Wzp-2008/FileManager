@@ -5,7 +5,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,22 +14,31 @@ import java.util.Optional;
 import java.util.Random;
 
 @Service
-@Log4j2
+@Slf4j
 public class JwtUtils {
     private final Algorithm hmacKey;
-    private static String generatorHmacKey(){
+    private static String generatorRandomCharList(int size, char minChar, char maxChar){
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 16; i++) {
-            int c = new Random().nextInt(33, 126);
+        for (int i = 0; i < size; i++) {
+            int c = new Random().nextInt(minChar, maxChar);
             builder.append((char) c);
         }
         return builder.toString();
+    }
+    public static String generatorRandomLowerStandString(int size){
+        return generatorRandomCharList(size, 'a', 'z');
+    }
+    public static String generatorRandomString(int size){
+        return generatorRandomCharList(size, '!', '~');
+    }
+    private static String generatorHmacKey(){
+        return generatorRandomString(16);
     }
     public JwtUtils(@Value("${hmac-key}") String hmacKey){
         String key;
         if ("RANDOM".equalsIgnoreCase(hmacKey)){
             key = generatorHmacKey();
-            log.info("Using Random Hmac Key: {}", key);
+            log.info("使用随机的HMAC密钥：{}", key);
         }else{
             key = hmacKey;
         }
@@ -39,7 +48,7 @@ public class JwtUtils {
         Calendar instance = Calendar.getInstance();
         instance.add(Calendar.HOUR,24 * 5);
         JWTCreator.Builder builder = JWT.create();
-        builder.withClaim("username", user.getUsername());
+        builder.withClaim("name", user.getName());
         builder.withClaim("id", user.getId());
         builder.withExpiresAt(instance.getTime());
         return builder.sign(this.hmacKey);
@@ -51,10 +60,10 @@ public class JwtUtils {
         }catch (Exception e){
             return Optional.empty();
         }
-        String username = verify.getClaim("username").asString();
+        String username = verify.getClaim("name").asString();
         Integer id = verify.getClaim("id").asInt();
         User user = new User();
-        user.setUsername(username);
+        user.setName(username);
         user.setId(id);
         return Optional.of(user);
     }

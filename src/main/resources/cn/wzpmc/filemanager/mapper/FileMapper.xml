@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzpmc.filemanager.mapper.FileMapper">
+    <insert id="createDefault">
+        CREATE TABLE IF NOT EXISTS `new_file`  (
+        `id` int NOT NULL AUTO_INCREMENT,
+        `name` varchar(100) NOT NULL,
+        `type` varchar(20) NULL,
+        `size` bigint NOT NULL,
+        `hash` char(128) NOT NULL COMMENT 'SHA512',
+        `uploader` int NOT NULL,
+        `upload_time` datetime NOT NULL DEFAULT now(),
+        `download_count` int NOT NULL DEFAULT 0,
+        PRIMARY KEY (`id`)
+        );
+    </insert>
+    <insert id="addFile" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert into `new_file`(`name`, `type`, `size`, `hash`, `uploader`, `upload_time`) values(#{name}, #{type}, #{size}, #{hash}, #{uploader}, #{uploadTime})
+    </insert>
+    <insert id="addDownloadCount">
+        update `new_file` set `download_count` = `download_count` + 1 where `id` = #{id};
+    </insert>
+    <delete id="removeFile">
+        delete from `new_file` where `id` = #{id};
+    </delete>
+    <select id="getOriginalFile" resultType="cn.wzpmc.filemanager.entities.FileObject">
+        select * from `new_file` where `id` = #{id};
+    </select>
+    <select id="getFileVo" resultType="cn.wzpmc.filemanager.entities.vo.FileObjectVo">
+        select `new_file`.*, `new_user`.`name` as `uploader_name` from `new_file` inner join `new_user` on `new_file`.`uploader` = `new_user`.`id` where `new_file`.`id` = #{id};
+    </select>
+    <select id="getFileCountByNameAndType" resultType="java.lang.Integer">
+        select count(*) from `new_file` where `name` = #{name} and `type` = #{type};
+    </select>
+    <select id="getFileById" resultType="cn.wzpmc.filemanager.entities.FileObject">
+        select * from `new_file` where `id` = #{id};
+    </select>
+    <select id="getAllFileCount" resultType="java.lang.Integer">
+        select count(*) from `new_file`;
+    </select>
+    <select id="getPageFile" resultType="cn.wzpmc.filemanager.entities.vo.FileObjectVo">
+        select `new_file`.*, `new_user`.`name` as `uploader_name` from `new_file` inner join `new_user` on `new_file`.`uploader` = `new_user`.`id` limit #{minId}, #{num};
+    </select>
+    <select id="getHashById" resultType="java.lang.String">
+        select `hash` from `new_file` where `id` = #{id};
+    </select>
+    <select id="getFileByType" resultType="cn.wzpmc.filemanager.entities.vo.FileObjectVo">
+        select `new_file`.*, `new_user`.`name` as `uploader_name` from `new_file` inner join `new_user` on `new_file`.`uploader` = `new_user`.`id` where `new_file`.`type` = #{type} limit #{minId}, #{num};
+    </select>
+    <select id="getFileCountByType" resultType="java.lang.Integer">
+        select count(*) from `new_file` where `type` = #{type};
+    </select>
+    <select id="getFileByUploader" resultType="cn.wzpmc.filemanager.entities.vo.FileObjectVo">
+        select `new_file`.*, `new_user`.`name` as `uploader_name` from `new_file` inner join `new_user` on `new_file`.`uploader` = `new_user`.`id` where `new_user`.`name` like #{uploader} limit #{minId}, #{num};
+    </select>
+    <select id="getFileCountByUploader" resultType="java.lang.Integer">
+        select count(*) from `new_file` inner join `new_user` on `new_file`.`uploader` = `new_user`.`id` where `new_user`.`name` like #{uploader};
+    </select>
+    <select id="getFileByName" resultType="cn.wzpmc.filemanager.entities.vo.FileObjectVo">
+        select `new_file`.*, `new_user`.`name` as `uploader_name` from `new_file` inner join `new_user` on `new_file`.`uploader` = `new_user`.`id` where `new_file`.`name` like #{name} limit #{minId}, #{num};
+    </select>
+    <select id="getFileCountByName" resultType="java.lang.Integer">
+        select count(*) from `new_file` where `new_file`.`name` like #{name};
+    </select>
+    <select id="getFileByDate" resultType="cn.wzpmc.filemanager.entities.vo.FileObjectVo">
+        select `new_file`.*, `new_user`.`name` as `uploader_name` from `new_file` inner join `new_user` on `new_file`.`uploader` = `new_user`.`id` where `new_file`.`upload_time` >= #{date} AND `new_file`.`upload_time` &lt; #{date} + INTERVAL 1 DAY limit #{minId}, #{num};
+    </select>
+    <select id="getFileCountByDate" resultType="java.lang.Integer">
+        select count(*) from `new_file` where `upload_time` >= #{date} AND `upload_time` &lt; #{date} + INTERVAL 1 DAY;
+    </select>
+</mapper>

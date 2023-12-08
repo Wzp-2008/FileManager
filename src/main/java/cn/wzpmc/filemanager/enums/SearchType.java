@@ -1,5 +1,5 @@
 package cn.wzpmc.filemanager.enums;
 
 public enum SearchType {
-    NAME,ID,MD5,FORMAT
+    FILE_NAME, ID, UPLOADER, UPLOAD_DAY, TYPE
 }

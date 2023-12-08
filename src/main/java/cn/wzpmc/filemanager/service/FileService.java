@@ -1,246 +1,283 @@
 package cn.wzpmc.filemanager.service;
 
-import cn.wzpmc.filemanager.dao.FileDao;
-import cn.wzpmc.filemanager.entities.CountableList;
-import cn.wzpmc.filemanager.entities.EncodingThreadInfo;
+import cn.wzpmc.filemanager.configurations.FileManagerConfiguration;
 import cn.wzpmc.filemanager.entities.FileObject;
+import cn.wzpmc.filemanager.entities.Page;
+import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.User;
-import cn.wzpmc.filemanager.enums.EncodingStatus;
-import cn.wzpmc.filemanager.ffmpeg.FFMpegRuntime;
-import cn.wzpmc.filemanager.ffmpeg.enums.VideoEncoder;
-import cn.wzpmc.filemanager.ffmpeg.threads.TranscodingFileThread;
+import cn.wzpmc.filemanager.entities.vo.FileObjectVo;
+import cn.wzpmc.filemanager.enums.Auth;
+import cn.wzpmc.filemanager.enums.HttpCodes;
+import cn.wzpmc.filemanager.enums.SearchType;
+import cn.wzpmc.filemanager.mapper.FileMapper;
+import cn.wzpmc.filemanager.mapper.UserMapper;
 import cn.wzpmc.filemanager.utils.JwtUtils;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.codec.binary.Hex;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
-import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
-@Log4j2
+@Slf4j
 public class FileService {
-    private final FileDao dao;
+    private final FileMapper fileMapper;
+    private final UserMapper userMapper;
     private final File savePath;
+    private final File tmpPath;
     private final JwtUtils jwtUtils;
-    private final FFMpegRuntime runtime;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final AccessService accessService;
+
     @Autowired
-    public FileService(FileDao dao, @Value("${save-path}") String savePath, JwtUtils jwtUtils){
-        this.dao = dao;
+    public FileService(FileMapper fileMapper, UserMapper userMapper, AccessService accessService, FileManagerConfiguration configuration, JwtUtils jwtUtils, RedisTemplate<String, String> redisTemplate){
+        this.fileMapper = fileMapper;
+        this.userMapper = userMapper;
+        this.accessService = accessService;
+        this.savePath = configuration.getSavePath();
+        this.tmpPath = configuration.getTmpPath();
         this.jwtUtils = jwtUtils;
-        this.savePath = new File(savePath);
-        if (!this.savePath.exists()){
-            boolean mkdir = this.savePath.mkdirs();
-            if (!mkdir){
-                log.error("无法创建保存文件夹，请重试！");
+        this.fileMapper.createDefault();
+        this.redisTemplate = redisTemplate;
+    }
+    private FileObject getFilenameExtend(String fullName){
+        StringBuilder filename = new StringBuilder();
+        String fileExtend = null;
+        for (int i = 0; i < fullName.length(); i++) {
+            char c = fullName.charAt(i);
+            if (c == '.') {
+                if (!Objects.isNull(fileExtend)) {
+                    filename.append(".").append(fileExtend);
+                }
+                fileExtend = "";
+                continue;
             }
-            log.info("成功创建保存文件夹！");
+            if (Objects.nonNull(fileExtend)){
+                fileExtend += c;
+            } else {
+                filename.append(c);
+            }
         }
-        this.runtime = new FFMpegRuntime();
-        DaemonThread daemonThread = new DaemonThread();
-        daemonThread.start();
+        FileObject result = new FileObject();
+        result.setName(filename.toString());
+        result.setType(fileExtend);
+        return result;
     }
-
-    public Long getFileCount() {
-        return dao.getFileCount();
-    }
-
-    public List<FileObject> getFiles(int page) {
-        if (page <= 0){
-            return new ArrayList<>();
+    public Result<FileObjectVo> uploadFile(MultipartFile multipartFile, String authorization) {
+        Optional<User> optionalUser = jwtUtils.getUser(authorization);
+        if (optionalUser.isEmpty()){
+            return Result.failed(HttpCodes.ACCESS_DENIED);
         }
-        return dao.getFiles((page - 1) * 20);
+        User user = optionalUser.get();
+        int userId = user.getId();
+        String originalName = multipartFile.getOriginalFilename();
+        if (Objects.isNull(originalName)){
+            return Result.failed(HttpCodes.HTTP_CODES401);
+        }
+        FileObject filenameExtend = getFilenameExtend(originalName);
+        String name = filenameExtend.getName();
+        String fileExtend = filenameExtend.getType();
+        if (this.fileMapper.getFileCountByNameAndType(name, fileExtend) >= 1){
+            // 文件存在
+            return Result.failed(HttpCodes.HTTP_CODES401);
+        }
+        String tmpFileName = JwtUtils.generatorRandomLowerStandString(8);
+        File tmpFile = new File(this.tmpPath, tmpFileName);
+        try {
+            if (!tmpFile.createNewFile()) {
+                log.error("无法创建文件：{}", tmpFile.getAbsoluteFile());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            multipartFile.transferTo(tmpFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String sha512;
+        try(FileInputStream fileInputStream = new FileInputStream(tmpFile)){
+            sha512 = DigestUtils.sha512Hex(fileInputStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        File file = new File(this.savePath, sha512);
+        if (!file.isFile()){
+            try {
+                Files.move(tmpFile.toPath(), file.toPath());
+            } catch (IOException e) {
+                log.error("无法移动文件：{} -> {}", tmpPath.getAbsoluteFile(), file.getAbsoluteFile());
+                e.printStackTrace();
+            }
+        }
+        long length = file.length();
+        FileObject fileObject = new FileObject();
+        fileObject.setName(name);
+        fileObject.setType(fileExtend);
+        fileObject.setSize(length);
+        fileObject.setHash(sha512);
+        fileObject.setUploader(userId);
+        fileObject.setUploadTime(new Date());
+        fileMapper.addFile(fileObject);
+        return Result.success(fileMapper.getFileVo(fileObject.getId()));
     }
 
-    public CountableList<FileObject> searchFilesById(Integer keywords, int page) {
-        return new CountableList<>(1,dao.searchFilesById(keywords, (page - 1) * 20));
+    public Result<String> generatorDownloadLink(int id, HttpServletRequest request) {
+        FileObject fileById = this.fileMapper.getFileById(id);
+        if (Objects.isNull(fileById)){
+            return Result.failed(HttpCodes.FILE_NOT_FOUND);
+        }
+        String remoteAddr = request.getRemoteHost();
+        String addrIdKeys = "addr:" + remoteAddr + "id:" + id;
+        ValueOperations<String, String> stringStringValueOperations = this.redisTemplate.opsForValue();
+        String downloadLink;
+        String usableLink = stringStringValueOperations.get(addrIdKeys);
+        if (Objects.nonNull(usableLink)){
+            downloadLink = usableLink;
+        } else {
+            downloadLink = JwtUtils.generatorRandomLowerStandString(10);
+            this.redisTemplate.opsForValue().set("link:" + downloadLink, JSON.toJSONString(fileById), 15, TimeUnit.MINUTES);
+            this.redisTemplate.opsForValue().set(addrIdKeys, downloadLink, 15, TimeUnit.MINUTES);
+            this.fileMapper.addDownloadCount(id);
+            accessService.addDownloadCounter();
+        }
+        return Result.success(downloadLink);
     }
 
-    public CountableList<FileObject> searchFilesByName(String keywords, int page) {
-        return new CountableList<>(dao.countSearchFilesByName('%' + keywords + '%'), dao.searchFilesByName('%' + keywords + '%', (page - 1) * 20));
-    }
-
-    public CountableList<FileObject> searchFilesByMd5(String keywords, int page) {
-        return new CountableList<>(dao.countSearchFilesByMd5('%' + keywords + '%'), dao.searchFilesByMd5('%' + keywords + '%', (page - 1) * 20));
-    }
-    public CountableList<FileObject> searchFilesByFormat(String keywords, int page) {
-        return new CountableList<>(dao.countSearchFilesByFormat('%' + keywords + '%'), dao.searchFilesByFormat('%' + keywords + '%', (page - 1) * 20));
-    }
-
-    @SneakyThrows
-    public void downloadFile(int id, HttpServletResponse response) {
-        FileObject info = dao.getFileInfo(id);
-        if (info == null){
-            response.sendError(404,"不存在的文件！");
+    public void downloadFile(String link, HttpServletResponse response) throws IOException {
+        ValueOperations<String, String> stringStringValueOperations = this.redisTemplate.opsForValue();
+        FileObject fileObject;
+        try {
+            JSONObject jsonObject = JSON.parseObject(stringStringValueOperations.get("link:" + link));
+            if (Objects.isNull(jsonObject)){
+                Result.failed(HttpCodes.FILE_NOT_FOUND).writeToResponse(response);
+                return;
+            }
+            fileObject = jsonObject.to(FileObject.class);
+        }catch (JSONException exception){
+            Result.failed(HttpCodes.FILE_NOT_FOUND).writeToResponse(response);
             return;
         }
-        response.setContentLengthLong((long) info.getFileSize());
-        response.setHeader("Content-Disposition", "attachment;filename=" + info.getFileName() + '.' + info.getFileFormat());
-        File downloadFile = new File(this.savePath, info.getMd5());
-        try (FileInputStream inputStream = new FileInputStream(downloadFile)) {
-            StreamUtils.copy(inputStream, response.getOutputStream());
+        String hash = fileObject.getHash();
+        File targetFile = new File(this.savePath, hash);
+        response.setContentLengthLong(fileObject.getSize());
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileObject.generatorFileName());
+        try(FileInputStream fis = new FileInputStream(targetFile); ServletOutputStream outputStream = response.getOutputStream()){
+            StreamUtils.copy(fis, outputStream);
         }
-    }
-    @SneakyThrows
-    public FileObject uploadFile(String token, MultipartFile file) {
-        String fullName = file.getOriginalFilename();
-        assert fullName != null;
-        File tempFile = File.createTempFile(fullName, "");
-        FileOutputStream fileOutputStream = new FileOutputStream(tempFile);
-        StreamUtils.copy(file.getInputStream(), fileOutputStream);
-        fileOutputStream.close();
-        return uploadFile(token, tempFile, fullName);
-    }
-    public FileObject uploadFile(String token, File file, String fullName){
-        Optional<User> user = jwtUtils.getUser(token);
-        if (user.isEmpty()) {
-            return null;
-        }
-        User requestUser = user.get();
-
-        assert fullName != null;
-        int i = fullName.lastIndexOf('.');
-        String name = fullName.substring(0, i);
-        String format = fullName.substring(i + 1);
-        String md5 = getFileMd5(file);
-        FileObject fileObject = new FileObject();
-        fileObject.setFileName(name);
-        fileObject.setFileFormat(format);
-        fileObject.setFileSize(file.length());
-        fileObject.setUploader(requestUser.getUsername());
-        fileObject.setMd5(md5);
-        File saveFile = new File(this.savePath, md5);
-        try {
-            Files.move(file.toPath(), saveFile.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-            log.warn("移动文件失败！, File={}", fileObject);
-            return null;
-        }
-        dao.uploadFile(fileObject);
-        return fileObject;
-    }
-    @SneakyThrows
-    private static String getFileMd5(File file){
-        MessageDigest MD5 = MessageDigest.getInstance("MD5");
-        FileInputStream fileInputStream = new FileInputStream(file);
-        MD5.digest(fileInputStream.readAllBytes());
-        fileInputStream.close();
-        return new String(Hex.encodeHex(MD5.digest()));
     }
 
-    public boolean removeFile(String token, FileObject file) {
-        Optional<User> user = jwtUtils.getUser(token);
-        if (user.isEmpty()) {
-            return false;
-        }
-        User requestUser = user.get();
-        if (!requestUser.getUsername().equals("wzp")) {
-            return false;
-        }
-        FileObject fileInfo = dao.getFileInfo(file.getId());
-        String md5 = fileInfo.getMd5();
-        File saveFile = new File(this.savePath, md5);
-        if (!saveFile.exists()) {
-            return false;
-        }
-        boolean delete = saveFile.delete();
-        if (!delete){
-            return false;
-        }
-        dao.deleteFile(file.getId());
-        return true;
+    public Result<Page<FileObjectVo>> getAllFile(int page, int num) {
+        List<FileObjectVo> pageFile = this.fileMapper.getPageFile((page - 1) * num, num);
+        int allFileCount = this.fileMapper.getAllFileCount();
+        return Result.page(allFileCount, pageFile);
     }
-    private static final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    public Map<String, Object> getFileDetails(int id){
-        FileObject fileInfo = dao.getFullFileInfo(id);
-        String md5 = fileInfo.getMd5();
-        File saveFile = new File(this.savePath, md5);
-        if (!saveFile.exists()) {
-            return null;
+
+    public Result<Boolean> removeFile(int id, String authorization) {
+        Optional<User> user = this.jwtUtils.getUser(authorization);
+        if (user.isEmpty()){
+            return Result.failed(HttpCodes.ACCESS_DENIED);
         }
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("文件ID", String.valueOf(fileInfo.getId()));
-        result.put("文件名", fileInfo.getFileName());
-        result.put("文件类型", fileInfo.getFileFormat());
-        result.put("文件MD5", md5);
-        result.put("文件上传者", fileInfo.getUploader());
-        result.put("文件上传时间", formatter.format(fileInfo.getUploadTime()));
-        if (runtime.check()) {
-            Map<String, Object> videoInfo = runtime.getVideoInfo(saveFile);
-            if (videoInfo != null) {
-                result.putAll(videoInfo);
+        if (Auth.user.equals(this.userMapper.getUserAuthById(user.get().getId()))){
+            return Result.failed(HttpCodes.ACCESS_DENIED);
+        }
+        FileObject fileById = this.fileMapper.getFileById(id);
+        if (Objects.isNull(fileById)){
+            return Result.failed(HttpCodes.FILE_NOT_FOUND);
+        }
+        File saveFile = new File(this.savePath, fileById.getHash());
+        if (!saveFile.exists()) {
+            log.warn("文件{}不存在，进行逻辑删除", fileById);
+        }else {
+            if (!saveFile.delete()) {
+                log.error("文件{}删除失败！", fileById);
+                return Result.failed(HttpCodes.HTTP_CODES500);
             }
-        }else{
-            log.warn("服务端缺少FFMpeg环境（FFMpeg和FFProbe），会影响某些功能使用！");
         }
-        return result;
-    }
-    private final Map<Integer, TranscodingFileThread> transcodingFileThreadMap = new Hashtable<>();
-    private final Map<String, EncodingStatus> statusMap = new Hashtable<>();
-    @SneakyThrows
-    public Object encoding(FileObject fileObject, VideoEncoder outputEnc, String token){
-        if (!runtime.check()) {
-            log.warn("服务端缺少FFMpeg环境（FFMpeg和FFProbe），会影响某些功能使用！");
-        }
-        if (transcodingFileThreadMap.containsKey(fileObject.getId())){
-            return "文件存在，无法转码！";
-        }
-        File outputTempFile = File.createTempFile("video-encoding-" + fileObject.getMd5(), ".mp4");
-        File inputFile = new File(savePath, fileObject.getMd5());
-        TranscodingFileThread transcodingFileThread = new TranscodingFileThread(inputFile, outputEnc, outputTempFile, (thread) -> {
-            statusMap.put(thread.getName(), EncodingStatus.END);
-            this.uploadFile(token, thread.getOutput(), fileObject.getFileName() + "-" + thread.getOutputEncoder().name + ".mp4");
-        }, runtime);
-        statusMap.put(transcodingFileThread.getName(), EncodingStatus.WAITING);
-        transcodingFileThreadMap.put(fileObject.getId(), transcodingFileThread);
-        return transcodingFileThreadMap.hashCode();
+        this.fileMapper.removeFile(id);
+        return Result.success(true);
     }
 
-    public List<EncodingThreadInfo> getEncodingInfo() {
-        List<EncodingThreadInfo> result = new ArrayList<>();
-        for (Map.Entry<Integer, TranscodingFileThread> entry : transcodingFileThreadMap.entrySet()) {
-            Integer fileId = entry.getKey();
-            TranscodingFileThread value = entry.getValue();
-            FileObject fullFileInfo = dao.getFullFileInfo(fileId);
-            result.add(new EncodingThreadInfo(statusMap.get(value.getName()), fullFileInfo, value.getProgress(), value.getTotalFrames(), value.getFrames(), value.getFps()));
+    @SneakyThrows
+    public Result<InputStream> getFileContentById(int id) {
+        String hashById = this.fileMapper.getHashById(id);
+        if (Objects.isNull(hashById)){
+            Result.failed(HttpCodes.FILE_NOT_FOUND);
         }
-        return result;
+        File targetFile = new File(this.savePath, hashById);
+        if (!targetFile.isFile()) {
+            return Result.failed(HttpCodes.HTTP_CODES500);
+        }
+        return Result.success(new FileInputStream(targetFile));
     }
-    private class DaemonThread extends Thread {
-        @SneakyThrows
-        @Override
-        public void run() {
-            while (true){
-                for (TranscodingFileThread value : FileService.this.transcodingFileThreadMap.values()) {
-                    String name = value.getName();
-                    EncodingStatus status = FileService.this.statusMap.get(name);
-                    if (status.equals(EncodingStatus.RUNNING)){
-                        break;
-                    }
-                    if (status.equals(EncodingStatus.END)){
-                        continue;
-                    }
-                    value.start();
-                    FileService.this.statusMap.put(name, EncodingStatus.RUNNING);
-                    break;
+
+    @SneakyThrows
+    public Result<Page<FileObjectVo>> search(int page, int num, SearchType searchType, String data) {
+        return switch (searchType) {
+            case ID -> {
+                long id = Long.parseLong(data);
+                FileObjectVo fileById = this.fileMapper.getFileVo(id);
+                List<FileObjectVo> result = new ArrayList<>();
+                if(fileById == null){
+                    yield Result.success(new Page<>(0, result));
                 }
-                Thread.sleep(1000);
+                result.add(fileById);
+                yield Result.success(new Page<>(1, result));
             }
+            case TYPE -> {
+                List<FileObjectVo> result = this.fileMapper.getFileByType(data, (page - 1) * num, num);
+                int total = this.fileMapper.getFileCountByType(data);
+                yield Result.success(new Page<>(total, result));
+            }
+            case UPLOADER -> {
+                String searchInput = "%" + data + "%";
+                List<FileObjectVo> result = this.fileMapper.getFileByUploader(searchInput, (page - 1) * num, num);
+                int total = this.fileMapper.getFileCountByUploader(searchInput);
+                yield Result.success(new Page<>(total, result));
+            }
+            case FILE_NAME -> {
+                String searchInput = "%" + data + "%";
+                List<FileObjectVo> result = this.fileMapper.getFileByName(searchInput, (page - 1) * num, num);
+                int total = this.fileMapper.getFileCountByName(searchInput);
+                yield Result.success(new Page<>(total, result));
+            }
+            case UPLOAD_DAY -> {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Date parse = simpleDateFormat.parse(data);
+                Calendar instance = Calendar.getInstance();
+                instance.setTime(parse);
+                instance.set(Calendar.HOUR_OF_DAY, 0);
+                instance.set(Calendar.MINUTE, 0);
+                instance.set(Calendar.SECOND, 0);
+                Date date = instance.getTime();
+                List<FileObjectVo> result = this.fileMapper.getFileByDate(date, (page - 1) * num, num);
+                int total = this.fileMapper.getFileCountByDate(date);
+                yield Result.success(new Page<>(total, result));
+            }
+        };
+    }
 
-        }
+    public Result<Boolean> checkUpload(String filename) {
+        FileObject filenameExtend = getFilenameExtend(filename);
+        String name = filenameExtend.getName();
+        String type = filenameExtend.getType();
+        return Result.success(this.fileMapper.getFileCountByNameAndType(name, type) == 0);
     }
 }

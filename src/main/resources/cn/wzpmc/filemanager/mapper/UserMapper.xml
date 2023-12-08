@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzpmc.filemanager.mapper.UserMapper">
+    <insert id="createDefault">
+        CREATE TABLE IF NOT EXISTS `new_user`  (
+        `id` int NOT NULL AUTO_INCREMENT,
+        `name` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+        `password` char(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'MD5+SHA512',
+        `auth` enum('admin','user') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'user',
+        PRIMARY KEY (`id`) USING BTREE
+        ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+    </insert>
+    <insert id="addUser" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert into `new_user`(`name`, `password`, `auth`) values (#{name}, #{password}, #{auth});
+    </insert>
+    <select id="getUser" resultType="cn.wzpmc.filemanager.entities.User">
+        select * from `new_user` where `name` = #{name} and `password` = #{password};
+    </select>
+    <select id="countUser" resultType="java.lang.Integer">
+        select count(*) from `new_user`;
+    </select>
+    <select id="getUserAuthById" resultType="cn.wzpmc.filemanager.enums.Auth">
+        select `auth` from `new_user` where `id` = #{id};
+    </select>
+    <select id="getUserCountByName" resultType="java.lang.Integer">
+        select count(`name`) from `new_user` where `name` = #{name};
+    </select>
+</mapper>

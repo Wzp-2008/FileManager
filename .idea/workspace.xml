@@ -5,19 +5,98 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b1988503-f417-4c69-ad49-94239747bbea" name="变更" comment="feat: adding get files">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/enums/VideoEncoder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/threads/TranscodingFileThread.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/application.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/EncodingThreadInfo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/enums/EncodingStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/wzp.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/mybatisx/templates.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/configurations/CorsConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/configurations/FastJsonConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/configurations/FileManagerConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/configurations/StaticResourceConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/AccessController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/CodecController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/AccessInformation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/Page.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/Result.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/abs/PasswordObject.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/vo/DownloadEntryVo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/vo/FileObjectVo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/vo/UserLoginVo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/vo/UserRegisterVo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/enums/Auth.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/enums/HttpCodes.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/mapper/AccessMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/mapper/FileMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/mapper/UserMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/AccessService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/CodecService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/mapper/AccessMapper.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/mapper/FileMapper.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/mapper/UserMapper.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/FFMpegJ/FileManager.FFMpegJ.main.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/FFMpegJ/FileManager.FFMpegJ.test.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/FileManager.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/FileManager.main.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FFMpegJ/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/FFMpegJ/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/FFMpegRuntime.java" beforeDir="false" afterPath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/FFMpegRuntime.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFMpegJ/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/FFMpegRuntime.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/enums/VideoEncoder.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFMpegJ/src/main/java/cn/wzpmc/filemanager/ffmpeg/threads/TranscodingFileThread.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/.vscode/extensions.json" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/.vscode/extensions.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/auto-imports.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/auto-imports.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/components.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/components.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/public/SiHCl3.png" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/public/SiHCl3.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/src/App.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/src/entities/FileDetailsInfo.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/src/entities/FileDetailsInfo.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/src/entities/FileObject.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/src/entities/FileObject.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/src/main.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/src/main.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/src/requester/Requester.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/src/requester/Requester.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/src/vite-env.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/src/vite-env.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/tsconfig.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/tsconfig.node.json" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/tsconfig.node.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FileManager/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/FileManager/vite.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HELP.md" beforeDir="false" afterPath="$PROJECT_DIR$/HELP.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/FileManagerApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/FileManagerApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/FileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/FileController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/dao/FileDao.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/dao/UserDao.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/CountableList.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/EncodingThreadInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/FileObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/FileObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/ResponseResult.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/entities/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/enums/EncodingStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/enums/SearchType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/enums/SearchType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/FileService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/FileService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/utils/JwtUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/utils/JwtUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/dao/FileDao.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/dao/UserDao.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/cn/wzpmc/filemanager/FileManagerApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/cn/wzpmc/filemanager/FileManagerApplicationTests.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,6 +130,12 @@
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="FileManager" type="f1a62948:ProjectNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="application" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="FileManager" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
               </path>
             </expand>
@@ -64,6 +149,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="TypeScript File" />
+        <option value="HTML File" />
+        <option value="Enum" />
         <option value="Class" />
       </list>
     </option>
@@ -72,9 +159,15 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="jar:///server/JAVA_HOME/17/lib/src.zip!/java.base/java/util/regex/Pattern.java" root0="SKIP_INSPECTION" />
-    <setting file="jar:///server/JAVA_HOME/20/lib/src.zip!/java.base/java/util/Date.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../../../JAVA_HOME/17/lib/src.zip!/java.base/java/io/File.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../../../JAVA_HOME/17/lib/src.zip!/java.base/java/net/InetAddress.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../../../JAVA_HOME/17/lib/src.zip!/java.base/java/text/DateFormat.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../../../JAVA_HOME/17/lib/src.zip!/java.base/java/util/Calendar.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../../../JAVA_HOME/17/lib/src.zip!/java.base/java/util/Date.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../../../JAVA_HOME/17/lib/src.zip!/java.base/java/util/regex/Pattern.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../../../JAVA_HOME/17/lib/src.zip!/java.xml/com/sun/org/apache/xerces/internal/impl/XMLEntityScanner.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.26/f43db6c43d481ab766a496c86dc43c145e3c9df4/lombok-1.18.26-sources.jar!/lombok/extern/slf4j/XSlf4j.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-web/6.0.7/6ed548931d69aeabeab4c5cc515ad2a2648baa8e/spring-web-6.0.7-sources.jar!/org/springframework/web/multipart/MultipartFile.java" root0="SKIP_INSPECTION" />
   </component>
   <component name="HttpClientSelectedEnvironments">
     <file url="jar://$APPLICATION_HOME_DIR$/plugins/restClient/lib/restClient.jar!/com/intellij/ws/rest/client/requests/collection/post-requests.http" environment="test" />
@@ -91,6 +184,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
     &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
     &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
     &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
@@ -99,15 +193,15 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;jdk.selected.JAVA_MODULE&quot;: &quot;temurin-20&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/server/JAVA_HOME/gradle&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/server/home/wzp/Project/FileManager/src/main/resources/cn/wzpmc/filemanager/mapper&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;SDKs&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;settings.typescriptcompiler&quot;,
@@ -128,33 +222,37 @@
       <window_info id="Commit_Guest" show_stripe_button="false" />
       <window_info id="Pull Requests" />
       <window_info id="Learn" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23818277" />
-      <window_info id="Commit" order="1" weight="0.32734376" />
-      <window_info id="Structure" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Database Changes" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18671875" />
+      <window_info id="Commit" order="1" weight="0.25" />
+      <window_info id="Structure" order="2" weight="0.17161459" />
+      <window_info anchor="bottom" id="Database Changes" weight="0.32994187" />
       <window_info anchor="bottom" id="TypeScript" />
-      <window_info anchor="bottom" id="Profiler" weight="0.32994187" />
-      <window_info anchor="bottom" id="Messages" weight="0.32994187" />
-      <window_info anchor="bottom" id="Java Enterprise" weight="0.33251953" />
+      <window_info anchor="bottom" id="Profiler" />
+      <window_info anchor="bottom" id="Java Enterprise" weight="0.31831396" />
       <window_info anchor="bottom" id="File Transfer" />
-      <window_info anchor="bottom" id="Run" weight="0.32994187" />
+      <window_info anchor="bottom" id="Find" show_stripe_button="false" weight="0.32994187" />
       <window_info anchor="bottom" id="Dependency Checker" />
-      <window_info active="true" anchor="bottom" id="Version Control" order="0" visible="true" weight="0.34228516" />
-      <window_info anchor="bottom" id="Problems View" order="1" weight="0.3396318" />
-      <window_info anchor="bottom" id="Terminal" order="2" weight="0.34190106" />
-      <window_info anchor="bottom" id="Build" order="3" weight="0.32994187" />
-      <window_info anchor="bottom" id="Debug" order="4" show_stripe_button="false" weight="0.32994187" />
-      <window_info anchor="bottom" id="Services" order="5" weight="0.34228516" />
+      <window_info anchor="bottom" id="Version Control" order="0" />
+      <window_info anchor="bottom" id="Problems View" order="1" weight="0.30184108" />
+      <window_info anchor="bottom" id="Terminal" order="2" weight="0.31831396" />
+      <window_info anchor="bottom" id="Services" order="3" weight="0.44718993" />
+      <window_info anchor="bottom" id="Build" order="4" weight="0.31831396" />
+      <window_info active="true" anchor="bottom" id="Run" order="5" visible="true" weight="0.44718993" />
+      <window_info anchor="bottom" id="Spring" order="6" show_stripe_button="false" />
       <window_info anchor="right" id="Endpoints" />
       <window_info anchor="right" id="Beans" />
       <window_info anchor="right" id="Meet New UI" show_stripe_button="false" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Notifications" order="0" weight="0.25" />
-      <window_info anchor="right" id="Database" order="1" weight="0.25" />
-      <window_info anchor="right" id="Gradle" order="2" weight="0.23619792" />
+      <window_info anchor="right" id="Database" order="1" weight="0.32994792" />
+      <window_info active="true" anchor="right" id="Gradle" order="2" visible="true" weight="0.32994792" />
     </layout>
+  </component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources/cn/wzpmc/filemanager/mapper" />
       <recent name="C:\Users\33572\Documents\Projects\IdeaProjects\FileManager" />
       <recent name="C:\Users\33572\Documents\Projects\IdeaProjects\FileManager\FileManager\src\assets" />
       <recent name="C:\Users\33572\Documents\Projects\IdeaProjects\FileManager\gradle\wrapper\dist" />
@@ -172,19 +270,6 @@
     </option>
   </component>
   <component name="RunManager" selected="Spring Boot.FileManagerApplication">
-    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="cn.wzpmc.filemanager.ffmpeg.Main" />
-      <module name="FileManager.FFMpegJ.main" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="cn.wzpmc.filemanager.ffmpeg.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="CheckTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -233,6 +318,28 @@
       <ForceTestExec>false</ForceTestExec>
       <method v="2" />
     </configuration>
+    <configuration name="FileManager [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <ForceTestExec>false</ForceTestExec>
+      <method v="2" />
+    </configuration>
     <configuration name="FileManager [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -255,23 +362,18 @@
       <ForceTestExec>false</ForceTestExec>
       <method v="2" />
     </configuration>
-    <configuration name="FileManager [nativeRun]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="FileManager [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
-        <option name="env">
-          <map>
-            <entry key="JAVA_HOME" value="/server/JAVA_HOME/20" />
-          </map>
-        </option>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
+        <option name="scriptParameters" />
         <option name="taskDescriptions">
           <list />
         </option>
         <option name="taskNames">
           <list>
-            <option value="nativeRun" />
+            <option value="jar" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -298,6 +400,7 @@
     <configuration name="FileManagerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
       <module name="FileManager.main" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="cn.wzpmc.filemanager.FileManagerApplication" />
+      <option name="WORKING_DIRECTORY" value="file://run" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -314,20 +417,21 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Gradle.FileManager [build]" />
+      <item itemvalue="Gradle.FileManager [jar]" />
       <item itemvalue="Gradle.FileManager [clean]" />
       <item itemvalue="Gradle.CheckTest" />
       <item itemvalue="Gradle.CheckTest.onTest" />
-      <item itemvalue="Gradle.FileManager [nativeRun]" />
       <item itemvalue="npm.dev" />
       <item itemvalue="Spring Boot.FileManagerApplication" />
-      <item itemvalue="应用程序.Main" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.CheckTest.onTest" />
+        <item itemvalue="Gradle.FileManager [jar]" />
+        <item itemvalue="Gradle.FileManager [build]" />
         <item itemvalue="Gradle.FileManager [clean]" />
+        <item itemvalue="Gradle.CheckTest.onTest" />
         <item itemvalue="Gradle.CheckTest" />
-        <item itemvalue="Gradle.FileManager [nativeRun]" />
       </list>
     </recent_temporary>
   </component>
@@ -359,6 +463,26 @@
       <workItem from="1681825747684" duration="2853000" />
       <workItem from="1682258664381" duration="2743000" />
       <workItem from="1682426315842" duration="7659000" />
+      <workItem from="1700232967665" duration="24000" />
+      <workItem from="1700232997037" duration="269000" />
+      <workItem from="1700233283121" duration="31000" />
+      <workItem from="1700233318805" duration="71000" />
+      <workItem from="1700233408562" duration="2759000" />
+      <workItem from="1700279208154" duration="6800000" />
+      <workItem from="1700305721886" duration="12355000" />
+      <workItem from="1700363852821" duration="17000" />
+      <workItem from="1700363878019" duration="929000" />
+      <workItem from="1700364822674" duration="7194000" />
+      <workItem from="1700379313976" duration="1910000" />
+      <workItem from="1700389972625" duration="17164000" />
+      <workItem from="1700991510202" duration="6016000" />
+      <workItem from="1701076119382" duration="3149000" />
+      <workItem from="1701517913965" duration="3782000" />
+      <workItem from="1701593245155" duration="8881000" />
+      <workItem from="1701666627683" duration="1315000" />
+      <workItem from="1701683274777" duration="1203000" />
+      <workItem from="1702046322259" duration="5022000" />
+      <workItem from="1702059853668" duration="24000" />
     </task>
     <task id="LOCAL-00001" summary="feat: adding get files">
       <created>1679928730544</created>
@@ -413,6 +537,21 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="feat: adding get files" />
     <option name="LAST_COMMIT_MESSAGE" value="feat: adding get files" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.io.EOFException" package="java.io" />
+          <option name="timeStamp" value="2" />
+        </breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/cn/wzpmc/filemanager/controller/UserController.java</url>
+          <line>29</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

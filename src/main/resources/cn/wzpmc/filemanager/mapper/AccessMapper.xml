@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzpmc.filemanager.mapper.AccessMapper">
+    <insert id="createDefault">
+        CREATE TABLE IF NOT EXISTS `new_access`  (
+        `date` date NOT NULL,
+        `total_access` int NOT NULL DEFAULT 0,
+        `total_download` int NOT NULL DEFAULT 0,
+        PRIMARY KEY (`date`)
+        );
+    </insert>
+    <insert id="addToday">
+        insert `new_access`(`date`) values(curdate());
+    </insert>
+    <update id="addTodayDownload">
+        update `new_access` set `total_download` = `total_download` + 1 where `date` = curdate();
+    </update>
+    <update id="addTodayAccess">
+        update `new_access` set `total_access` = `total_access` + 1 where `date` = curdate();
+    </update>
+    <select id="countToday" resultType="java.lang.Integer">
+        select count(*) from `new_access` where `date` = curdate();
+    </select>
+    <select id="getAllAccessData" resultType="cn.wzpmc.filemanager.entities.AccessInformation">
+        select * from `new_access` where `date` > date_sub(curdate(), INTERVAL #{count} DAY);
+    </select>
+    <select id="getAllAccessInformation" resultType="cn.wzpmc.filemanager.entities.AccessInformation">
+        SELECT sum(`total_download`) as `totalDownload`, sum(`total_access`) as `totalAccess`, now() as `date` from `new_access`;
+    </select>
+</mapper>
