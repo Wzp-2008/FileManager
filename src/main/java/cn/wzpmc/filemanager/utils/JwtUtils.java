@@ -4,6 +4,7 @@ import cn.wzpmc.filemanager.entities.User;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +53,22 @@ public class JwtUtils {
         builder.withClaim("id", user.getId());
         builder.withExpiresAt(instance.getTime());
         return builder.sign(this.hmacKey);
+    }
+    public void verifyToken(String token) throws JWTVerificationException {
+        JWT.require(this.hmacKey).build().verify(token);
+    }
+    public User forceDecode(String token) {
+        try {
+            DecodedJWT decode = JWT.decode(token);
+            String username = decode.getClaim("name").asString();
+            Integer id = decode.getClaim("id").asInt();
+            User user = new User();
+            user.setName(username);
+            user.setId(id);
+            return user;
+        }catch (JWTVerificationException e){
+            return null;
+        }
     }
     public Optional<User> getUser(String token){
         DecodedJWT verify;
