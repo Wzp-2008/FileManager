@@ -1,0 +1,18 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: FileManager
+  datasource:
+    url: jdbc:mysql://server.wzpmc.cn:3306/fsv2
+    username: "fsv2"
+    password: "JiGSnWrwpPFnrthM"
+    type: com.alibaba.druid.pool.DruidDataSource
+  data:
+    redis:
+      host: "server.wzpmc.cn"
+      database: 3
+      password: "MyCraftAdmin123"
+wzp:
+  filemanager:
+    save-path: "./file"
