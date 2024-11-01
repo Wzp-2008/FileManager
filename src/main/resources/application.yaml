@@ -13,6 +13,11 @@ spring:
       host: "server.wzpmc.cn"
       database: 3
       password: "MyCraftAdmin123"
+  servlet:
+    multipart:
+      max-file-size: 100GB
+      max-request-size: 100GB
 wzp:
   filemanager:
     save-path: "./file"
+    hmac-key: "V(LWJ6D5*4%,Hk{1"

@@ -38,6 +38,7 @@ dependencies {
 	implementation("org.springframework.shell:spring-shell-starter")
 	// https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-spring-boot3-starter
 	implementation("com.mybatis-flex:mybatis-flex-spring-boot3-starter:1.9.7")
+	annotationProcessor("com.mybatis-flex:mybatis-flex-processor:1.9.7")
 	// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2
 	implementation("com.alibaba.fastjson2:fastjson2:2.0.53")
 	// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension
@@ -55,7 +56,7 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
 	implementation("com.mysql:mysql-connector-j:9.0.0")
 	compileOnly("org.projectlombok:lombok")
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
+	/*developmentOnly("org.springframework.boot:spring-boot-devtools")*/
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
