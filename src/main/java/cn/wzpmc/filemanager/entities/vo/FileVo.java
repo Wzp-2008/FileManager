@@ -6,20 +6,21 @@ import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
-import java.util.Objects;
 
 @Table("file")
 @Data
-public class FileVo {
+public class FileVo implements Serializable {
     @Id(keyType = KeyType.Auto)
-    private int id;
+    private long id;
     private String name;
     private String ext;
     private String mime;
-    private String sha1;
-    private int uploader;
-    private int folder;
+    private String hash;
+    private long uploader;
+    private long folder;
+    private long size;
     @Column(onInsertValue = "now()")
     private Date uploadTime;
 

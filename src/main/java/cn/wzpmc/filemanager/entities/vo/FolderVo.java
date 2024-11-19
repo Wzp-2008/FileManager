@@ -12,10 +12,10 @@ import java.util.Date;
 @Data
 public class FolderVo {
     @Id(keyType = KeyType.Auto)
-    private int id;
+    private long id;
     private String name;
-    private int parent;
-    private int creator;
+    private long parent;
+    private long creator;
     @Column(onInsertValue = "now()")
     private Date createTime;
 

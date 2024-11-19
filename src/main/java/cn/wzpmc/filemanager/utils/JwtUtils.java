@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Calendar;
 import java.util.Optional;
-import java.util.Random;
 
 @Component
 @Log4j2
@@ -35,7 +34,7 @@ public class JwtUtils {
         }
         this.hmacKey = Algorithm.HMAC512(key);
     }
-    public String createToken(int uid){
+    public String createToken(long uid){
         Calendar instance = Calendar.getInstance();
         instance.add(Calendar.HOUR,24 * 5);
         JWTCreator.Builder builder = JWT.create();

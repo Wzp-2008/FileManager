@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class Page<T> {
-    private int total;
+public class PageResult<T> {
+    private long total;
     private List<T> data;
 }

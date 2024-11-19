@@ -1,5 +1,6 @@
 package cn.wzpmc.filemanager.commands;
 
+import cn.wzpmc.filemanager.entities.vo.UserVo;
 import cn.wzpmc.filemanager.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
@@ -14,6 +15,6 @@ public class AuthorizationCommands {
     }
     @ShellMethod("创建一个密钥")
     public void key(){
-        this.userService.genInviteCode();
+        this.userService.genInviteCode(UserVo.CONSOLE, "0.0.0.0");
     }
 }

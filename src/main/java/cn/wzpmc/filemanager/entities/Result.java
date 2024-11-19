@@ -3,10 +3,7 @@ package cn.wzpmc.filemanager.entities;
 import com.alibaba.fastjson2.JSON;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 
@@ -93,6 +90,7 @@ public class Result<T> {
     }
 
     public void writeToResponse(HttpServletResponse response){
+        response.addHeader("Content-Type", "application/json; charset=utf-8");
         try(ServletOutputStream outputStream = response.getOutputStream()){
             writeToOutputStream(outputStream);
         } catch (IOException e) {
