@@ -3,22 +3,8 @@ server:
 spring:
   application:
     name: FileManager
-  datasource:
-    url: jdbc:mysql://server.wzpmc.cn:3306/fsv2
-    username: "fsv2"
-    password: "JiGSnWrwpPFnrthM"
-    type: com.alibaba.druid.pool.DruidDataSource
-  data:
-    redis:
-      host: "server.wzpmc.cn"
-      database: 3
-      password: "MyCraftAdmin123"
   servlet:
     multipart:
       max-file-size: 400GB
       max-request-size: 400GB
       resolve-lazily: true
-wzp:
-  filemanager:
-    save-path: "./file"
-    hmac-key: "V(LWJ6D5*4%,Hk{1"
