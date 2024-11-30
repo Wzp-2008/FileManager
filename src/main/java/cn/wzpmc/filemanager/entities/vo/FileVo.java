@@ -1,5 +1,6 @@
 package cn.wzpmc.filemanager.entities.vo;
 
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
@@ -11,6 +12,7 @@ import java.util.Date;
 
 @Table("file")
 @Data
+@JSONCompiled
 public class FileVo implements Serializable {
     @Id(keyType = KeyType.Auto)
     private long id;

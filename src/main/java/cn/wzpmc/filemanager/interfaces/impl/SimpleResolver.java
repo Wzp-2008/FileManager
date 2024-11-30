@@ -42,7 +42,7 @@ public class SimpleResolver extends SimplePathResolver {
             if (file != null) {
                 return RawFileObject.of(file);
             }
-            return RawFileObject.of(folderMapper.selectOneById(FOLDER_VO.NAME.eq(name).and(FOLDER_VO.PARENT.eq(parentId))));
+            return RawFileObject.of(folderMapper.selectOneByCondition(FOLDER_VO.NAME.eq(name).and(FOLDER_VO.PARENT.eq(parentId))));
         }
         FolderVo folderVo = folderMapper.selectOneByCondition(FOLDER_VO.NAME.eq(currentLayerName).and(FOLDER_VO.PARENT.eq(parentId)));
         if (folderVo == null) {

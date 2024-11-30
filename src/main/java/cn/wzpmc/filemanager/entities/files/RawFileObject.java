@@ -3,6 +3,7 @@ package cn.wzpmc.filemanager.entities.files;
 import cn.wzpmc.filemanager.entities.files.enums.FileType;
 import cn.wzpmc.filemanager.entities.vo.FileVo;
 import cn.wzpmc.filemanager.entities.vo.FolderVo;
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JSONCompiled
 public class RawFileObject {
     private long id;
     private String name;

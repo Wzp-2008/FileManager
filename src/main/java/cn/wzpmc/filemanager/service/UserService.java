@@ -58,15 +58,17 @@ public class UserService {
             return;
         }
         UserVo userVo = this.userMapper.selectOneByCondition(findUserCondition);
+        userVo.clearPassword();
         long id = userVo.getId();
         String token = this.jwtUtils.createToken(id);
         response.addHeader("Add-Authorization", token);
         this.statisticsService.insertAction(userVo, Actions.LOGIN, JSONObject.of("status", "success", "address", address));
-        Result.success("登录成功").writeToResponse(response);
+        Result.success("登录成功", userVo).writeToResponse(response);
     }
     public void register(UserRegisterRequest request, HttpServletResponse response, String address) {
         String username = request.getUsername();
         String password = request.getPassword();
+        String sha1edPassword = DigestUtils.sha1Hex(password);
         Auth auth = request.getAuth();
         if (this.userMapper.selectCountByCondition(USER_VO.NAME.eq(username)) > 0) {
             this.statisticsService.insertAction(Actions.REGISTER, JSONObject.of("status", "error", "auth", auth, "msg", "用户名已存在", "address", address));
@@ -85,13 +87,14 @@ public class UserService {
             }
             statisticsData.put("inviteCode", inviteCode);
         }
-        UserVo userVo = new UserVo(username, password, auth);
+        UserVo userVo = new UserVo(username, sha1edPassword, auth);
         this.userMapper.insert(userVo);
+        userVo.clearPassword();
         long id = userVo.getId();
         String token = this.jwtUtils.createToken(id);
         response.addHeader("Add-Authorization", token);
         this.statisticsService.insertAction(userVo, Actions.REGISTER, statisticsData);
-        Result.success("注册成功！").writeToResponse(response);
+        Result.success("注册成功！", userVo).writeToResponse(response);
     }
 
     public Result<String> invite(UserVo userVo, String address) {
@@ -105,5 +108,14 @@ public class UserService {
         statisticsService.insertAction(actor, Actions.INVITE, address);
         ops.set(s, "", 15, TimeUnit.MINUTES);
         return s;
+    }
+
+    public Result<UserVo> getUserInformation(Long id) {
+        UserVo userVo = userMapper.selectOneById(id);
+        if (userVo == null){
+            return Result.failed(HttpStatus.NOT_FOUND, "用户不存在！");
+        }
+        userVo.clearPassword();
+        return Result.success(userVo);
     }
 }

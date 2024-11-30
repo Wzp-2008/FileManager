@@ -1,6 +1,7 @@
 package cn.wzpmc.filemanager.entities;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Data
+@JSONCompiled
 public class Result<T> {
     private int status;
     private String msg;

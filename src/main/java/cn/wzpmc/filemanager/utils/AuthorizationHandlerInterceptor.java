@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.lang.reflect.Method;
-
 @Component
 public class AuthorizationHandlerInterceptor implements HandlerInterceptor {
     private final AuthorizationUtils authorizationUtils;

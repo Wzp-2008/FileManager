@@ -4,8 +4,8 @@ import cn.wzpmc.filemanager.annotation.Address;
 import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
 import cn.wzpmc.filemanager.entities.PageResult;
 import cn.wzpmc.filemanager.entities.Result;
-import cn.wzpmc.filemanager.entities.files.DeleteRequest;
 import cn.wzpmc.filemanager.entities.files.FolderCreateRequest;
+import cn.wzpmc.filemanager.entities.files.NamedRawFile;
 import cn.wzpmc.filemanager.entities.files.RawFileObject;
 import cn.wzpmc.filemanager.entities.files.enums.FileType;
 import cn.wzpmc.filemanager.entities.vo.FileVo;
@@ -32,8 +32,8 @@ public class FileController {
     }
 
     @GetMapping("/get")
-    public Result<PageResult<RawFileObject>> getFilePager(@RequestParam long page, @RequestParam int num, @RequestParam long folder, @Address String address) {
-        return fileService.getFilePager(page, num, folder, address);
+    public Result<PageResult<NamedRawFile>> getFilePager(@RequestParam long page, @RequestParam int num, @RequestParam long folder) {
+        return fileService.getFilePager(page, num, folder);
     }
 
     @PostMapping("/mkdir")
@@ -41,14 +41,24 @@ public class FileController {
         return fileService.mkdir(request, user, address);
     }
 
-    @GetMapping("/detail")
+    @GetMapping("/get/file")
+    public Result<NamedRawFile> getFile(@RequestParam long id) {
+        return fileService.getFile(id);
+    }
+
+    @GetMapping("/get/folder")
+    public Result<NamedRawFile> getFolder(@RequestParam long id) {
+        return fileService.getFolder(id);
+    }
+
+    @GetMapping("/detail/file")
     public Result<FileVo> getFileDetail(@RequestParam long id) {
         return fileService.getFileDetail(id);
     }
 
     @DeleteMapping("/rm")
-    public Result<Void> delete(@RequestBody DeleteRequest request, @AuthorizationRequired UserVo user, @Address String address) {
-        return fileService.delete(request, user, address);
+    public Result<Void> delete(@RequestParam long id, @RequestParam FileType type, @AuthorizationRequired UserVo user, @Address String address) {
+        return fileService.delete(id, type, user, address);
     }
 
     @GetMapping("/link")

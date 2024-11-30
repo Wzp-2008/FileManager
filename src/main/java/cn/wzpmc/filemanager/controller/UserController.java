@@ -38,4 +38,12 @@ public class UserController {
     public Result<String> invite(@AuthorizationRequired(level = Auth.admin) UserVo userVo, @Address String address) {
         return userService.invite(userVo, address);
     }
+    @GetMapping("/info")
+    public Result<UserVo> getUserInfo(@AuthorizationRequired UserVo user) {
+        return Result.success(user);
+    }
+    @GetMapping("/info/{id}")
+    public Result<UserVo> getUser(@PathVariable Long id) {
+        return userService.getUserInformation(id);
+    }
 }

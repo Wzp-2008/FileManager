@@ -1,3 +1,5 @@
+import java.net.URI
+
 plugins {
 	java
 	id("org.springframework.boot") version "3.3.4"
@@ -23,6 +25,7 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven { url = URI("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
 extra["snippetsDir"] = file("build/generated-snippets")
@@ -39,12 +42,14 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-spring-boot3-starter
 	implementation("com.mybatis-flex:mybatis-flex-spring-boot3-starter:1.9.7")
 	annotationProcessor("com.mybatis-flex:mybatis-flex-processor:1.9.7")
+	compileOnly("org.mybatis.spring.native:mybatis-spring-native-extensions:0.1.0-SNAPSHOT")
+	compileOnly("org.mybatis.spring.native:mybatis-spring-native-core:0.1.0-SNAPSHOT")
 	// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2
-	implementation("com.alibaba.fastjson2:fastjson2:2.0.53")
+	implementation("com.alibaba.fastjson2:fastjson2:2.0.46")
 	// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension
-	implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.53")
+	implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.46")
 	// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension-spring6
-	implementation("com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.53")
+	implementation("com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.46")
 	// https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter
 	implementation("com.alibaba:druid-spring-boot-starter:1.2.23")
 	// https://mvnrepository.com/artifact/com.auth0/java-jwt

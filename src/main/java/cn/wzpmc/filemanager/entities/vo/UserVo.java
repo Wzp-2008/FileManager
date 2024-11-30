@@ -1,6 +1,7 @@
 package cn.wzpmc.filemanager.entities.vo;
 
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
@@ -11,6 +12,7 @@ import lombok.Data;
 @Table("user")
 @Data
 @AllArgsConstructor
+@JSONCompiled
 public class UserVo {
     @Id(keyType = KeyType.Auto)
     private long id;
@@ -31,6 +33,9 @@ public class UserVo {
     }
     public UserVo(long id) {
         this.id = id;
+    }
+    public void clearPassword() {
+        this.setPassword(null);
     }
     public static final UserVo CONSOLE = new UserVo(0L, "CONSOLE", Auth.admin);
 }

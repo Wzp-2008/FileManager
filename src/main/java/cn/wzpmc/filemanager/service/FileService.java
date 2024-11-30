@@ -3,8 +3,8 @@ package cn.wzpmc.filemanager.service;
 import cn.wzpmc.filemanager.config.FileManagerProperties;
 import cn.wzpmc.filemanager.entities.PageResult;
 import cn.wzpmc.filemanager.entities.Result;
-import cn.wzpmc.filemanager.entities.files.DeleteRequest;
 import cn.wzpmc.filemanager.entities.files.FolderCreateRequest;
+import cn.wzpmc.filemanager.entities.files.NamedRawFile;
 import cn.wzpmc.filemanager.entities.files.RawFileObject;
 import cn.wzpmc.filemanager.entities.files.enums.FileType;
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
@@ -36,20 +36,24 @@ import org.apache.tomcat.util.http.fileupload.impl.FileItemIteratorImpl;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.io.*;
-import java.net.URLEncoder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static cn.wzpmc.filemanager.entities.vo.table.FileVoTableDef.FILE_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.FolderVoTableDef.FOLDER_VO;
+import static cn.wzpmc.filemanager.entities.vo.table.UserVoTableDef.USER_VO;
 import static com.mybatisflex.core.query.QueryMethods.*;
 
 @Slf4j
@@ -70,6 +74,34 @@ public class FileService {
     public static final String SHARE_PREFIX = "SHARE_";
     public static final char PATH_SEPARATOR_CHAR = '/';
     public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
+
+    protected static QueryWrapper queryRawFileWithOwnerName() {
+        return select(
+                FILE_VO.ID.as("id"),
+                FILE_VO.NAME.as("name"),
+                FILE_VO.EXT.as("ext"),
+                FILE_VO.SIZE.as("size"),
+                FILE_VO.FOLDER.as("parent"),
+                FILE_VO.UPLOADER.as("owner"),
+                USER_VO.NAME.as("ownerName"),
+                FILE_VO.UPLOAD_TIME.as("time"),
+                string("FILE").as("type")
+        ).from(FILE_VO).leftJoin(USER_VO).on(USER_VO.ID.eq(FILE_VO.UPLOADER));
+    }
+
+    protected static QueryWrapper queryRawFolderWithOwnerName() {
+        return select(
+                FOLDER_VO.ID.as("id"),
+                FOLDER_VO.NAME.as("name"),
+                null_().as("ext"),
+                number(-1).as("size"),
+                FOLDER_VO.PARENT.as("parent"),
+                FOLDER_VO.CREATOR.as("owner"),
+                USER_VO.NAME.as("ownerName"),
+                FOLDER_VO.CREATE_TIME.as("time"),
+                string("FOLDER").as("type")
+        ).from(FOLDER_VO).leftJoin(USER_VO).on(USER_VO.ID.eq(FOLDER_VO.CREATOR));
+    }
 
     protected void tryDeleteOrDeleteOnExit(File tmpFile) {
         if (!tmpFile.delete()) {
@@ -165,39 +197,19 @@ public class FileService {
         return folderParams;
     }
 
-    public Result<PageResult<RawFileObject>> getFilePager(long page, int num, long folder, String address) {
-        QueryWrapper queryWrapper = select(
-                FILE_VO.ID.as("id"),
-                FILE_VO.NAME.as("name"),
-                FILE_VO.EXT.as("ext"),
-                FILE_VO.SIZE.as("size"),
-                FILE_VO.FOLDER.as("parent"),
-                FILE_VO.UPLOADER.as("owner"),
-                FILE_VO.UPLOAD_TIME.as("time"),
-                string("FILE").as("type")
-        ).from(FILE_VO).
-                where(FILE_VO.FOLDER.eq(folder)).
-                unionAll(
-                        select(
-                                FOLDER_VO.ID.as("id"),
-                                FOLDER_VO.NAME.as("name"),
-                                null_().as("ext"),
-                                number(-1).as("size"),
-                                FOLDER_VO.PARENT.as("parent"),
-                                FOLDER_VO.CREATOR.as("owner"),
-                                FOLDER_VO.CREATE_TIME.as("time"),
-                                string("FOLDER").as("type")
-                        ).from(FOLDER_VO).
-                                where(FOLDER_VO.PARENT.eq(folder))
-                ).
-                orderBy(
+    public Result<PageResult<NamedRawFile>> getFilePager(long page, int num, long folder) {
+        QueryWrapper folderQueryWrapper = queryRawFolderWithOwnerName().where(FOLDER_VO.PARENT.eq(folder));
+        QueryWrapper fileQueryWrapper = queryRawFileWithOwnerName().where(FILE_VO.FOLDER.eq(folder));
+        QueryWrapper queryWrapper = fileQueryWrapper.unionAll(folderQueryWrapper)
+                .orderBy(
                         column("time").
                                 asc(),
                         column("id").
                                 asc()
                 );
-        Page<RawFileObject> paginate = fileMapper.paginateAs(page, num, queryWrapper, RawFileObject.class);
-        PageResult<RawFileObject> result = new PageResult<>(paginate.getTotalRow(), paginate.getRecords());
+        long totalCount = fileMapper.selectCountByCondition(FILE_VO.FOLDER.eq(folder)) + folderMapper.selectCountByCondition(FOLDER_VO.PARENT.eq(folder));
+        Page<NamedRawFile> paginate = fileMapper.paginateAs(page, num, totalCount, queryWrapper, NamedRawFile.class);
+        PageResult<NamedRawFile> result = new PageResult<>(paginate.getTotalRow(), paginate.getRecords());
         return Result.success(result);
     }
 
@@ -233,10 +245,15 @@ public class FileService {
         }
     }
 
+    public void deleteFolder(long id) {
+        fileMapper.selectListByCondition(FILE_VO.FOLDER.eq(id)).forEach(this::deleteFile);
+        fileMapper.deleteByCondition(FILE_VO.FOLDER.eq(id));
+        folderMapper.selectListByCondition(FOLDER_VO.PARENT.eq(id)).stream().map(FolderVo::getId).forEach(this::deleteFolder);
+        folderMapper.deleteById(id);
+    }
+
     @Transactional
-    public Result<Void> delete(DeleteRequest request, UserVo user, String address) {
-        long id = request.getId();
-        FileType type = request.getType();
+    public Result<Void> delete(long id, FileType type, UserVo user, String address) {
         long actorId = user.getId();
         if (type.equals(FileType.FILE)) {
             FileVo fileVo = fileMapper.selectOneById(id);
@@ -256,25 +273,12 @@ public class FileService {
                 return Result.failed(HttpStatus.NOT_FOUND, "文件不存在！");
             }
             if (user.getAuth().equals(Auth.user)) {
-                if (folderMapper.selectCountByCondition(FOLDER_VO.ID.eq(id).and(FOLDER_VO.CREATOR.eq(actorId))) <= 0) {
-                    return Result.failed(HttpStatus.UNAUTHORIZED, "权限不足！");
-                }
+                return Result.failed(HttpStatus.UNAUTHORIZED, "权限不足！");
             }
-            fileMapper.deleteByCondition(FILE_VO.FOLDER.eq(id));
-            for (FileVo fileVo : fileMapper.selectListByCondition(FILE_VO.FOLDER.eq(id))) {
-                deleteFile(fileVo);
-            }
+            this.deleteFolder(folder.getId());
         }
         statisticsService.insertAction(user, Actions.DELETE, JSONObject.of("id", id, "type", type, "address", address));
         return Result.success();
-    }
-
-    public Result<FileVo> getFileDetail(long id) {
-        FileVo fileVo = this.fileMapper.selectOneById(id);
-        if (fileVo == null) {
-            return Result.failed(HttpStatus.NOT_FOUND, "未知文件");
-        }
-        return Result.success(fileVo);
     }
 
     @SneakyThrows
@@ -296,6 +300,10 @@ public class FileService {
             if (minMax.length > 1) {
                 max = Long.parseLong(minMax[1]);
             }
+            response.setStatus(206);
+            response.addHeader("Content-Range", "bytes " + min + "-" + max + "/" + size);
+        } else {
+            response.setStatus(200);
         }
         String hash = fileVo.getHash();
         File file = new File(properties.getSavePath(), hash);
@@ -304,10 +312,10 @@ public class FileService {
         if (ext != null) {
             fullName += '.' + ext;
         }
-        response.setStatus(206);
+
         response.addHeader("Content-Length", String.valueOf(max - min));
-        response.addHeader("Content-Range", "bytes " + min + "-" + max + "/" + size);
-        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fullName, StandardCharsets.UTF_8));
+        ContentDisposition disposition = ContentDisposition.attachment().filename(fullName, StandardCharsets.UTF_8).build();
+        response.addHeader("Content-Disposition", disposition.toString());
         ServletOutputStream outputStream = response.getOutputStream();
         try (FileInputStream fis = new FileInputStream(file)) {
             StreamUtils.copyRange(fis, outputStream, min, max);
@@ -368,5 +376,29 @@ public class FileService {
             return Result.failed(HttpStatus.NOT_FOUND, "文件夹不存在");
         }
         return Result.success("成功", pathService.getFilePath(RawFileObject.of(folderVo)));
+    }
+
+    public Result<NamedRawFile> getFile(long id) {
+        NamedRawFile fileVo = this.fileMapper.selectOneByQueryAs(queryRawFileWithOwnerName().where(FILE_VO.ID.eq(id)), NamedRawFile.class);
+        if (fileVo == null) {
+            return Result.failed(HttpStatus.NOT_FOUND, "未知文件");
+        }
+        return Result.success(fileVo);
+    }
+
+    public Result<NamedRawFile> getFolder(long id) {
+        NamedRawFile fileVo = this.folderMapper.selectOneByQueryAs(queryRawFolderWithOwnerName().where(FOLDER_VO.ID.eq(id)), NamedRawFile.class);
+        if (fileVo == null) {
+            return Result.failed(HttpStatus.NOT_FOUND, "未知文件");
+        }
+        return Result.success(fileVo);
+    }
+
+    public Result<FileVo> getFileDetail(long id) {
+        FileVo fileVo = this.fileMapper.selectOneById(id);
+        if (fileVo == null) {
+            return Result.failed(HttpStatus.NOT_FOUND, "未知文件");
+        }
+        return Result.success(fileVo);
     }
 }
