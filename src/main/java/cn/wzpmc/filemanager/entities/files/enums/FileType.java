@@ -4,5 +4,12 @@ import com.alibaba.fastjson2.annotation.JSONCompiled;
 
 @JSONCompiled
 public enum FileType {
-    FILE, FOLDER
+    /**
+     * 文件
+     */
+    FILE,
+    /**
+     * 文件夹
+     */
+    FOLDER
 }

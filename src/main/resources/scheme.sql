@@ -36,13 +36,17 @@ CREATE TABLE IF NOT EXISTS `folder`
   COLLATE = utf8mb4_general_ci COMMENT ='文件夹';
 CREATE TABLE IF NOT EXISTS `statistics`
 (
-    `actor`  int                                                                                                                   DEFAULT NULL COMMENT '操作者',
-    `action` enum ('UPLOAD','DELETE','ACCESS','DOWNLOAD','SEARCH','LOGIN','INVITE','REGISTER') COLLATE utf8mb4_general_ci NOT NULL COMMENT '所做的操作',
-    `params` varchar(255) COLLATE utf8mb4_general_ci                                                                               DEFAULT NULL COMMENT '操作的参数（在ACCESS操作中为空）',
-    `time`   datetime                                                                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作的时间',
+    `actor`            int                                                                                                                   DEFAULT NULL COMMENT '操作者',
+    `action`           enum ('UPLOAD','DELETE','ACCESS','DOWNLOAD','SEARCH','LOGIN','INVITE','REGISTER') COLLATE utf8mb4_general_ci NOT NULL COMMENT '所做的操作',
+    `params`           varchar(255) COLLATE utf8mb4_general_ci                                                                               DEFAULT NULL COMMENT '操作的参数（在ACCESS操作中为空）',
+    `time`             datetime                                                                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作的时间',
+    `download_file_id` int GENERATED ALWAYS AS (if((`action` = _utf8mb4'DOWNLOAD'),
+                                                   json_unquote(json_extract(`params`, _utf8mb4'$.id')),
+                                                   NULL)) VIRTUAL COMMENT '对于下载类型事件的文件ID',
     KEY `action` (`action`) COMMENT '操作类型索引',
     KEY `actor_index` (`actor`) COMMENT '操作者索引',
-    KEY `time` (`time`) COMMENT '时间索引'
+    KEY `time` (`time`) COMMENT '时间索引',
+    KEY `download_file_id_index` (`download_file_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci COMMENT ='统计信息';
@@ -61,3 +65,30 @@ CREATE TABLE IF NOT EXISTS `user`
   AUTO_INCREMENT = 4
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci COMMENT ='用户表';
+CREATE OR REPLACE VIEW `raw_file` AS
+select `file`.`id`                AS `id`,
+       `file`.`name`              AS `name`,
+       `file`.`ext`               AS `ext`,
+       `file`.`size`              AS `size`,
+       `file`.`folder`            AS `parent`,
+       `file`.`uploader`          AS `owner`,
+       `user`.`name`              AS `owner_name`,
+       `file`.`upload_time`       AS `time`,
+       count(`statistics`.`time`) AS `down_count`,
+       'FILE'                     AS `type`
+from ((`file` left join `user`
+       on (((`user`.`id` = `file`.`uploader`) and (`user`.`banned` = 0)))) left join `statistics`
+      on (((`statistics`.`action` = 'DOWNLOAD') and (`file`.`id` = `statistics`.`download_file_id`))))
+group by `file`.`id`
+union all
+select `folder`.`id`          AS `id`,
+       `folder`.`name`        AS `name`,
+       NULL                   AS `ext`,
+       -(1)                   AS `size`,
+       `folder`.`parent`      AS `parent`,
+       `folder`.`creator`     AS `owner`,
+       `user`.`name`          AS `owner_name`,
+       `folder`.`create_time` AS `time`,
+       0                      AS `down_count`,
+       'FOLDER'               AS `type`
+from (`folder` left join `user` on (((`user`.`id` = `folder`.`creator`) and (`user`.`banned` = 0))));

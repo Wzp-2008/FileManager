@@ -10,6 +10,12 @@ import java.util.List;
 @AllArgsConstructor
 @JSONCompiled
 public class PageResult<T> {
+    /**
+     * 总行数
+     */
     private long total;
+    /**
+     * 当前页数据
+     */
     private List<T> data;
 }

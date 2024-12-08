@@ -1,8 +1,10 @@
 package cn.wzpmc.filemanager.interfaces.impl;
 
-import cn.wzpmc.filemanager.entities.files.RawFileObject;
+import cn.wzpmc.filemanager.entities.files.FullRawFileObject;
 import cn.wzpmc.filemanager.mapper.FileMapper;
 import cn.wzpmc.filemanager.mapper.FolderMapper;
+import cn.wzpmc.filemanager.mapper.RawFileMapper;
+import com.mybatisflex.core.query.QueryCondition;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -13,8 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.Date;
 
-import static cn.wzpmc.filemanager.entities.vo.table.FileVoTableDef.FILE_VO;
-import static cn.wzpmc.filemanager.entities.vo.table.FolderVoTableDef.FOLDER_VO;
+import static cn.wzpmc.filemanager.entities.files.table.FullRawFileObjectTableDef.FULL_RAW_FILE_OBJECT;
 
 @Component
 @Primary
@@ -22,16 +23,18 @@ import static cn.wzpmc.filemanager.entities.vo.table.FolderVoTableDef.FOLDER_VO;
 public class ComplexResolver extends SimplePathResolver {
     private final ReverseResolver reverseResolver;
     private final SimpleResolver simpleResolver;
+    private final RawFileMapper rawFileMapper;
     @Autowired
-    public ComplexResolver(FileMapper fileMapper, FolderMapper folderMapper, ReverseResolver reverseResolver, SimpleResolver simpleResolver) {
+    public ComplexResolver(FileMapper fileMapper, FolderMapper folderMapper, ReverseResolver reverseResolver, SimpleResolver simpleResolver, RawFileMapper rawFileMapper) {
         super(fileMapper, folderMapper);
         this.reverseResolver = reverseResolver;
         this.simpleResolver = simpleResolver;
+        this.rawFileMapper = rawFileMapper;
     }
 
     @Override
     @Nullable
-    public RawFileObject resolveFile(@NonNull String[] path) {
+    public FullRawFileObject resolveFile(@NonNull String[] path) {
         String strPath = Arrays.toString(path);
         String targetFileName = path[path.length - 1];
         int lastDotIndex = targetFileName.lastIndexOf('.');
@@ -42,17 +45,21 @@ public class ComplexResolver extends SimplePathResolver {
             ext = targetFileName.substring(lastDotIndex + 1);
         }
         long start = new Date().getTime();
-        long totalRawFileCount = this.fileMapper.selectCountByCondition(FILE_VO.NAME.eq(name).and(FILE_VO.EXT.eq(ext))) + this.folderMapper.selectCountByCondition(FOLDER_VO.NAME.eq(name));
+        QueryCondition extCondition = FULL_RAW_FILE_OBJECT.EXT.eq(ext);
+        if (ext.isEmpty()) {
+            extCondition = extCondition.or(FULL_RAW_FILE_OBJECT.EXT.isNull());
+        }
+        long totalRawFileCount = this.rawFileMapper.selectCountByCondition(FULL_RAW_FILE_OBJECT.NAME.eq(name).and(extCondition));
         if (totalRawFileCount == 0)  return null;
         if (totalRawFileCount > path.length) {
             log.info("use simple resolver to solve path with {}", strPath);
-            RawFileObject rawFileObject = simpleResolver.resolveFile(path);
+            FullRawFileObject rawFileObject = simpleResolver.resolveFile(path);
             long end = new Date().getTime();
             log.info("solve path {} cost {}ms", strPath, end - start);
             return rawFileObject;
         }
         log.info("use reverse resolver to solve path with {}", strPath);
-        RawFileObject rawFileObject = reverseResolver.resolveFile(path);
+        FullRawFileObject rawFileObject = reverseResolver.resolveFile(path);
         long end = new Date().getTime();
         log.info("solve path {} cost {}ms", strPath, end - start);
         return rawFileObject;

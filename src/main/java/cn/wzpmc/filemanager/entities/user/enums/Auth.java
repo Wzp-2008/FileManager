@@ -7,7 +7,14 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @JSONCompiled
 public enum Auth {
-    admin(1, "admin"), user(0, "user");
+    /**
+     * 管理员
+     */
+    admin(1, "admin"),
+    /**
+     * 普通用户
+     */
+    user(0, "user");
     public final int value;
     @EnumValue
     public final String name;

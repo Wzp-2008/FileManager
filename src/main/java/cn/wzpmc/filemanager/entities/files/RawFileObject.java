@@ -15,13 +15,37 @@ import java.util.Date;
 @NoArgsConstructor
 @JSONCompiled
 public class RawFileObject {
+    /**
+     * 文件ID
+     */
     private long id;
+    /**
+     * 文件名
+     */
     private String name;
+    /**
+     * 文件扩展名（文件夹为null）
+     */
     private String ext;
+    /**
+     * 文件大小（文件夹为-1）
+     */
     private long size;
+    /**
+     * 文件所有者
+     */
     private long owner;
+    /**
+     * 父文件夹ID
+     */
     private long parent;
+    /**
+     * 文件上传时间
+     */
     private Date time;
+    /**
+     * 文件类型
+     */
     private FileType type;
 
     public static RawFileObject of(FileVo file) {

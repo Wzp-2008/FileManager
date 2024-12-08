@@ -13,11 +13,26 @@ import java.util.Date;
 @Data
 @JSONCompiled
 public class FolderVo {
+    /**
+     * 文件夹ID
+     */
     @Id(keyType = KeyType.Auto)
     private long id;
+    /**
+     * 文件夹名
+     */
     private String name;
+    /**
+     * 文件夹的父文件夹ID
+     */
     private long parent;
+    /**
+     * 文件夹的创建者
+     */
     private long creator;
+    /**
+     * 文件夹的创建时间
+     */
     @Column(onInsertValue = "now()")
     private Date createTime;
 

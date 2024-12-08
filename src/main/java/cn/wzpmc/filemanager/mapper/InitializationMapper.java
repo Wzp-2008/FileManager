@@ -8,4 +8,5 @@ public interface InitializationMapper {
     void createFolderTable();
     void createStatisticsTable();
     void createUserTable();
+    void createRawFileView();
 }

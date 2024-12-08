@@ -6,6 +6,12 @@ import lombok.Data;
 @Data
 @JSONCompiled
 public class FolderCreateRequest {
+    /**
+     * 父文件夹ID
+     */
     private long parent;
+    /**
+     * 文件名
+     */
     private String name;
 }
