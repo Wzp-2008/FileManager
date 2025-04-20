@@ -309,7 +309,7 @@ public class FileService {
         }
         long size = fileVo.getSize();
         long min = 0;
-        long max = size;
+        long max = size - 1;
         if (!range.equals("null")) {
             String[] unitRanges = range.split("=");
             String[] minMax = unitRanges[1].split("-");
@@ -321,21 +321,22 @@ public class FileService {
             }
             response.setStatus(206);
             response.addHeader("Content-Range", "bytes " + min + "-" + max + "/" + size);
+            response.addHeader("Accept-Ranges", "bytes");
         } else {
             response.setStatus(200);
         }
-        // log.info("-------Prepare-Response-{}-{}-------", min, max);
+        log.debug("-------Prepare-Response-{}-{}-{}-------", min, max, id);
         String hash = fileVo.getHash();
         String fullName = fileVo.getName();
         String ext = fileVo.getExt();
         if (ext != null) {
             fullName += '.' + ext;
         }
-        response.addHeader("Content-Length", String.valueOf(max - min));
+        response.addHeader("Content-Length", String.valueOf(max - min + 1));
         ContentDisposition disposition = ContentDisposition.attachment().filename(fullName, StandardCharsets.UTF_8).build();
         response.addHeader("Content-Disposition", disposition.toString());
         File file = new File(properties.getSavePath(), hash);
-        // log.info("-------Copy-{}-{}-------", min, max);
+        log.debug("-------Copy-{}-{}-{}-------", min, max, id);
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             InputStream stream = null;
             try {
@@ -360,7 +361,7 @@ public class FileService {
                 response.reset();
             }
         }
-        // log.info("-------flush-{}-{}-------", min, max);
+        log.debug("-------flush-{}-{}-{}-------", min, max, id);
     }
 
     public Result<String> getFileLink(long id, String address, HttpServletRequest request) {
