@@ -159,16 +159,32 @@ public class FileController {
         return type.equals(FileType.FILE) ? fileService.findFilePathById(id) : fileService.findFolderPathById(id);
     }
 
+    /**
+     * 获取需要上传的区块列表
+     * @param hash 文件分块后的所有hash值
+     * @return 需要上传的区块哈希和区块ID
+     */
     @PostMapping("/chunk/check")
     public Result<List<CheckChunkResult>> checkChunkUploaded(@RequestBody List<String> hash) {
         return fileService.checkChunkUploaded(hash);
     }
 
+    /**
+     * 上传一个区块
+     * @param block 区块文件
+     * @return 上传的区块ID
+     */
     @PostMapping("/chunk/upload")
     public Result<Long> uploadChunk(@RequestBody MultipartFile block) {
         return fileService.uploadChunk(block);
     }
 
+
+    /**
+     * 将区块保存为文件
+     * @param request 保存文件请求
+     * @return 保存后的文件
+     */
     @PutMapping("/chunk/save")
     public Result<FileVo> saveFile(@RequestBody SaveChunksRequest request) {
         return fileService.saveFile(request);

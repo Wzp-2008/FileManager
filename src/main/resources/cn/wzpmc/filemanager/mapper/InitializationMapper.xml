@@ -7,7 +7,7 @@
         CREATE TABLE IF NOT EXISTS `file`
         (
         `id` int NOT NULL AUTO_INCREMENT COMMENT '文件ID',
-        `name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件名',
+        `name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件名',
         `ext` varchar(40) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '文件扩展名',
         `mime` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件的MIME类型',
         `hash` char(128) COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件sha512',
@@ -31,7 +31,7 @@
         CREATE TABLE IF NOT EXISTS `folder`
         (
         `id` int NOT NULL AUTO_INCREMENT COMMENT '文件夹ID',
-        `name` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件夹名称',
+        `name` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件夹名称',
         `parent` int DEFAULT NULL COMMENT '父文件夹ID',
         `creator` int DEFAULT NULL COMMENT '创建者ID',
         `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

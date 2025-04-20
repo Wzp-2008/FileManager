@@ -49,10 +49,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -148,6 +145,10 @@ public class FileService {
             if (fieldName.equals("file")) {
                 String name = next.getName();
                 FilenameDescription filename = getFilename(name);
+                Optional<Result<FileVo>> illegalResult = filename.checkIllegal();
+                if (illegalResult.isPresent()) {
+                    return illegalResult.get();
+                }
                 String start = filename.name();
                 String extName = filename.ext();
                 if (fileMapper.selectCountByCondition(FILE_VO.NAME.eq(start).and(FILE_VO.EXT.eq(extName)).and(FILE_VO.FOLDER.eq(folderParams))) > 0) {
@@ -229,6 +230,12 @@ public class FileService {
     public Result<FolderVo> mkdir(FolderCreateRequest request, UserVo user, String address) {
         String name = request.getName();
         long parent = request.getParent();
+        if (name.isEmpty()) {
+            return Result.failed(HttpStatus.BAD_REQUEST, "文件名不可为空！");
+        }
+        if (name.length() > 160) {
+            return Result.failed(HttpStatus.PAYLOAD_TOO_LARGE, "文件夹名称过长，无法创建！");
+        }
         if (fileMapper.selectCountByCondition(FILE_VO.EXT.eq(null_()).and(FILE_VO.NAME.eq(name)).and(FILE_VO.FOLDER.eq(parent))) > 0) {
             return Result.failed(HttpStatus.CONFLICT, "创建文件夹失败，同名文件已存在！");
         }
@@ -479,8 +486,13 @@ public class FileService {
     @Transactional
     public Result<FileVo> saveFile(SaveChunksRequest chunks) {
         FilenameDescription filename = getFilename(chunks.getFilename());
+        Optional<Result<FileVo>> illegalResult = filename.checkIllegal();
+        if (illegalResult.isPresent()) {
+            return illegalResult.get();
+        }
         String name = filename.name();
         String ext = filename.ext();
+
         Long folderId = chunks.getFolderId();
         if (fileMapper.selectCountByCondition(FILE_VO.FOLDER.eq(folderId).and(FILE_VO.NAME.eq(name)).and(FILE_VO.EXT.eq(ext))) > 0) {
             return Result.failed(HttpStatus.CONFLICT, "文件已存在！");
@@ -488,8 +500,7 @@ public class FileService {
         FileVo fileVo = new FileVo();
         List<Long> chunkIds = chunks.getChunks();
         List<ChunksVo> chunksVos = chunksMapper.selectListByIds(chunkIds);
-        //noinspection OptionalGetWithoutIsPresent
-        List<ChunksVo> sortedChunks = chunkIds.stream().map(e -> chunksVos.stream().filter(a -> a.getId() == e).findFirst().get()).toList();
+        List<ChunksVo> sortedChunks = chunkIds.stream().map(e -> chunksVos.stream().filter(a -> a.getId() == e).findFirst().orElseThrow()).toList();
         String mime;
         String sha512;
         long size;
@@ -528,5 +539,14 @@ public class FileService {
     }
 
     private record FilenameDescription(String name, String ext) {
+        public <T> Optional<Result<T>> checkIllegal() {
+            if (name.length() > 120 || ext.length() > 40) {
+                return Optional.of(Result.failed(HttpStatus.PAYLOAD_TOO_LARGE, "文件名过长，无法上传！"));
+            }
+            if (name.isEmpty()) {
+                return Optional.of(Result.failed(HttpStatus.BAD_REQUEST, "文件名为空，无法上传！"));
+            }
+            return Optional.empty();
+        }
     }
 }

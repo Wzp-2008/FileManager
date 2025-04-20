@@ -21,8 +21,6 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 import static cn.wzpmc.filemanager.entities.vo.table.UserVoTableDef.USER_VO;
@@ -70,6 +68,10 @@ public class UserService {
     public void register(UserRegisterRequest request, HttpServletResponse response, String address) {
         String username = request.getUsername();
         String password = request.getPassword();
+        if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
+            Result.failed(HttpStatus.BAD_REQUEST, "用户名/密码不可为空！").writeToResponse(response);
+            return;
+        }
         String sha1edPassword = DigestUtils.sha1Hex(password);
         Auth auth = request.getAuth();
         if (this.userMapper.selectCountByCondition(USER_VO.NAME.eq(username)) > 0) {
