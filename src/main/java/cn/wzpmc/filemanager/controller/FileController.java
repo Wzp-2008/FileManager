@@ -4,6 +4,8 @@ import cn.wzpmc.filemanager.annotation.Address;
 import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
 import cn.wzpmc.filemanager.entities.PageResult;
 import cn.wzpmc.filemanager.entities.Result;
+import cn.wzpmc.filemanager.entities.chunk.CheckChunkResult;
+import cn.wzpmc.filemanager.entities.chunk.SaveChunksRequest;
 import cn.wzpmc.filemanager.entities.files.FolderCreateRequest;
 import cn.wzpmc.filemanager.entities.files.FullRawFileObject;
 import cn.wzpmc.filemanager.entities.files.enums.FileType;
@@ -16,9 +18,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 文件操作相关接口
@@ -129,6 +133,7 @@ public class FileController {
      * @deprecated
      */
     @GetMapping("/share")
+    @Deprecated
     public Result<String> shareFile(@RequestParam Long id, @RequestParam(defaultValue = "9999-12-31") Date lastCouldDownloadTime, @RequestParam(defaultValue = "-1") int maxDownloadCount) {
         return fileService.shareFile(id, lastCouldDownloadTime, maxDownloadCount);
     }
@@ -152,5 +157,20 @@ public class FileController {
     @GetMapping("/path/{id}")
     public Result<String> findFilePathById(@PathVariable("id") long id, @RequestParam(value = "type", defaultValue = "FILE") FileType type) {
         return type.equals(FileType.FILE) ? fileService.findFilePathById(id) : fileService.findFolderPathById(id);
+    }
+
+    @PostMapping("/chunk/check")
+    public Result<List<CheckChunkResult>> checkChunkUploaded(@RequestBody List<String> hash) {
+        return fileService.checkChunkUploaded(hash);
+    }
+
+    @PostMapping("/chunk/upload")
+    public Result<Long> uploadChunk(@RequestBody MultipartFile block) {
+        return fileService.uploadChunk(block);
+    }
+
+    @PutMapping("/chunk/save")
+    public Result<FileVo> saveFile(@RequestBody SaveChunksRequest request) {
+        return fileService.saveFile(request);
     }
 }

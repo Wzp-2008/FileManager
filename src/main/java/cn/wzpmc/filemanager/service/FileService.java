@@ -3,6 +3,8 @@ package cn.wzpmc.filemanager.service;
 import cn.wzpmc.filemanager.config.FileManagerProperties;
 import cn.wzpmc.filemanager.entities.PageResult;
 import cn.wzpmc.filemanager.entities.Result;
+import cn.wzpmc.filemanager.entities.chunk.CheckChunkResult;
+import cn.wzpmc.filemanager.entities.chunk.SaveChunksRequest;
 import cn.wzpmc.filemanager.entities.files.FolderCreateRequest;
 import cn.wzpmc.filemanager.entities.files.FullRawFileObject;
 import cn.wzpmc.filemanager.entities.files.RawFileObject;
@@ -10,16 +12,13 @@ import cn.wzpmc.filemanager.entities.files.enums.FileType;
 import cn.wzpmc.filemanager.entities.files.enums.SortField;
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
-import cn.wzpmc.filemanager.entities.vo.FileVo;
-import cn.wzpmc.filemanager.entities.vo.FolderVo;
-import cn.wzpmc.filemanager.entities.vo.UserVo;
+import cn.wzpmc.filemanager.entities.vo.*;
 import cn.wzpmc.filemanager.interfaces.FilePathService;
-import cn.wzpmc.filemanager.mapper.FileMapper;
-import cn.wzpmc.filemanager.mapper.FolderMapper;
-import cn.wzpmc.filemanager.mapper.RawFileMapper;
+import cn.wzpmc.filemanager.mapper.*;
 import cn.wzpmc.filemanager.utils.JwtUtils;
 import cn.wzpmc.filemanager.utils.RandomUtils;
-import cn.wzpmc.filemanager.utils.SizeStatisticsDigestInputStream;
+import cn.wzpmc.filemanager.utils.stream.SerialFileInputStream;
+import cn.wzpmc.filemanager.utils.stream.SizeStatisticsDigestInputStream;
 import com.alibaba.fastjson2.JSONObject;
 import com.mybatisflex.core.audit.http.HashUtil;
 import com.mybatisflex.core.paginate.Page;
@@ -32,6 +31,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tika.Tika;
+import org.apache.tomcat.util.buf.HexUtils;
 import org.apache.tomcat.util.http.fileupload.FileItemStream;
 import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.apache.tomcat.util.http.fileupload.impl.FileItemIteratorImpl;
@@ -43,17 +43,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static cn.wzpmc.filemanager.entities.files.table.FullRawFileObjectTableDef.FULL_RAW_FILE_OBJECT;
+import static cn.wzpmc.filemanager.entities.vo.table.ChunkFileVoTableDef.CHUNK_FILE_VO;
+import static cn.wzpmc.filemanager.entities.vo.table.ChunksVoTableDef.CHUNKS_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.FileVoTableDef.FILE_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.FolderVoTableDef.FOLDER_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.UserVoTableDef.USER_VO;
@@ -70,6 +75,8 @@ public class FileService {
     private final FileManagerProperties properties;
     private final StatisticsService statisticsService;
     private final RedisTemplate<String, FileVo> linkMapper;
+    private final ChunkFileMapper chunkFileMapper;
+    private final ChunksMapper chunksMapper;
     /*private final RedisTemplate<String, Long> linkCountMapper;*/
     private final StringRedisTemplate idAddrLinkMapper;
     private final JwtUtils jwtUtils;
@@ -114,6 +121,19 @@ public class FileService {
         }
     }
 
+    private FilenameDescription getFilename(String name) {
+        int i = name.lastIndexOf(".");
+        String extName = null;
+        String start = name;
+        if (i != -1) {
+            start = name.substring(0, i);
+        }
+        if (!(i == -1 || i == name.length() - 1)) {
+            extName = name.substring(i + 1);
+        }
+        return new FilenameDescription(start, extName);
+    }
+
     @SneakyThrows
     @Transactional
     public Result<FileVo> simpleUpload(MultipartHttpServletRequest request, UserVo user, String address) {
@@ -127,15 +147,9 @@ public class FileService {
             String fieldName = next.getFieldName();
             if (fieldName.equals("file")) {
                 String name = next.getName();
-                int i = name.lastIndexOf(".");
-                String extName = null;
-                String start = name;
-                if (i != -1) {
-                    start = name.substring(0, i);
-                }
-                if (!(i == -1 || i == name.length() - 1)) {
-                    extName = name.substring(i + 1);
-                }
+                FilenameDescription filename = getFilename(name);
+                String start = filename.name();
+                String extName = filename.ext();
                 if (fileMapper.selectCountByCondition(FILE_VO.NAME.eq(start).and(FILE_VO.EXT.eq(extName)).and(FILE_VO.FOLDER.eq(folderParams))) > 0) {
                     return Result.failed(HttpStatus.CONFLICT, "存在同名文件，请改名或删除后重试！");
                 }
@@ -280,7 +294,6 @@ public class FileService {
         return Result.success();
     }
 
-    @SneakyThrows
     public void downloadFile(String id, String range, HttpServletResponse response) {
         FileVo fileVo = linkMapper.opsForValue().get(id);
         if (fileVo == null) {
@@ -304,22 +317,43 @@ public class FileService {
         } else {
             response.setStatus(200);
         }
+        // log.info("-------Prepare-Response-{}-{}-------", min, max);
         String hash = fileVo.getHash();
-        File file = new File(properties.getSavePath(), hash);
         String fullName = fileVo.getName();
         String ext = fileVo.getExt();
         if (ext != null) {
             fullName += '.' + ext;
         }
-
         response.addHeader("Content-Length", String.valueOf(max - min));
         ContentDisposition disposition = ContentDisposition.attachment().filename(fullName, StandardCharsets.UTF_8).build();
         response.addHeader("Content-Disposition", disposition.toString());
-        ServletOutputStream outputStream = response.getOutputStream();
-        try (FileInputStream fis = new FileInputStream(file)) {
-            StreamUtils.copyRange(fis, outputStream, min, max);
+        File file = new File(properties.getSavePath(), hash);
+        // log.info("-------Copy-{}-{}-------", min, max);
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
+            InputStream stream = null;
+            try {
+                if (file.exists()) {
+                    stream = new FileInputStream(file);
+                } else {
+                    List<ChunksVo> chunksVos = chunksMapper.selectListByQuery(select(CHUNKS_VO.ALL_COLUMNS).from(CHUNK_FILE_VO).rightJoin(CHUNKS_VO).on(CHUNK_FILE_VO.CHUNK_ID.eq(CHUNKS_VO.ID)).where(CHUNK_FILE_VO.FILE_ID.eq(fileVo.getId())).orderBy(CHUNK_FILE_VO.INDEX.asc()));
+                    if (chunksVos.isEmpty()) {
+                        Result.failed(HttpStatus.NOT_FOUND, "未知文件").writeToResponse(response);
+                        return;
+                    }
+                    stream = openSerialFileInputStreamByChunks(chunksVos);
+                }
+                StreamUtils.copyRange(stream, outputStream, min, max);
+            } finally {
+                if (stream != null) {
+                    stream.close();
+                }
+            }
+        } catch (IOException e) {
+            if (!response.isCommitted()) {
+                response.reset();
+            }
         }
-        outputStream.flush();
+        // log.info("-------flush-{}-{}-------", min, max);
     }
 
     public Result<String> getFileLink(long id, String address, HttpServletRequest request) {
@@ -399,5 +433,100 @@ public class FileService {
             return Result.failed(HttpStatus.NOT_FOUND, "未知文件");
         }
         return Result.success(fileVo);
+    }
+
+    public Result<List<CheckChunkResult>> checkChunkUploaded(List<String> hash) {
+        List<ChunksVo> chunksVos = chunksMapper.selectListByCondition(CHUNKS_VO.HASH.in(hash));
+        Map<String, Long> hashResult = new HashMap<>();
+        chunksVos.forEach(e -> hashResult.put(e.getHash(), e.getId()));
+        List<CheckChunkResult> list1 = hash.stream().map(e -> new CheckChunkResult(e, hashResult.get(e))).toList();
+        return Result.success(list1);
+    }
+
+    @SneakyThrows
+    public Result<Long> uploadChunk(MultipartFile block) {
+        File savePath = properties.getSavePath();
+        File blobDir = new File(savePath, "blobs");
+        SizeStatisticsDigestInputStream sizeStatisticsDigestInputStream = new SizeStatisticsDigestInputStream(block.getInputStream(), DigestUtils.getSha1Digest());
+        byte[] bytes = sizeStatisticsDigestInputStream.readAllBytes();
+        long size = sizeStatisticsDigestInputStream.getSize();
+        sizeStatisticsDigestInputStream.close();
+        MessageDigest messageDigest = sizeStatisticsDigestInputStream.getMessageDigest();
+        String hex = HashUtil.toHex(messageDigest.digest());
+        ChunksVo chunksVo = chunksMapper.selectOneByCondition(CHUNKS_VO.HASH.eq(hex));
+        if (chunksVo != null) {
+            return Result.success(chunksVo.getId());
+        }
+        String start = hex.substring(0, 2);
+        File chunkBlockDir = new File(blobDir, start);
+        if (!chunkBlockDir.exists()) {
+            if (!chunkBlockDir.mkdirs()) {
+                return Result.failed(HttpStatus.INTERNAL_SERVER_ERROR, "无法创建分区文件夹");
+            }
+        }
+        File file = new File(chunkBlockDir, hex);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(bytes);
+        }
+        chunksVo = new ChunksVo();
+        chunksVo.setHash(hex);
+        chunksVo.setSize(size);
+        chunksMapper.insert(chunksVo);
+        return Result.success(chunksVo.getId());
+    }
+
+    @SneakyThrows
+    @Transactional
+    public Result<FileVo> saveFile(SaveChunksRequest chunks) {
+        FilenameDescription filename = getFilename(chunks.getFilename());
+        String name = filename.name();
+        String ext = filename.ext();
+        Long folderId = chunks.getFolderId();
+        if (fileMapper.selectCountByCondition(FILE_VO.FOLDER.eq(folderId).and(FILE_VO.NAME.eq(name)).and(FILE_VO.EXT.eq(ext))) > 0) {
+            return Result.failed(HttpStatus.CONFLICT, "文件已存在！");
+        }
+        FileVo fileVo = new FileVo();
+        List<Long> chunkIds = chunks.getChunks();
+        List<ChunksVo> chunksVos = chunksMapper.selectListByIds(chunkIds);
+        //noinspection OptionalGetWithoutIsPresent
+        List<ChunksVo> sortedChunks = chunkIds.stream().map(e -> chunksVos.stream().filter(a -> a.getId() == e).findFirst().get()).toList();
+        String mime;
+        String sha512;
+        long size;
+        FileOutputStream fileOutputStream = new FileOutputStream("test.bin");
+        try (SerialFileInputStream serialFileInputStream = openSerialFileInputStreamByChunks(sortedChunks)) {
+            Tika tika = new Tika();
+            mime = tika.detect(serialFileInputStream);
+            serialFileInputStream.reset();
+            try (SizeStatisticsDigestInputStream sizeStatisticsDigestInputStream = new SizeStatisticsDigestInputStream(serialFileInputStream, DigestUtils.getSha512Digest())) {
+                sizeStatisticsDigestInputStream.transferTo(fileOutputStream);
+                sizeStatisticsDigestInputStream.close();
+                sha512 = HexUtils.toHexString(sizeStatisticsDigestInputStream.getMessageDigest().digest());
+                size = sizeStatisticsDigestInputStream.getSize();
+            }
+        }
+        fileOutputStream.close();
+
+        fileVo.setName(name);
+        fileVo.setExt(ext);
+        fileVo.setUploader(-2);
+        fileVo.setFolder(folderId);
+        fileVo.setMime(mime);
+        fileVo.setHash(sha512);
+        fileVo.setSize(size);
+        fileMapper.insert(fileVo);
+        long fileId = fileVo.getId();
+        AtomicLong currentIndex = new AtomicLong();
+        List<ChunkFileVo> mapper = chunkIds.stream().map(e -> new ChunkFileVo(e, fileId, currentIndex.getAndIncrement())).toList();
+        chunkFileMapper.insertBatch(mapper);
+        return Result.success(fileVo);
+    }
+
+    private SerialFileInputStream openSerialFileInputStreamByChunks(List<ChunksVo> chunks) {
+        List<File> list = chunks.stream().map(ChunksVo::getHash).map(e -> new File(new File(new File(properties.getSavePath(), "blobs"), e.substring(0, 2)), e)).toList();
+        return new SerialFileInputStream(list);
+    }
+
+    private record FilenameDescription(String name, String ext) {
     }
 }

@@ -1,4 +1,4 @@
-package cn.wzpmc.filemanager.utils;
+package cn.wzpmc.filemanager.utils.stream;
 
 import lombok.Getter;
 
