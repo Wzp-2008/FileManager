@@ -368,7 +368,7 @@ public class FileService {
         FileVo fileVo = fileMapper.selectOneById(id);
         long fileId = fileVo.getId();
         String identify = ID_ADDR_PREFIX + fileId + address;
-        String link = null;// idAddrLinkMapper.opsForValue().get(identify);
+        String link = idAddrLinkMapper.opsForValue().get(identify);
         if (link == null) {
             link = randomUtils.generatorRandomFileName(8);
             String authorization = request.getHeader("Authorization");
