@@ -21,4 +21,4 @@ spring:
 wzp:
   filemanager:
     save-path: "./file" # file save path
-    hmac-key: "V(LWJ6D5*4%,Hk{1" # jwt key(can be any random string)
+    hmac-key: "fsv2" # jwt key(can be any random string)
