@@ -6,3 +6,5 @@ spring:
       max-file-size: 400GB
       max-request-size: 400GB
       resolve-lazily: true
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
