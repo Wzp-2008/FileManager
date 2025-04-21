@@ -1,0 +1,24 @@
+server:
+  port: 28080 #server port
+  ssl: # ssl (not required)
+    key-store: keys/key.p12 # ssl key store path
+    key-store-type: PKCS12 # ssl key store type
+    key-store-password: "" # ssl key store password
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/fsv2 # mysql jdbc url
+    username: "fsv2" # mysql username
+    password: "fsv2" # mysql password
+  data:
+    redis:
+      host: "127.0.0.1" # redis host
+      database: 3 # redis database
+      password: "fsv2" # redis password
+  servlet:
+  multipart:
+    max-file-size: 100GB # max file upload size
+    max-request-size: 100GB # max file upload size
+wzp:
+  filemanager:
+    save-path: "./file" # file save path
+    hmac-key: "V(LWJ6D5*4%,Hk{1" # jwt key(can be any random string)
