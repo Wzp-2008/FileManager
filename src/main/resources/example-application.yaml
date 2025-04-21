@@ -15,9 +15,9 @@ spring:
       database: 3 # redis database
       password: "fsv2" # redis password
   servlet:
-  multipart:
-    max-file-size: 100GB # max file upload size
-    max-request-size: 100GB # max file upload size
+    multipart:
+      max-file-size: 100GB # max file upload size
+      max-request-size: 100GB # max file upload size
 wzp:
   filemanager:
     save-path: "./file" # file save path
