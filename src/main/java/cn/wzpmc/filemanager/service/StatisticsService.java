@@ -1,5 +1,6 @@
 package cn.wzpmc.filemanager.service;
 
+import cn.wzpmc.filemanager.config.FileManagerProperties;
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
 import cn.wzpmc.filemanager.entities.vo.StatisticsVo;
 import cn.wzpmc.filemanager.entities.vo.UserVo;
@@ -12,8 +13,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class StatisticsService {
     private final StatisticsMapper statisticsMapper;
+    private final FileManagerProperties properties;
 
     public void insertAction(@Nullable UserVo actor, Actions actions, @Nullable Object params) {
+        if (properties.isDev()) return;
         statisticsMapper.insert(new StatisticsVo(actor != null ? actor.getId() : null, actions, params != null ? params.toString() : null));
     }
 
