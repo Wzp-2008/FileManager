@@ -5,7 +5,9 @@ import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
 import cn.wzpmc.filemanager.entities.user.UserLoginRequest;
 import cn.wzpmc.filemanager.entities.user.UserRegisterRequest;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
+import cn.wzpmc.filemanager.entities.vo.PrefsVo;
 import cn.wzpmc.filemanager.entities.vo.UserVo;
+import cn.wzpmc.filemanager.mapper.PrefsMapper;
 import cn.wzpmc.filemanager.mapper.UserMapper;
 import cn.wzpmc.filemanager.utils.JwtUtils;
 import cn.wzpmc.filemanager.utils.RandomUtils;
@@ -33,13 +35,15 @@ public class UserService {
     private final StringRedisTemplate authTemplate;
     private final RandomUtils randomUtils;
     private final StatisticsService statisticsService;
+    private final PrefsMapper prefsMapper;
     @Autowired
-    public UserService(UserMapper userMapper, JwtUtils jwtUtils, StringRedisTemplate authTemplate, RandomUtils randomUtils, StatisticsService statisticsService) {
+    public UserService(UserMapper userMapper, JwtUtils jwtUtils, StringRedisTemplate authTemplate, RandomUtils randomUtils, StatisticsService statisticsService, PrefsMapper prefsMapper) {
         this.userMapper = userMapper;
         this.jwtUtils = jwtUtils;
         this.authTemplate = authTemplate;
         this.randomUtils = randomUtils;
         this.statisticsService = statisticsService;
+        this.prefsMapper = prefsMapper;
         long count = this.userMapper.selectCountByQuery(new QueryWrapper());
         if (count == 0) {
             String s = genInviteCode(UserVo.CONSOLE, "0.0.0.0");
@@ -57,7 +61,7 @@ public class UserService {
             Result.failed(HttpStatus.UNAUTHORIZED, "账号或密码错误").writeToResponse(response);
             return;
         }
-        UserVo userVo = this.userMapper.selectOneByCondition(findUserCondition);
+        UserVo userVo = this.userMapper.selectOneWithRelationsByCondition(findUserCondition);
         userVo.clearPassword();
         long id = userVo.getId();
         String token = this.jwtUtils.createToken(id);
@@ -121,5 +125,12 @@ public class UserService {
         }
         userVo.clearPassword();
         return Result.success(userVo);
+    }
+
+    public Result<PrefsVo> updatePrefs(UserVo user, PrefsVo prefs) {
+        long id = user.getId();
+        prefs.setUserId(id);
+        prefsMapper.update(prefs);
+        return Result.success(prefs);
     }
 }

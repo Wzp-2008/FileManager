@@ -36,7 +36,7 @@ public class AuthorizationUtils {
             throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "token错误或已过期"));
         }
         Integer i = user.get();
-        UserVo userVo = this.userMapper.selectOneById(i);
+        UserVo userVo = this.userMapper.selectOneWithRelationsById(i);
         if (userVo == null) {
             throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "用户不存在"));
         }

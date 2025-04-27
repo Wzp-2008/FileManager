@@ -105,4 +105,16 @@
         'FOLDER'               AS `type`
         from (`folder` left join `user` on (((`user`.`id` = `folder`.`creator`) and (`user`.`banned` = 0))));
     </insert>
+    <insert id="createPrefTable">
+        create table if not exists `prefs`
+        (
+        user_id int not null comment '用户ID'
+        primary key,
+        sort_field enum ('ID', 'NAME', 'EXT', 'TIME', 'UPLOADER', 'DOWNLOAD_COUNT', 'SIZE') null comment '排序方式',
+        sort_reverse tinyint null comment '排序反向',
+        constraint prefs_user_id_uindex
+        unique (user_id)
+        )
+        comment '用户设置表';
+    </insert>
 </mapper>

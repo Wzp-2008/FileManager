@@ -2,16 +2,15 @@ package cn.wzpmc.filemanager.entities.vo;
 
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
-import com.mybatisflex.annotation.Column;
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Table("user")
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @JSONCompiled
 public class UserVo {
     /**
@@ -38,6 +37,9 @@ public class UserVo {
      */
     @Column(isLogicDelete = true, onInsertValue = "0")
     private boolean banned;
+
+    @RelationOneToOne(selfField = "id", targetField = "userId", targetTable = "prefs")
+    private PrefsVo prefs;
 
     public UserVo(String name, String password, Auth auth) {
         this.name = name;

@@ -6,6 +6,7 @@ import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.user.UserLoginRequest;
 import cn.wzpmc.filemanager.entities.user.UserRegisterRequest;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
+import cn.wzpmc.filemanager.entities.vo.PrefsVo;
 import cn.wzpmc.filemanager.entities.vo.UserVo;
 import cn.wzpmc.filemanager.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -69,5 +70,15 @@ public class UserController {
     @GetMapping("/info/{id}")
     public Result<UserVo> getUser(@PathVariable Long id) {
         return userService.getUserInformation(id);
+    }
+
+    /**
+     * 修改当前用户设置
+     * @param prefs 新的用户设置
+     * @return 该用户的新设置
+     */
+    @PostMapping("/prefs")
+    public Result<PrefsVo> updatePrefs(@AuthorizationRequired UserVo user, @RequestBody PrefsVo prefs) {
+        return userService.updatePrefs(user, prefs);
     }
 }

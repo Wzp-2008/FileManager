@@ -9,4 +9,5 @@ public interface InitializationMapper {
     void createStatisticsTable();
     void createUserTable();
     void createRawFileView();
+    void createPrefTable();
 }
