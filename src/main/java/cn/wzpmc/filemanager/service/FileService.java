@@ -239,8 +239,12 @@ public class FileService {
         if (fileMapper.selectCountByCondition(FILE_VO.EXT.eq(null_()).and(FILE_VO.NAME.eq(name)).and(FILE_VO.FOLDER.eq(parent))) > 0) {
             return Result.failed(HttpStatus.CONFLICT, "创建文件夹失败，同名文件已存在！");
         }
-        if (folderMapper.selectCountByCondition(FOLDER_VO.NAME.eq(name).and(FOLDER_VO.PARENT.eq(parent))) > 0) {
-            return Result.failed(HttpStatus.CONFLICT, "创建文件夹失败，同名文件已存在！");
+        FolderVo folder = folderMapper.selectOneByCondition(FOLDER_VO.NAME.eq(name).and(FOLDER_VO.PARENT.eq(parent)));
+        if (folder != null) {
+            if (request.isExistsReturn()) {
+                return Result.success("文件夹已存在！", folder);
+            }
+            return Result.failed(HttpStatus.CONFLICT, "创建文件夹失败，同名文件夹已存在！");
         }
         FolderVo folderVo = new FolderVo();
         folderVo.setCreator(user.getId());
