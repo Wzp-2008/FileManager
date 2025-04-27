@@ -15,10 +15,10 @@ spring:
       database: 3 # redis database
       password: "fsv2" # redis password
   servlet:
-  multipart:
-    max-file-size: 100GB # max file upload size
-    max-request-size: 100GB # max file upload size
+    multipart:
+      max-file-size: 100GB # max file upload size
+      max-request-size: 100GB # max file upload size
 wzp:
   filemanager:
     save-path: "./file" # file save path
-    hmac-key: "V(LWJ6D5*4%,Hk{1" # jwt key(can be any random string)
+    hmac-key: "fsv2" # jwt key(can be any random string)
