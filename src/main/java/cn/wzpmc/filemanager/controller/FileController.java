@@ -53,7 +53,7 @@ public class FileController {
      * @return 分页后的文件列表
      */
     @GetMapping("/get")
-    public Result<PageResult<FullRawFileObject>> getFilePager(@RequestParam long page, @RequestParam int num, @RequestParam long folder, @RequestParam(defaultValue = "TIME") SortField sort, @RequestParam(defaultValue = "false") boolean reverse) {
+    public Result<PageResult<FullRawFileObject>> getFilePager(@RequestParam long page, @RequestParam int num, @RequestParam long folder, @RequestParam(defaultValue = "ID") SortField sort, @RequestParam(defaultValue = "false") boolean reverse) {
         return fileService.getFilePager(page, num, folder, sort, reverse);
     }
 
