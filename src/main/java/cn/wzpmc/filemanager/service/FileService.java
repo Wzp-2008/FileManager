@@ -308,6 +308,16 @@ public class FileService {
             return;
         }
         long size = fileVo.getSize();
+        String hash = fileVo.getHash();
+        File file = new File(properties.getSavePath(), hash);
+        List<ChunksVo> chunksVos = null;
+        if (!file.exists()) {
+            chunksVos = chunksMapper.selectListByQuery(select(CHUNKS_VO.ALL_COLUMNS).from(CHUNK_FILE_VO).rightJoin(CHUNKS_VO).on(CHUNK_FILE_VO.CHUNK_ID.eq(CHUNKS_VO.ID)).where(CHUNK_FILE_VO.FILE_ID.eq(fileVo.getId())).orderBy(CHUNK_FILE_VO.INDEX.asc()));
+            if (chunksVos.isEmpty()) {
+                Result.failed(HttpStatus.INTERNAL_SERVER_ERROR, "服务器错误，未找到文件，请联系服务器管理员处理！(shareLinkId=" + id + ", fileHash=" + hash + ", fileId=" + fileVo.getId() + ")").writeToResponse(response);
+                return;
+            }
+        }
         long min = 0;
         long max = size - 1;
         if (!range.equals("null")) {
@@ -326,7 +336,6 @@ public class FileService {
             response.setStatus(200);
         }
         log.debug("-------Prepare-Response-{}-{}-{}-------", min, max, id);
-        String hash = fileVo.getHash();
         String fullName = fileVo.getName();
         String ext = fileVo.getExt();
         if (ext != null) {
@@ -335,26 +344,11 @@ public class FileService {
         response.addHeader("Content-Length", String.valueOf(max - min + 1));
         ContentDisposition disposition = ContentDisposition.attachment().filename(fullName, StandardCharsets.UTF_8).build();
         response.addHeader("Content-Disposition", disposition.toString());
-        File file = new File(properties.getSavePath(), hash);
+
         log.debug("-------Copy-{}-{}-{}-------", min, max, id);
         try (ServletOutputStream outputStream = response.getOutputStream()) {
-            InputStream stream = null;
-            try {
-                if (file.exists()) {
-                    stream = new FileInputStream(file);
-                } else {
-                    List<ChunksVo> chunksVos = chunksMapper.selectListByQuery(select(CHUNKS_VO.ALL_COLUMNS).from(CHUNK_FILE_VO).rightJoin(CHUNKS_VO).on(CHUNK_FILE_VO.CHUNK_ID.eq(CHUNKS_VO.ID)).where(CHUNK_FILE_VO.FILE_ID.eq(fileVo.getId())).orderBy(CHUNK_FILE_VO.INDEX.asc()));
-                    if (chunksVos.isEmpty()) {
-                        Result.failed(HttpStatus.NOT_FOUND, "未知文件").writeToResponse(response);
-                        return;
-                    }
-                    stream = openSerialFileInputStreamByChunks(chunksVos);
-                }
+            try (InputStream stream = chunksVos == null ? new FileInputStream(file) : openSerialFileInputStreamByChunks(chunksVos)) {
                 StreamUtils.copyRange(stream, outputStream, min, max);
-            } finally {
-                if (stream != null) {
-                    stream.close();
-                }
             }
         } catch (IOException e) {
             if (!response.isCommitted()) {
