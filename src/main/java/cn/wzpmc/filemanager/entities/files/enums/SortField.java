@@ -30,6 +30,10 @@ public enum SortField {
     /**
      * 通过文件下载次数排序
      */
-    DOWNLOAD_COUNT(FULL_RAW_FILE_OBJECT.DOWN_COUNT);
+    DOWNLOAD_COUNT(FULL_RAW_FILE_OBJECT.DOWN_COUNT),
+    /**
+     * 根据文件大小排序
+     */
+    SIZE(FULL_RAW_FILE_OBJECT.SIZE);
     public final QueryColumn column;
 }
