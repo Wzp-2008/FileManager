@@ -128,9 +128,8 @@ public class UserService {
     }
 
     public Result<PrefsVo> updatePrefs(UserVo user, PrefsVo prefs) {
-        long id = user.getId();
-        prefs.setUserId(id);
-        prefsMapper.update(prefs);
+        prefs.setUserId(user.getId());
+        prefsMapper.update(prefs, false);
         return Result.success(prefs);
     }
 }
