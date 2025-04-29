@@ -6,6 +6,7 @@ import cn.wzpmc.filemanager.entities.PageResult;
 import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.chunk.CheckChunkResult;
 import cn.wzpmc.filemanager.entities.chunk.SaveChunksRequest;
+import cn.wzpmc.filemanager.entities.files.FilePathDescription;
 import cn.wzpmc.filemanager.entities.files.FolderCreateRequest;
 import cn.wzpmc.filemanager.entities.files.FullRawFileObject;
 import cn.wzpmc.filemanager.entities.files.enums.FileType;
@@ -32,6 +33,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FileController {
     private final FileService fileService;
+
+
+    /**
+     * 检查文件是否可以上传
+     * @param description 文件路径
+     * @return 是否可以上传
+     */
+    @PostMapping("/upload/check")
+    @AuthorizationRequired
+    public Result<Boolean> checkUploadPossible(@RequestBody FilePathDescription description) {
+        return fileService.checkUploadPossible(description.getName(), description.getFolderId());
+    }
 
     /**
      * 上传一个文件

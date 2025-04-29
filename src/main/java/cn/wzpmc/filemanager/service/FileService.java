@@ -58,8 +58,8 @@ import static cn.wzpmc.filemanager.entities.vo.table.ChunkFileVoTableDef.CHUNK_F
 import static cn.wzpmc.filemanager.entities.vo.table.ChunksVoTableDef.CHUNKS_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.FileVoTableDef.FILE_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.FolderVoTableDef.FOLDER_VO;
-import static cn.wzpmc.filemanager.entities.vo.table.UserVoTableDef.USER_VO;
-import static com.mybatisflex.core.query.QueryMethods.*;
+import static com.mybatisflex.core.query.QueryMethods.null_;
+import static com.mybatisflex.core.query.QueryMethods.select;
 
 @Slf4j
 @Service
@@ -83,34 +83,6 @@ public class FileService {
     public static final char PATH_SEPARATOR_CHAR = '/';
     public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
 
-    protected static QueryWrapper queryRawFileWithOwnerName() {
-        return select(
-                FILE_VO.ID.as("id"),
-                FILE_VO.NAME.as("name"),
-                FILE_VO.EXT.as("ext"),
-                FILE_VO.SIZE.as("size"),
-                FILE_VO.FOLDER.as("parent"),
-                FILE_VO.UPLOADER.as("owner"),
-                USER_VO.NAME.as("ownerName"),
-                FILE_VO.UPLOAD_TIME.as("time"),
-                string("FILE").as("type")
-        ).from(FILE_VO).leftJoin(USER_VO).on(USER_VO.ID.eq(FILE_VO.UPLOADER));
-    }
-
-    protected static QueryWrapper queryRawFolderWithOwnerName() {
-        return select(
-                FOLDER_VO.ID.as("id"),
-                FOLDER_VO.NAME.as("name"),
-                null_().as("ext"),
-                number(-1).as("size"),
-                FOLDER_VO.PARENT.as("parent"),
-                FOLDER_VO.CREATOR.as("owner"),
-                USER_VO.NAME.as("ownerName"),
-                FOLDER_VO.CREATE_TIME.as("time"),
-                string("FOLDER").as("type")
-        ).from(FOLDER_VO).leftJoin(USER_VO).on(USER_VO.ID.eq(FOLDER_VO.CREATOR));
-    }
-
     protected void tryDeleteOrDeleteOnExit(File tmpFile) {
         if (!tmpFile.delete()) {
             log.error("delete tmp file error");
@@ -131,6 +103,17 @@ public class FileService {
         return new FilenameDescription(start, extName);
     }
 
+    private <T> Optional<Result<T>> checkFilenameConflict(FilenameDescription filename, Long folder) {
+        return checkFilenameConflict(filename.name, filename.ext, folder);
+    }
+
+    private <T> Optional<Result<T>> checkFilenameConflict(String start, String extName, Long folder) {
+        if (fileMapper.selectCountByCondition(FILE_VO.NAME.eq(start).and(FILE_VO.EXT.eq(extName)).and(FILE_VO.FOLDER.eq(folder))) > 0) {
+            return Optional.of(Result.failed(HttpStatus.CONFLICT, "存在同名文件，请改名或删除后重试！"));
+        }
+        return Optional.empty();
+    }
+
     @SneakyThrows
     @Transactional
     public Result<FileVo> simpleUpload(MultipartHttpServletRequest request, UserVo user, String address) {
@@ -149,11 +132,8 @@ public class FileService {
                 if (illegalResult.isPresent()) {
                     return illegalResult.get();
                 }
-                String start = filename.name();
-                String extName = filename.ext();
-                if (fileMapper.selectCountByCondition(FILE_VO.NAME.eq(start).and(FILE_VO.EXT.eq(extName)).and(FILE_VO.FOLDER.eq(folderParams))) > 0) {
-                    return Result.failed(HttpStatus.CONFLICT, "存在同名文件，请改名或删除后重试！");
-                }
+                String start = filename.name;
+                String extName = filename.ext;
                 InputStream inputStream = next.openStream();
                 SizeStatisticsDigestInputStream digestInputStream = new SizeStatisticsDigestInputStream(inputStream, DigestUtils.getSha512Digest());
                 File savePath = properties.getSavePath();
@@ -537,7 +517,26 @@ public class FileService {
         return new SerialFileInputStream(list);
     }
 
+    public Result<Boolean> checkUploadPossible(String name, Long folder) {
+        FilenameDescription filename = getFilename(name);
+        Optional<Result<Boolean>> illegalResult = filename.checkIllegal();
+        if (illegalResult.isPresent()) {
+            return illegalResult.get();
+        }
+        Optional<Result<Boolean>> objectResult = this.checkFilenameConflict(filename, folder);
+        return objectResult.orElseGet(() -> Result.success("可以上传", true));
+    }
+
     private record FilenameDescription(String name, String ext) {
+        private FilenameDescription(String name, String ext) {
+            this.name = name;
+            if (ext == null) {
+                this.ext = "";
+                return;
+            }
+            this.ext = ext;
+        }
+
         public <T> Optional<Result<T>> checkIllegal() {
             if (name.length() > 120 || ext.length() > 40) {
                 return Optional.of(Result.failed(HttpStatus.PAYLOAD_TOO_LARGE, "文件名过长，无法上传！"));
@@ -547,5 +546,6 @@ public class FileService {
             }
             return Optional.empty();
         }
+
     }
 }
