@@ -138,36 +138,42 @@ public class FileService {
                 SizeStatisticsDigestInputStream digestInputStream = new SizeStatisticsDigestInputStream(inputStream, DigestUtils.getSha512Digest());
                 File savePath = properties.getSavePath();
                 File tmpFile = new File(savePath, "cache-" + randomUtils.generatorRandomFileName(20));
-                try (FileOutputStream fileOutputStream = new FileOutputStream(tmpFile)) {
-                    StreamUtils.copy(digestInputStream, fileOutputStream);
-                }
-                digestInputStream.close();
-                String hex = HashUtil.toHex(digestInputStream.getMessageDigest().digest());
-                long size = digestInputStream.getSize();
-                if (size == 0) {
+                try {
+                    try (FileOutputStream fileOutputStream = new FileOutputStream(tmpFile)) {
+                        StreamUtils.copy(digestInputStream, fileOutputStream);
+                    }
+                    digestInputStream.close();
+                    String hex = HashUtil.toHex(digestInputStream.getMessageDigest().digest());
+                    long size = digestInputStream.getSize();
+                    if (size == 0) {
+                        tryDeleteOrDeleteOnExit(tmpFile);
+                        return Result.failed(HttpStatus.LENGTH_REQUIRED, "请勿上传空文件！");
+                    }
+                    Tika tika = new Tika();
+                    String detect = tika.detect(tmpFile);
+                    FileVo fileVo = new FileVo();
+                    fileVo.setUploader(user.getId());
+                    fileVo.setMime(detect);
+                    fileVo.setSize(size);
+                    fileVo.setName(start);
+                    fileVo.setExt(extName);
+                    fileVo.setHash(hex);
+                    fileVo.setFolder(folderParams);
+                    fileMapper.insert(fileVo);
+                    statisticsService.insertAction(user, Actions.UPLOAD, JSONObject.of("id", fileVo.getId(), "hex", hex, "address", address));
+                    File targetFile = new File(savePath, hex);
+                    lastUploadFile = fileVo;
+                    if (targetFile.isFile()) {
+                        tryDeleteOrDeleteOnExit(tmpFile);
+                        continue;
+                    }
+                    if (!tmpFile.renameTo(targetFile)) {
+                        throw new RuntimeException("error while moving file");
+                    }
+                } catch (Exception e) {
+                    log.error("error while processing file", e);
+                } finally {
                     tryDeleteOrDeleteOnExit(tmpFile);
-                    return Result.failed(HttpStatus.LENGTH_REQUIRED, "请勿上传空文件！");
-                }
-                Tika tika = new Tika();
-                String detect = tika.detect(tmpFile);
-                FileVo fileVo = new FileVo();
-                fileVo.setUploader(user.getId());
-                fileVo.setMime(detect);
-                fileVo.setSize(size);
-                fileVo.setName(start);
-                fileVo.setExt(extName);
-                fileVo.setHash(hex);
-                fileVo.setFolder(folderParams);
-                fileMapper.insert(fileVo);
-                statisticsService.insertAction(user, Actions.UPLOAD, JSONObject.of("id", fileVo.getId(), "hex", hex, "address", address));
-                File targetFile = new File(savePath, hex);
-                lastUploadFile = fileVo;
-                if (targetFile.isFile()) {
-                    tryDeleteOrDeleteOnExit(tmpFile);
-                    continue;
-                }
-                if (!tmpFile.renameTo(targetFile)) {
-                    throw new RuntimeException("error while moving file");
                 }
             }
         }
