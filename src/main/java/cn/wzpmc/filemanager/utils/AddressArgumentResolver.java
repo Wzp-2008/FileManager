@@ -21,26 +21,34 @@ public class AddressArgumentResolver implements HandlerMethodArgumentResolver {
         return parameter.hasParameterAnnotation(Address.class);
     }
 
-    @Override
-    @Nullable
-    public Object resolveArgument(@NonNull MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer, @NonNull NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) {
-        String remoteAddr = "0.0.0.0";
-        if (webRequest instanceof ServletWebRequest servletWebRequest) {
-            HttpServletRequest request = servletWebRequest.getRequest();
-            remoteAddr = request.getRemoteAddr();
-            if (remoteAddr.equals("127.0.0.1")) {
-                String header = request.getHeader("X-Real-IP");
-                if (header != null) {
-                    remoteAddr = header;
-                }
+    public static String getAddr(HttpServletRequest request) {
+        String remoteAddr = request.getRemoteAddr();
+        if (remoteAddr.equals("127.0.0.1")) {
+            String header = request.getHeader("X-Real-IP");
+            if (header != null) {
+                remoteAddr = header;
             }
-            if (remoteAddr.equals("127.0.0.1")) {
-                String xff = request.getHeader("X-Forwarded-For");
-                if (xff != null) {
-                    remoteAddr = xff;
-                }
+        }
+        if (remoteAddr.equals("127.0.0.1")) {
+            String xff = request.getHeader("X-Forwarded-For");
+            if (xff != null) {
+                remoteAddr = xff;
             }
         }
         return remoteAddr;
+    }
+
+    public static String getAddr(NativeWebRequest nativeRequest) {
+        if (nativeRequest instanceof ServletWebRequest servletWebRequest) {
+            HttpServletRequest request = servletWebRequest.getRequest();
+            return getAddr(request);
+        }
+        return "0.0.0.0";
+    }
+
+    @Override
+    @Nullable
+    public Object resolveArgument(@NonNull MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer, @NonNull NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) {
+        return getAddr(webRequest);
     }
 }

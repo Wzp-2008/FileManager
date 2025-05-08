@@ -3,6 +3,7 @@ package cn.wzpmc.filemanager.configuration;
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
 import cn.wzpmc.filemanager.entities.vo.UserVo;
 import cn.wzpmc.filemanager.service.StatisticsService;
+import cn.wzpmc.filemanager.utils.AddressArgumentResolver;
 import cn.wzpmc.filemanager.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,7 +37,7 @@ public class StaticResourceConfiguration implements WebMvcConfigurer, HandlerInt
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
-        String remoteAddr = request.getRemoteAddr();
+        String remoteAddr = AddressArgumentResolver.getAddr(request);
         String authorization = request.getHeader("Authorization");
         if (authorization != null) {
             Optional<Integer> user = jwtUtils.getUser(authorization);
