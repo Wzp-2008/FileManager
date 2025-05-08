@@ -2,6 +2,7 @@ package cn.wzpmc.filemanager.utils;
 
 import cn.wzpmc.filemanager.annotation.Address;
 import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.NonNull;
@@ -23,9 +24,23 @@ public class AddressArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     @Nullable
     public Object resolveArgument(@NonNull MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer, @NonNull NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) {
+        String remoteAddr = "0.0.0.0";
         if (webRequest instanceof ServletWebRequest servletWebRequest) {
-            return servletWebRequest.getRequest().getRemoteAddr();
+            HttpServletRequest request = servletWebRequest.getRequest();
+            remoteAddr = request.getRemoteAddr();
+            if (remoteAddr.equals("127.0.0.1")) {
+                String header = request.getHeader("X-Real-IP");
+                if (header != null) {
+                    remoteAddr = header;
+                }
+            }
+            if (remoteAddr.equals("127.0.0.1")) {
+                String xff = request.getHeader("X-Forwarded-For");
+                if (xff != null) {
+                    remoteAddr = xff;
+                }
+            }
         }
-        return null;
+        return remoteAddr;
     }
 }
