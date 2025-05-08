@@ -78,31 +78,31 @@
     </insert>
     <insert id="createRawFileView">
         CREATE OR REPLACE VIEW `raw_file` AS
-        select `file`.`id`                AS `id`,
-        `file`.`name`              AS `name`,
-        `file`.`ext`               AS `ext`,
-        `file`.`size`              AS `size`,
-        `file`.`folder`            AS `parent`,
-        `file`.`uploader`          AS `owner`,
-        `user`.`name`              AS `owner_name`,
-        `file`.`upload_time`       AS `time`,
+        select `file`.`id` AS `id`,
+        `file`.`name` AS `name`,
+        `file`.`ext` AS `ext`,
+        `file`.`size` AS `size`,
+        `file`.`folder` AS `parent`,
+        `file`.`uploader` AS `owner`,
+        `user`.`name` AS `owner_name`,
+        `file`.`upload_time` AS `time`,
         count(`statistics`.`time`) AS `down_count`,
-        'FILE'                     AS `type`
+        'FILE' AS `type`
         from ((`file` left join `user`
         on (((`user`.`id` = `file`.`uploader`) and (`user`.`banned` = 0)))) left join `statistics`
         on (((`statistics`.`action` = 'DOWNLOAD') and (`file`.`id` = `statistics`.`download_file_id`))))
         group by `file`.`id`
         union all
-        select `folder`.`id`          AS `id`,
-        `folder`.`name`        AS `name`,
-        NULL                   AS `ext`,
-        -(1)                   AS `size`,
-        `folder`.`parent`      AS `parent`,
-        `folder`.`creator`     AS `owner`,
-        `user`.`name`          AS `owner_name`,
+        select `folder`.`id` AS `id`,
+        `folder`.`name` AS `name`,
+        NULL AS `ext`,
+        -(1) AS `size`,
+        `folder`.`parent` AS `parent`,
+        `folder`.`creator` AS `owner`,
+        `user`.`name` AS `owner_name`,
         `folder`.`create_time` AS `time`,
-        0                      AS `down_count`,
-        'FOLDER'               AS `type`
+        0 AS `down_count`,
+        'FOLDER' AS `type`
         from (`folder` left join `user` on (((`user`.`id` = `folder`.`creator`) and (`user`.`banned` = 0))));
     </insert>
     <insert id="createPrefTable">
