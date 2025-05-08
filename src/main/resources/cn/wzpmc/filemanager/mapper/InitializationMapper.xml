@@ -56,7 +56,7 @@
         KEY `actor_index` (`actor`) COMMENT '操作者索引',
         KEY `time` (`time`) COMMENT '时间索引',
         KEY `download_file_id_index` (`download_file_id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='统计信息'
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='统计信息';
     </insert>
     <insert id="createUserTable">
         CREATE TABLE IF NOT EXISTS `user`

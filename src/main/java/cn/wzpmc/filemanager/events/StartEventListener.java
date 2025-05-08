@@ -24,8 +24,8 @@ public class StartEventListener {
         initializationMapper.createStatisticsTable();
         initializationMapper.createFolderTable();
         initializationMapper.createFileTable();
-        initializationMapper.createRawFileView();
         initializationMapper.createPrefTable();
+        initializationMapper.createRawFileView();
         //开启审计功能
         AuditManager.setAuditEnable(true);
         MessageCollector collector = new ConsoleMessageCollector();
