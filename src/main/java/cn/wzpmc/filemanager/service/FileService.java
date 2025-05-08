@@ -78,6 +78,7 @@ public class FileService {
     private final StringRedisTemplate idAddrLinkMapper;
     private final JwtUtils jwtUtils;
     private final FilePathService pathService;
+    private final File savePath;
     public static final String ID_ADDR_PREFIX = "ID_ADDR_";
     public static final String SHARE_PREFIX = "SHARE_";
     public static final char PATH_SEPARATOR_CHAR = '/';
@@ -136,7 +137,6 @@ public class FileService {
                 String extName = filename.ext;
                 InputStream inputStream = next.openStream();
                 SizeStatisticsDigestInputStream digestInputStream = new SizeStatisticsDigestInputStream(inputStream, DigestUtils.getSha512Digest());
-                File savePath = properties.getSavePath();
                 File tmpFile = new File(savePath, "cache-" + randomUtils.generatorRandomFileName(20));
                 try {
                     try (FileOutputStream fileOutputStream = new FileOutputStream(tmpFile)) {
