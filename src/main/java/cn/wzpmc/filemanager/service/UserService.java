@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+import static cn.wzpmc.filemanager.entities.vo.table.FingerprintVoTableDef.FINGERPRINT_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.UserVoTableDef.USER_VO;
 
 @Slf4j
@@ -144,7 +145,11 @@ public class UserService {
         fingerprintVo.setUserId(user.getId());
         String fingerprint = request.getFingerprint();
         fingerprintVo.setFingerprint(fingerprint);
-        fingerprintMapper.insertOrUpdate(fingerprintVo);
+        if (fingerprintMapper.selectCountByCondition(FINGERPRINT_VO.FINGERPRINT.eq(fingerprint)) > 0) {
+            fingerprintMapper.update(fingerprintVo);
+        } else {
+            fingerprintMapper.insert(fingerprintVo);
+        }
         statisticsService.insertAction(user, Actions.FINGERPRINT_SAVE, JSONObject.of("fingerprint", fingerprint, "address", address));
         return Result.success(true);
     }
