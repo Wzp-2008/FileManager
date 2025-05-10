@@ -104,4 +104,14 @@ public class UserController {
     public Result<UserVo> fingerprintLogin(HttpServletResponse response, @RequestParam("fingerprint") String fingerprint, @Address String address) {
         return userService.fingerprintLogin(response, fingerprint, address);
     }
+
+    /**
+     * 尝试删除浏览器指纹
+     * @param user 用户信息
+     * @return 是否删除成功
+     */
+    @DeleteMapping("/fingerprint/tryRemove")
+    public Result<Boolean> tryRemoveFingerprint(@AuthorizationRequired UserVo user, @RequestParam("fingerprint") String fingerprint) {
+        return userService.tryRemoveFingerprint(user, fingerprint);
+    }
 }

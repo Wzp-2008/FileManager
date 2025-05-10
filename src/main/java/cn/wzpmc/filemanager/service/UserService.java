@@ -171,4 +171,12 @@ public class UserService {
         statisticsService.insertAction(userVo, Actions.LOGIN, JSONObject.of("fingerprint", fingerprint, "address", address, "status", "success"));
         return Result.success(userVo);
     }
+
+    public Result<Boolean> tryRemoveFingerprint(UserVo user, String fingerprint) {
+        int i = fingerprintMapper.deleteByCondition(FINGERPRINT_VO.FINGERPRINT.eq(fingerprint).and(FINGERPRINT_VO.USER_ID.eq(user.getId())));
+        if (i > 0) {
+            return Result.success("删除成功", true);
+        }
+        return Result.failed(HttpStatus.NOT_FOUND, "浏览器指纹不存在");
+    }
 }
