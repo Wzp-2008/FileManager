@@ -163,7 +163,7 @@ public class UserService {
         }
         String token = jwtUtils.createToken(userId);
         response.addHeader("Add-Authorization", token);
-        statisticsService.insertAction(Actions.LOGIN, JSONObject.of("fingerprint", fingerprint, "address", address, "status", "success"));
+        statisticsService.insertAction(userVo, Actions.LOGIN, JSONObject.of("fingerprint", fingerprint, "address", address, "status", "success"));
         return Result.success(userVo);
     }
 }
