@@ -25,6 +25,7 @@ public class StartEventListener {
         initializationMapper.createFolderTable();
         initializationMapper.createFileTable();
         initializationMapper.createPrefTable();
+        initializationMapper.createFingerprintTable();
         initializationMapper.createRawFileView();
         //开启审计功能
         AuditManager.setAuditEnable(true);

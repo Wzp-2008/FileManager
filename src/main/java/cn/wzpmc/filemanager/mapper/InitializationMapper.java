@@ -10,4 +10,6 @@ public interface InitializationMapper {
     void createUserTable();
     void createRawFileView();
     void createPrefTable();
+
+    void createFingerprintTable();
 }

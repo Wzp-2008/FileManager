@@ -35,5 +35,9 @@ public enum Actions {
     /**
      * 注册事件
      */
-    REGISTER
+    REGISTER,
+    /**
+     * 保存浏览器指纹
+     */
+    FINGERPRINT_SAVE
 }

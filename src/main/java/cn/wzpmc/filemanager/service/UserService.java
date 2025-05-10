@@ -1,12 +1,15 @@
 package cn.wzpmc.filemanager.service;
 
 import cn.wzpmc.filemanager.entities.Result;
+import cn.wzpmc.filemanager.entities.fingerprint.FingerprintRequest;
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
 import cn.wzpmc.filemanager.entities.user.UserLoginRequest;
 import cn.wzpmc.filemanager.entities.user.UserRegisterRequest;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
+import cn.wzpmc.filemanager.entities.vo.FingerprintVo;
 import cn.wzpmc.filemanager.entities.vo.PrefsVo;
 import cn.wzpmc.filemanager.entities.vo.UserVo;
+import cn.wzpmc.filemanager.mapper.FingerprintMapper;
 import cn.wzpmc.filemanager.mapper.PrefsMapper;
 import cn.wzpmc.filemanager.mapper.UserMapper;
 import cn.wzpmc.filemanager.utils.JwtUtils;
@@ -36,8 +39,10 @@ public class UserService {
     private final RandomUtils randomUtils;
     private final StatisticsService statisticsService;
     private final PrefsMapper prefsMapper;
+    private final FingerprintMapper fingerprintMapper;
+
     @Autowired
-    public UserService(UserMapper userMapper, JwtUtils jwtUtils, StringRedisTemplate authTemplate, RandomUtils randomUtils, StatisticsService statisticsService, PrefsMapper prefsMapper) {
+    public UserService(UserMapper userMapper, JwtUtils jwtUtils, StringRedisTemplate authTemplate, RandomUtils randomUtils, StatisticsService statisticsService, PrefsMapper prefsMapper, FingerprintMapper fingerprintMapper) {
         this.userMapper = userMapper;
         this.jwtUtils = jwtUtils;
         this.authTemplate = authTemplate;
@@ -49,6 +54,7 @@ public class UserService {
             String s = genInviteCode(UserVo.CONSOLE, "0.0.0.0");
             log.info("生成了管理员密钥：{}，有效期15分钟，若失效请使用控制台命令/key或重启后端重新生成！", s);
         }
+        this.fingerprintMapper = fingerprintMapper;
     }
     public void login(UserLoginRequest request, HttpServletResponse response, String address) {
         String username = request.getUsername();
@@ -131,5 +137,33 @@ public class UserService {
         prefs.setUserId(user.getId());
         prefsMapper.update(prefs, false);
         return Result.success(prefs);
+    }
+
+    public Result<Boolean> saveFingerprint(UserVo user, FingerprintRequest request, String address) {
+        FingerprintVo fingerprintVo = new FingerprintVo();
+        fingerprintVo.setUserId(user.getId());
+        String fingerprint = request.getFingerprint();
+        fingerprintVo.setFingerprint(fingerprint);
+        fingerprintMapper.insertOrUpdate(fingerprintVo);
+        statisticsService.insertAction(user, Actions.FINGERPRINT_SAVE, JSONObject.of("fingerprint", fingerprint, "address", address));
+        return Result.success(true);
+    }
+
+    public Result<UserVo> fingerprintLogin(HttpServletResponse response, String fingerprint, String address) {
+        FingerprintVo fingerprintVo = fingerprintMapper.selectOneById(fingerprint);
+        if (fingerprintVo == null) {
+            statisticsService.insertAction(Actions.LOGIN, JSONObject.of("fingerprint", fingerprint, "address", address, "status", "error", "msg", "指纹不存在"));
+            return Result.failed(HttpStatus.NOT_FOUND, "指纹不存在！");
+        }
+        long userId = fingerprintVo.getUserId();
+        UserVo userVo = userMapper.selectOneById(userId);
+        if (userVo == null) {
+            statisticsService.insertAction(Actions.LOGIN, JSONObject.of("fingerprint", fingerprint, "address", address, "status", "error", "msg", "用户不存在或被封禁"));
+            return Result.failed(HttpStatus.NOT_FOUND, "用户不存在或被封禁");
+        }
+        String token = jwtUtils.createToken(userId);
+        response.addHeader("Add-Authorization", token);
+        statisticsService.insertAction(Actions.LOGIN, JSONObject.of("fingerprint", fingerprint, "address", address, "status", "success"));
+        return Result.success(userVo);
     }
 }

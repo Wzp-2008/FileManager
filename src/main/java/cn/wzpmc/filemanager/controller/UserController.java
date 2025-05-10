@@ -3,6 +3,7 @@ package cn.wzpmc.filemanager.controller;
 import cn.wzpmc.filemanager.annotation.Address;
 import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
 import cn.wzpmc.filemanager.entities.Result;
+import cn.wzpmc.filemanager.entities.fingerprint.FingerprintRequest;
 import cn.wzpmc.filemanager.entities.user.UserLoginRequest;
 import cn.wzpmc.filemanager.entities.user.UserRegisterRequest;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
@@ -80,5 +81,27 @@ public class UserController {
     @PostMapping("/prefs")
     public Result<PrefsVo> updatePrefs(@AuthorizationRequired UserVo user, @RequestBody PrefsVo prefs) {
         return userService.updatePrefs(user, prefs);
+    }
+
+    /**
+     * 保存浏览器指纹
+     * @param request 指纹保存请求体
+     * @param address 请求的地址
+     * @return 是否保存成功
+     */
+    @PostMapping("/fingerprint/save")
+    public Result<Boolean> saveFingerprint(@AuthorizationRequired UserVo user, @RequestBody FingerprintRequest request, @Address String address) {
+        return userService.saveFingerprint(user, request, address);
+    }
+
+    /**
+     * 尝试使用浏览器指纹登录
+     * @param fingerprint 浏览器指纹
+     * @param address 请求的地址
+     * @return 登录后的用户
+     */
+    @GetMapping("/fingerprint/login")
+    public Result<UserVo> fingerprintLogin(HttpServletResponse response, @RequestParam("fingerprint") String fingerprint, @Address String address) {
+        return userService.fingerprintLogin(response, fingerprint, address);
     }
 }
