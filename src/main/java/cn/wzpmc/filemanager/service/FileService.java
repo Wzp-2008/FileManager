@@ -39,6 +39,8 @@ import org.apache.tomcat.util.http.fileupload.FileItemStream;
 import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.apache.tomcat.util.http.fileupload.impl.FileItemIteratorImpl;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ContentDisposition;
@@ -80,12 +82,18 @@ public class FileService {
     /*private final RedisTemplate<String, Long> linkCountMapper;*/
     private final StringRedisTemplate idAddrLinkMapper;
     private final JwtUtils jwtUtils;
-    private final FilePathService pathService;
+    private FilePathService pathService;
     private final File savePath;
     public static final String ID_ADDR_PREFIX = "ID_ADDR_";
     public static final String SHARE_PREFIX = "SHARE_";
     public static final char PATH_SEPARATOR_CHAR = '/';
     public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
+
+    @Autowired
+    @Lazy
+    public void setPathService(FilePathService pathService) {
+        this.pathService = pathService;
+    }
 
     protected void tryDeleteOrDeleteOnExit(File tmpFile) {
         if (!tmpFile.delete()) {
