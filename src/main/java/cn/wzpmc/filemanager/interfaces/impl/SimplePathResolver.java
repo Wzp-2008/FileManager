@@ -3,7 +3,6 @@ package cn.wzpmc.filemanager.interfaces.impl;
 import cn.wzpmc.filemanager.entities.files.RawFileObject;
 import cn.wzpmc.filemanager.entities.vo.FolderVo;
 import cn.wzpmc.filemanager.interfaces.FilePathService;
-import cn.wzpmc.filemanager.mapper.FileMapper;
 import cn.wzpmc.filemanager.mapper.FolderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -13,7 +12,6 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public abstract class SimplePathResolver implements FilePathService {
-    protected final FileMapper fileMapper;
     protected final FolderMapper folderMapper;
 
     @NonNull

@@ -14,7 +14,10 @@ import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
 import cn.wzpmc.filemanager.entities.vo.*;
 import cn.wzpmc.filemanager.interfaces.FilePathService;
-import cn.wzpmc.filemanager.mapper.*;
+import cn.wzpmc.filemanager.mapper.ChunkFileMapper;
+import cn.wzpmc.filemanager.mapper.ChunksMapper;
+import cn.wzpmc.filemanager.mapper.FileMapper;
+import cn.wzpmc.filemanager.mapper.FolderMapper;
 import cn.wzpmc.filemanager.utils.JwtUtils;
 import cn.wzpmc.filemanager.utils.RandomUtils;
 import cn.wzpmc.filemanager.utils.stream.SerialFileInputStream;
@@ -53,13 +56,14 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static cn.wzpmc.filemanager.entities.files.table.FullRawFileObjectTableDef.FULL_RAW_FILE_OBJECT;
 import static cn.wzpmc.filemanager.entities.vo.table.ChunkFileVoTableDef.CHUNK_FILE_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.ChunksVoTableDef.CHUNKS_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.FileVoTableDef.FILE_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.FolderVoTableDef.FOLDER_VO;
-import static com.mybatisflex.core.query.QueryMethods.null_;
-import static com.mybatisflex.core.query.QueryMethods.select;
+import static cn.wzpmc.filemanager.entities.vo.table.StatisticsVoTableDef.STATISTICS_VO;
+import static cn.wzpmc.filemanager.entities.vo.table.UserVoTableDef.USER_VO;
+import static cn.wzpmc.filemanager.entities.vo.table.custom.StatisticsVoTableDef.STATISTICS_VO_EXT;
+import static com.mybatisflex.core.query.QueryMethods.*;
 
 @Slf4j
 @Service
@@ -67,7 +71,6 @@ import static com.mybatisflex.core.query.QueryMethods.select;
 public class FileService {
     private final FileMapper fileMapper;
     private final FolderMapper folderMapper;
-    private final RawFileMapper rawFileMapper;
     private final RandomUtils randomUtils;
     private final FileManagerProperties properties;
     private final StatisticsService statisticsService;
@@ -202,16 +205,54 @@ public class FileService {
         return folderParams;
     }
 
+    private QueryWrapper getRawFileSelector() {
+        return select(
+                FILE_VO.ID,
+                FILE_VO.NAME,
+                FILE_VO.EXT,
+                FILE_VO.SIZE,
+                FILE_VO.FOLDER.as("parent"),
+                FILE_VO.UPLOADER.as("owner"),
+                FILE_VO.UPLOAD_TIME.as("time"),
+                string("FILE").as("type"),
+                USER_VO.NAME.as("owner_name"),
+                count(STATISTICS_VO.TIME).as("down_count")
+        ).from(FILE_VO)
+                .leftJoin(USER_VO).on(USER_VO.ID.eq(FILE_VO.UPLOADER).and(USER_VO.BANNED.eq(0)))
+                .leftJoin(STATISTICS_VO).on(STATISTICS_VO_EXT.DOWNLOAD_FILE_ID.eq(FILE_VO.ID))
+                .groupBy(FILE_VO.ID);
+    }
+
+    private QueryWrapper getRawFolderSelector() {
+        return select(FOLDER_VO.ID,
+                FOLDER_VO.NAME,
+                null_().as("ext"),
+                number(-1).as("size"),
+                FOLDER_VO.PARENT,
+                FOLDER_VO.CREATOR.as("owner"),
+                FOLDER_VO.CREATE_TIME.as("time"),
+                string("FOLDER").as("type"),
+                USER_VO.NAME.as("owner_name"),
+                number(0).as("down_count")
+        ).from(FOLDER_VO)
+                .leftJoin(USER_VO).on(USER_VO.ID.eq(FOLDER_VO.CREATOR).and(USER_VO.BANNED.eq(0)));
+    }
+
     public Result<PageResult<FullRawFileObject>> getFilePager(long page, int num, long folder, SortField sort, boolean reverse) {
-        QueryWrapper from = QueryWrapper.create().select(FULL_RAW_FILE_OBJECT.ALL_COLUMNS).from(FULL_RAW_FILE_OBJECT).where(FULL_RAW_FILE_OBJECT.PARENT.eq(folder));
+        QueryWrapper rawFileSelect = getRawFileSelector()
+                .where(FILE_VO.FOLDER.eq(folder))
+                .unionAll(getRawFolderSelector().where(FOLDER_VO.PARENT.eq(folder)));
+        QueryWrapper from = new QueryWrapper().with("RAW_FILE").asSelect(rawFileSelect).select().from("RAW_FILE");
         if (sort != SortField.ID) {
             from = from.orderBy(sort.column, reverse);
         }
-        from = from.orderBy(FULL_RAW_FILE_OBJECT.ID, reverse);
-        Page<FullRawFileObject> paginate = rawFileMapper.paginate(page, num, from);
+        from = from.orderBy(column("id"), reverse);
+        long size = fileMapper.selectCountByQuery(selectCount().from(rawFileSelect).as("subQuery"));
+        Page<FullRawFileObject> paginate = fileMapper.paginateAs(page, num, size, from, FullRawFileObject.class);
         PageResult<FullRawFileObject> result = new PageResult<>(paginate.getTotalRow(), paginate.getRecords());
         return Result.success(result);
     }
+
 
     public Result<FolderVo> mkdir(FolderCreateRequest request, UserVo user, String address) {
         String name = request.getName();
@@ -404,7 +445,7 @@ public class FileService {
     }
 
     public Result<FullRawFileObject> getFile(long id) {
-        FullRawFileObject fileVo = this.rawFileMapper.selectOneByCondition(FULL_RAW_FILE_OBJECT.TYPE.eq(FileType.FILE).and(FULL_RAW_FILE_OBJECT.ID.eq(id)));
+        FullRawFileObject fileVo = this.fileMapper.selectOneByQueryAs(getRawFileSelector().where(FILE_VO.ID.eq(id)), FullRawFileObject.class);
         if (fileVo == null) {
             return Result.failed(HttpStatus.NOT_FOUND, "未知文件");
         }
@@ -412,7 +453,7 @@ public class FileService {
     }
 
     public Result<FullRawFileObject> getFolder(long id) {
-        FullRawFileObject fileVo = this.rawFileMapper.selectOneByCondition(FULL_RAW_FILE_OBJECT.TYPE.eq(FileType.FOLDER).and(FULL_RAW_FILE_OBJECT.ID.eq(id)));
+        FullRawFileObject fileVo = this.folderMapper.selectOneByQueryAs(getRawFolderSelector().where(FOLDER_VO.ID.eq(id)), FullRawFileObject.class);
         if (fileVo == null) {
             return Result.failed(HttpStatus.NOT_FOUND, "未知文件");
         }
@@ -531,6 +572,24 @@ public class FileService {
         }
         Optional<Result<Boolean>> objectResult = this.checkFilenameConflict(filename, folder);
         return objectResult.orElseGet(() -> Result.success("可以上传", true));
+    }
+
+    public List<FullRawFileObject> getRawFilesByNameAndFolder(String name, String ext, long folder) {
+        return fileMapper.selectListByQueryAs(getRawFileSelector().where(FILE_VO.NAME.eq(name).and(SortField.EXT.column.eq(ext)).and(FILE_VO.FOLDER.eq(folder)))
+                .unionAll(getRawFolderSelector().where(FOLDER_VO.NAME.eq(name).and(FOLDER_VO.PARENT.eq(folder)))), FullRawFileObject.class);
+    }
+
+    private QueryWrapper getRawFilesByNameQuery(String name, String ext) {
+        return getRawFileSelector().where(FILE_VO.NAME.eq(name).and(SortField.EXT.column.eq(ext)))
+                .unionAll(getRawFolderSelector().where(FOLDER_VO.NAME.eq(name)));
+    }
+
+    public List<FullRawFileObject> getRawFilesByName(String name, String ext) {
+        return fileMapper.selectListByQueryAs(this.getRawFilesByNameQuery(name, ext), FullRawFileObject.class);
+    }
+
+    public long getRawFilesCountByName(String name, String ext) {
+        return fileMapper.selectCountByQuery(selectCount().from(this.getRawFilesByNameQuery(name, ext)).as("subQuery"));
     }
 
     private record FilenameDescription(String name, String ext) {

@@ -3,37 +3,37 @@ package cn.wzpmc.filemanager.entities.files.enums;
 import com.mybatisflex.core.query.QueryColumn;
 import lombok.RequiredArgsConstructor;
 
-import static cn.wzpmc.filemanager.entities.files.table.FullRawFileObjectTableDef.FULL_RAW_FILE_OBJECT;
+import static com.mybatisflex.core.query.QueryMethods.column;
 
 @RequiredArgsConstructor
 public enum SortField {
     /**
      * 通过ID排序（默认）
      */
-    ID(FULL_RAW_FILE_OBJECT.ID),
+    ID(column("id")),
     /**
      * 通过文件夹排序
      */
-    NAME(FULL_RAW_FILE_OBJECT.NAME),
+    NAME(column("name")),
     /**
      * 通过文件扩展名排序
      */
-    EXT(FULL_RAW_FILE_OBJECT.EXT),
+    EXT(column("ext")),
     /**
      * 通过文件上传时间排序
      */
-    TIME(FULL_RAW_FILE_OBJECT.TIME),
+    TIME(column("time")),
     /**
      * 通过文件上传者排序
      */
-    UPLOADER(FULL_RAW_FILE_OBJECT.OWNER),
+    UPLOADER(column("owner")),
     /**
      * 通过文件下载次数排序
      */
-    DOWNLOAD_COUNT(FULL_RAW_FILE_OBJECT.DOWN_COUNT),
+    DOWNLOAD_COUNT(column("down_count")),
     /**
      * 根据文件大小排序
      */
-    SIZE(FULL_RAW_FILE_OBJECT.SIZE);
+    SIZE(column("size"));
     public final QueryColumn column;
 }

@@ -3,28 +3,30 @@ package cn.wzpmc.filemanager.interfaces.impl;
 import cn.wzpmc.filemanager.entities.files.FullRawFileObject;
 import cn.wzpmc.filemanager.entities.files.enums.FileType;
 import cn.wzpmc.filemanager.entities.vo.FolderVo;
-import cn.wzpmc.filemanager.mapper.FileMapper;
 import cn.wzpmc.filemanager.mapper.FolderMapper;
-import cn.wzpmc.filemanager.mapper.RawFileMapper;
-import com.mybatisflex.core.query.QueryCondition;
+import cn.wzpmc.filemanager.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static cn.wzpmc.filemanager.entities.files.table.FullRawFileObjectTableDef.FULL_RAW_FILE_OBJECT;
-import static cn.wzpmc.filemanager.entities.vo.table.FileVoTableDef.FILE_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.FolderVoTableDef.FOLDER_VO;
 
 @Component
 public class SimpleResolver extends SimplePathResolver {
-    private final RawFileMapper rawFileMapper;
+    private FileService fileService;
     @Autowired
-    public SimpleResolver(FileMapper fileMapper, FolderMapper folderMapper, RawFileMapper rawFileMapper) {
-        super(fileMapper, folderMapper);
-        this.rawFileMapper = rawFileMapper;
+    public SimpleResolver(FolderMapper folderMapper) {
+        super(folderMapper);
+    }
+
+    @Autowired
+    @Lazy
+    public void setFileService(FileService fileService) {
+        this.fileService = fileService;
     }
 
     @Nullable
@@ -43,11 +45,7 @@ public class SimpleResolver extends SimplePathResolver {
                 name = currentLayerName.substring(0, lastDotIndex);
                 ext = currentLayerName.substring(lastDotIndex + 1);
             }
-            QueryCondition extCondition = FULL_RAW_FILE_OBJECT.EXT.eq(ext);
-            if (ext.isEmpty()) {
-                extCondition = extCondition.or(FULL_RAW_FILE_OBJECT.EXT.isNull());
-            }
-            List<FullRawFileObject> files = rawFileMapper.selectListByCondition(FULL_RAW_FILE_OBJECT.NAME.eq(name).and(extCondition).and(FILE_VO.FOLDER.eq(parentId)));
+            List<FullRawFileObject> files = this.fileService.getRawFilesByNameAndFolder(name, ext, parentId);
             int size = files.size();
             if (size == 0) {
                 return null;
