@@ -51,7 +51,7 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension-spring6
 	implementation("com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.46")
 	// https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter
-	implementation("com.alibaba:druid-spring-boot-starter:1.2.23")
+	implementation("com.alibaba:druid-spring-boot-starter:1.2.24")
 	// https://mvnrepository.com/artifact/com.auth0/java-jwt
 	implementation("com.auth0:java-jwt:4.4.0")
 	// https://mvnrepository.com/artifact/commons-codec/commons-codec
