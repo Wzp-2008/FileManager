@@ -40,7 +40,7 @@ dependencies {
 	}
 	implementation("org.springframework.shell:spring-shell-starter")
 	// https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-spring-boot3-starter
-	implementation("com.mybatis-flex:mybatis-flex-spring-boot3-starter:1.9.7")
+	implementation("com.mybatis-flex:mybatis-flex-spring-boot3-starter:1.10.9")
 	annotationProcessor("com.mybatis-flex:mybatis-flex-processor:1.9.7")
 	compileOnly("org.mybatis.spring.native:mybatis-spring-native-extensions:0.1.0-SNAPSHOT")
 	compileOnly("org.mybatis.spring.native:mybatis-spring-native-core:0.1.0-SNAPSHOT")
