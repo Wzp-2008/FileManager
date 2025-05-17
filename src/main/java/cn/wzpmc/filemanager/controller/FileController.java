@@ -9,6 +9,7 @@ import cn.wzpmc.filemanager.entities.chunk.SaveChunksRequest;
 import cn.wzpmc.filemanager.entities.files.FilePathDescription;
 import cn.wzpmc.filemanager.entities.files.FolderCreateRequest;
 import cn.wzpmc.filemanager.entities.files.FullRawFileObject;
+import cn.wzpmc.filemanager.entities.files.MoveFileRequest;
 import cn.wzpmc.filemanager.entities.files.enums.FileType;
 import cn.wzpmc.filemanager.entities.files.enums.SortField;
 import cn.wzpmc.filemanager.entities.vo.FileVo;
@@ -147,6 +148,7 @@ public class FileController {
      */
     @GetMapping("/share")
     @Deprecated
+    @AuthorizationRequired
     public Result<String> shareFile(@RequestParam Long id, @RequestParam(defaultValue = "9999-12-31") Date lastCouldDownloadTime, @RequestParam(defaultValue = "-1") int maxDownloadCount) {
         return fileService.shareFile(id, lastCouldDownloadTime, maxDownloadCount);
     }
@@ -178,6 +180,7 @@ public class FileController {
      * @return 需要上传的区块哈希和区块ID
      */
     @PostMapping("/chunk/check")
+    @AuthorizationRequired
     public Result<List<CheckChunkResult>> checkChunkUploaded(@RequestBody List<String> hash) {
         return fileService.checkChunkUploaded(hash);
     }
@@ -188,6 +191,7 @@ public class FileController {
      * @return 上传的区块ID
      */
     @PostMapping("/chunk/upload")
+    @AuthorizationRequired
     public Result<Long> uploadChunk(@RequestBody MultipartFile block) {
         return fileService.uploadChunk(block);
     }
@@ -199,7 +203,18 @@ public class FileController {
      * @return 保存后的文件
      */
     @PutMapping("/chunk/save")
+    @AuthorizationRequired
     public Result<FileVo> saveFile(@RequestBody SaveChunksRequest request) {
         return fileService.saveFile(request);
+    }
+
+    /**
+     * 移动文件位置
+     * @param request 文件位置请求
+     * @return 是否移动成功
+     */
+    @PatchMapping("/move")
+    public Result<Boolean> moveFile(@RequestBody MoveFileRequest request, @AuthorizationRequired UserVo user) {
+        return fileService.moveFile(request, user);
     }
 }

@@ -7,6 +7,7 @@ import cn.wzpmc.filemanager.entities.chunk.CheckChunkResult;
 import cn.wzpmc.filemanager.entities.chunk.SaveChunksRequest;
 import cn.wzpmc.filemanager.entities.files.FolderCreateRequest;
 import cn.wzpmc.filemanager.entities.files.FullRawFileObject;
+import cn.wzpmc.filemanager.entities.files.MoveFileRequest;
 import cn.wzpmc.filemanager.entities.files.RawFileObject;
 import cn.wzpmc.filemanager.entities.files.enums.FileType;
 import cn.wzpmc.filemanager.entities.files.enums.SortField;
@@ -600,6 +601,64 @@ public class FileService {
         return fileMapper.selectCountByQuery(selectCount().from(this.getRawFilesByNameQuery(name, ext)).as("subQuery"));
     }
 
+    public Result<Boolean> moveFile(MoveFileRequest request, UserVo user) {
+        long originalFileId = request.getOriginalFileId();
+        FileType fileType = request.getFileType();
+        long userId = user.getId();
+        boolean isAdmin = user.getAuth().equals(Auth.admin);
+        if (fileType.equals(FileType.FILE)) {
+            FileVo fileVo = fileMapper.selectOneById(originalFileId);
+            if (fileVo == null) {
+                return Result.failed(HttpStatus.NOT_FOUND, "原始文件不存在！");
+            }
+            if (!isAdmin && fileVo.getUploader() != userId) {
+                return Result.failed(HttpStatus.FORBIDDEN, "权限不足！");
+            }
+            String newFilename = request.getNewFilename();
+            if (newFilename == null) {
+                String ext = fileVo.getExt();
+                newFilename = fileVo.getName() + (ext.isEmpty() ? "" : "." + ext);
+            }
+            Long newParentId = request.getNewParentId();
+            if (newParentId == null) {
+                newParentId = fileVo.getFolder();
+            }
+            if (fileMapper.selectCountByCondition(FILE_VO.NAME.eq(newFilename).and(FILE_VO.FOLDER.eq(newParentId))) > 0) {
+                return Result.failed(HttpStatus.CONFLICT, "文件已存在！");
+            }
+            FileVo targetVo = new FileVo();
+            targetVo.setId(originalFileId);
+            targetVo.setName(newFilename);
+            targetVo.setFolder(newParentId);
+            fileMapper.update(targetVo);
+            return Result.success("移动成功");
+        }
+        FolderVo folderVo = folderMapper.selectOneById(originalFileId);
+        if (folderVo == null) {
+            return Result.failed(HttpStatus.NOT_FOUND, "原始文件不存在！");
+        }
+        if (!isAdmin) {
+            return Result.failed(HttpStatus.FORBIDDEN, "权限不足！");
+        }
+        String newFilename = request.getNewFilename();
+        if (newFilename == null) {
+            newFilename = folderVo.getName();
+        }
+        Long newParentId = request.getNewParentId();
+        if (newParentId == null) {
+            newParentId = folderVo.getParent();
+        }
+        if (folderMapper.selectCountByCondition(FOLDER_VO.NAME.eq(newFilename).and(FOLDER_VO.PARENT.eq(newParentId))) > 0) {
+            return Result.failed(HttpStatus.CONFLICT, "文件已存在！");
+        }
+        FolderVo targetVo = new FolderVo();
+        targetVo.setId(originalFileId);
+        targetVo.setName(newFilename);
+        targetVo.setParent(newParentId);
+        folderMapper.update(targetVo);
+        return Result.success("移动成功");
+    }
+
     private record FilenameDescription(String name, String ext) {
         private FilenameDescription(String name, String ext) {
             this.name = name;
@@ -619,6 +678,5 @@ public class FileService {
             }
             return Optional.empty();
         }
-
     }
 }
