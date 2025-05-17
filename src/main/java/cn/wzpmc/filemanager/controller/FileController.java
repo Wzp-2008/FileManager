@@ -64,11 +64,12 @@ public class FileController {
      * @param folder 要获取的文件所在的文件夹
      * @param sort 文件的排序方式
      * @param reverse 是否反向排序
+     * @param keywords 搜索关键词
      * @return 分页后的文件列表
      */
     @GetMapping("/get")
-    public Result<PageResult<FullRawFileObject>> getFilePager(@RequestParam long page, @RequestParam int num, @RequestParam long folder, @RequestParam(defaultValue = "ID") SortField sort, @RequestParam(defaultValue = "false") boolean reverse) {
-        return fileService.getFilePager(page, num, folder, sort, reverse);
+    public Result<PageResult<FullRawFileObject>> getFilePager(@RequestParam long page, @RequestParam int num, @RequestParam long folder, @RequestParam(defaultValue = "ID") SortField sort, @RequestParam(defaultValue = "false") boolean reverse, @RequestParam(defaultValue = "") String keywords) {
+        return fileService.getFilePager(page, num, folder, sort, reverse, keywords);
     }
 
     /**

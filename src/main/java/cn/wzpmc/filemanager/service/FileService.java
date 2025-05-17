@@ -247,10 +247,26 @@ public class FileService {
                 .leftJoin(USER_VO).on(USER_VO.ID.eq(FOLDER_VO.CREATOR).and(USER_VO.BANNED.eq(0)));
     }
 
-    public Result<PageResult<FullRawFileObject>> getFilePager(long page, int num, long folder, SortField sort, boolean reverse) {
-        QueryWrapper rawFileSelect = getRawFileSelector()
-                .where(FILE_VO.FOLDER.eq(folder))
-                .unionAll(getRawFolderSelector().where(FOLDER_VO.PARENT.eq(folder)));
+    public Result<PageResult<FullRawFileObject>> getFilePager(long page, int num, long folder, SortField sort, boolean reverse, String keywords) {
+        QueryWrapper rawFileSelect = getRawFileSelector();
+        QueryWrapper rawFolderSelect = getRawFolderSelector();
+        boolean queryFolder = true;
+        if (keywords.isEmpty()) {
+            rawFileSelect = rawFileSelect.where(FILE_VO.FOLDER.eq(folder));
+            rawFolderSelect = rawFolderSelect.where(FOLDER_VO.PARENT.eq(folder));
+        } else {
+            FilenameDescription filename = getFilename(keywords);
+            if (filename.ext.isEmpty()) {
+                rawFileSelect = rawFileSelect.where(FILE_VO.NAME.like("%" + keywords + "%").or(FILE_VO.EXT.like("%" + keywords + "%")));
+                rawFolderSelect.where(FOLDER_VO.NAME.like(FOLDER_VO.PARENT.like("%" + keywords + "%")));
+            } else {
+                queryFolder = false;
+                rawFileSelect = rawFileSelect.where(FILE_VO.NAME.like("%" + filename.name + "%").and(FILE_VO.EXT.like("%" + filename + "%")));
+            }
+        }
+        if (queryFolder) {
+            rawFileSelect = rawFileSelect.unionAll(rawFolderSelect);
+        }
         QueryWrapper from = new QueryWrapper().with("RAW_FILE").asSelect(rawFileSelect).select().from("RAW_FILE");
         if (sort != SortField.ID) {
             from = from.orderBy(sort.column, reverse);
