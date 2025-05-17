@@ -30,7 +30,8 @@ repositories {
 
 extra["snippetsDir"] = file("build/generated-snippets")
 extra["springShellVersion"] = "3.3.3"
-
+val fastjsonVersion = "2.0.57"
+val mybatisFlexVersion = "1.10.9"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
@@ -40,16 +41,17 @@ dependencies {
 	}
 	implementation("org.springframework.shell:spring-shell-starter")
 	// https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-spring-boot3-starter
-	implementation("com.mybatis-flex:mybatis-flex-spring-boot3-starter:1.10.9")
-	annotationProcessor("com.mybatis-flex:mybatis-flex-processor:1.10.9")
-	compileOnly("org.mybatis.spring.native:mybatis-spring-native-extensions:0.1.0-SNAPSHOT")
-	compileOnly("org.mybatis.spring.native:mybatis-spring-native-core:0.1.0-SNAPSHOT")
+	implementation("com.mybatis-flex:mybatis-flex-spring-boot3-starter:${mybatisFlexVersion}")
+	annotationProcessor("com.mybatis-flex:mybatis-flex-processor:${mybatisFlexVersion}")
+	/* compileOnly("org.mybatis.spring.native:mybatis-spring-native-extensions:${mybatisSpringNativeVersion}")
+	compileOnly("org.mybatis.spring.native:mybatis-spring-native-core:${mybatisSpringNativeVersion}")*/
 	// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2
-	implementation("com.alibaba.fastjson2:fastjson2:2.0.46")
+	implementation("com.alibaba.fastjson2:fastjson2:${fastjsonVersion}")
+	implementation("com.alibaba.fastjson2:fastjson2-codegen:${fastjsonVersion}")
 	// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension
-	implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.57")
+	implementation("com.alibaba.fastjson2:fastjson2-extension:${fastjsonVersion}")
 	// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension-spring6
-	implementation("com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.57")
+	implementation("com.alibaba.fastjson2:fastjson2-extension-spring6:${fastjsonVersion}")
 	// https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter
 	implementation("com.alibaba:druid-spring-boot-starter:1.2.24")
 	// https://mvnrepository.com/artifact/com.auth0/java-jwt
