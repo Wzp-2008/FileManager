@@ -1,14 +1,12 @@
 package cn.wzpmc.filemanager.entities.files;
 
 import com.alibaba.fastjson2.annotation.JSONCompiled;
-import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
-@Table("raw_file")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
