@@ -5,14 +5,21 @@ import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
 import cn.wzpmc.filemanager.entities.vo.UserVo;
 import cn.wzpmc.filemanager.exceptions.AuthorizationException;
+import cn.wzpmc.filemanager.exceptions.TokenExpireAuthorizationException;
 import cn.wzpmc.filemanager.mapper.UserMapper;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.NativeWebRequest;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Slf4j
@@ -33,7 +40,7 @@ public class AuthorizationUtils {
         Auth level = authorizationRequired.level();
         Optional<Integer> user = this.jwtUtils.getUser(header);
         if (user.isEmpty()) {
-            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "token错误或已过期"));
+            throw TokenExpireAuthorizationException.of();
         }
         Integer i = user.get();
         UserVo userVo = this.userMapper.selectOneWithRelationsById(i);
@@ -52,11 +59,53 @@ public class AuthorizationUtils {
         }
         throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "权限不足"));
     }
-    public UserVo auth(WebRequest request, AuthorizationRequired authorizationRequired) throws AuthorizationException {
-        return auth(request.getHeader("Authorization"), authorizationRequired);
+
+    private UserVo tryGetUserFromExpired(String originalToken) {
+        DecodedJWT decode = JWT.decode(originalToken);
+        try {
+            Date expiresAt = decode.getExpiresAt();
+            JWT.require(jwtUtils.getHmacKey()).acceptExpiresAt(expiresAt.getTime()).build().verify(decode);
+        } catch (JWTVerificationException e) {
+            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "签名不正确"));
+        }
+        Claim uid = decode.getClaim("uid");
+        Long anInt = uid.asLong();
+        UserVo userVo = this.userMapper.selectOneWithRelationsById(anInt);
+        if (userVo == null) {
+            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "用户不存在"));
+        }
+        return userVo;
     }
-    public boolean auth(HttpServletRequest request, AuthorizationRequired authorizationRequired) throws AuthorizationException {
-        auth(request.getHeader("Authorization"), authorizationRequired);
-        return true;
+
+    public UserVo auth(NativeWebRequest request, AuthorizationRequired authorizationRequired) throws AuthorizationException {
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null) {
+            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "未找到token"));
+        }
+        try {
+            return auth(authorization, authorizationRequired);
+        } catch (TokenExpireAuthorizationException ignored) {
+            UserVo user = tryGetUserFromExpired(authorization);
+            Object nativeResponse = request.getNativeResponse();
+            if (nativeResponse instanceof HttpServletResponse resp) {
+                resp.addHeader("Add-Authorization", jwtUtils.createToken(user.getId()));
+            }
+            return user;
+        }
+    }
+
+    public boolean auth(HttpServletRequest request, HttpServletResponse response, AuthorizationRequired authorizationRequired) throws AuthorizationException {
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null) {
+            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "未找到token"));
+        }
+        try {
+            auth(authorization, authorizationRequired);
+            return true;
+        } catch (TokenExpireAuthorizationException ignored) {
+            UserVo user = tryGetUserFromExpired(authorization);
+            response.addHeader("Add-Authorization", jwtUtils.createToken(user.getId()));
+            return true;
+        }
     }
 }

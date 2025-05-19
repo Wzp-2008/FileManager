@@ -6,6 +6,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.Optional;
 @Component
 @Log4j2
 public class JwtUtils {
+    @Getter
     private final Algorithm hmacKey;
     private final RandomUtils randomUtils;
     private String generatorHmacKey(){
@@ -36,7 +38,8 @@ public class JwtUtils {
     }
     public String createToken(long uid){
         Calendar instance = Calendar.getInstance();
-        instance.add(Calendar.HOUR,24 * 5);
+//        instance.add(Calendar.HOUR,24 * 5);
+        instance.add(Calendar.SECOND, 10);
         JWTCreator.Builder builder = JWT.create();
         builder.withClaim("uid", uid);
         builder.withExpiresAt(instance.getTime());

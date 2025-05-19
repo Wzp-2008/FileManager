@@ -24,7 +24,7 @@ public class AuthorizationHandlerInterceptor implements HandlerInterceptor {
                 return true;
             }
             AuthorizationRequired annotation = method.getMethodAnnotation(AuthorizationRequired.class);
-            return authorizationUtils.auth(request, annotation);
+            return authorizationUtils.auth(request, response, annotation);
         }
         return true;
     }
