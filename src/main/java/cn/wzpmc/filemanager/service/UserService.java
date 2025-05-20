@@ -141,7 +141,7 @@ public class UserService {
             prefsMapper.updateByCondition(prefs, false, PREFS_VO.USER_ID.eq(id));
         } else {
             prefs.setUserId(id);
-            prefsMapper.insert(prefs);
+            prefsMapper.insertWithPk(prefs);
         }
         return Result.success(prefs);
     }
