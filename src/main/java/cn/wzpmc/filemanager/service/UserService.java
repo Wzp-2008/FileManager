@@ -137,7 +137,7 @@ public class UserService {
 
     public Result<PrefsVo> updatePrefs(UserVo user, PrefsVo prefs) {
         long id = user.getId();
-        if (prefsMapper.selectCountByCondition(USER_VO.ID.eq(id)) > 0) {
+        if (prefsMapper.selectCountByCondition(PREFS_VO.USER_ID.eq(id)) > 0) {
             prefsMapper.updateByCondition(prefs, false, PREFS_VO.USER_ID.eq(id));
         } else {
             prefs.setUserId(id);
