@@ -38,8 +38,7 @@ public class JwtUtils {
     }
     public String createToken(long uid){
         Calendar instance = Calendar.getInstance();
-//        instance.add(Calendar.HOUR,24 * 5);
-        instance.add(Calendar.SECOND, 10);
+        instance.add(Calendar.HOUR,24 * 5);
         JWTCreator.Builder builder = JWT.create();
         builder.withClaim("uid", uid);
         builder.withExpiresAt(instance.getTime());
