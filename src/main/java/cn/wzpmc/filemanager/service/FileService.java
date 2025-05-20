@@ -258,7 +258,7 @@ public class FileService {
             FilenameDescription filename = getFilename(keywords);
             if (filename.ext.isEmpty()) {
                 rawFileSelect = rawFileSelect.where(FILE_VO.NAME.like("%" + keywords + "%").or(FILE_VO.EXT.like("%" + keywords + "%")));
-                rawFolderSelect.where(FOLDER_VO.NAME.like(FOLDER_VO.PARENT.like("%" + keywords + "%")));
+                rawFolderSelect.where(FOLDER_VO.NAME.like("%" + keywords + "%"));
             } else {
                 queryFolder = false;
                 rawFileSelect = rawFileSelect.where(FILE_VO.NAME.like("%" + filename.name + "%").and(FILE_VO.EXT.like("%" + filename + "%")));
