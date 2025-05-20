@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 import static cn.wzpmc.filemanager.entities.vo.table.FingerprintVoTableDef.FINGERPRINT_VO;
+import static cn.wzpmc.filemanager.entities.vo.table.PrefsVoTableDef.PREFS_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.UserVoTableDef.USER_VO;
 
 @Slf4j
@@ -135,8 +136,13 @@ public class UserService {
     }
 
     public Result<PrefsVo> updatePrefs(UserVo user, PrefsVo prefs) {
-        prefs.setUserId(user.getId());
-        prefsMapper.update(prefs, false);
+        long id = user.getId();
+        if (prefsMapper.selectCountByCondition(USER_VO.ID.eq(id)) > 0) {
+            prefsMapper.updateByCondition(prefs, false, PREFS_VO.USER_ID.eq(id));
+        } else {
+            prefs.setUserId(id);
+            prefsMapper.insert(prefs);
+        }
         return Result.success(prefs);
     }
 
