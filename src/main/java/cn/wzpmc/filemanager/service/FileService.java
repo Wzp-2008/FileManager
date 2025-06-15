@@ -261,7 +261,7 @@ public class FileService {
                 rawFolderSelect.where(FOLDER_VO.NAME.like("%" + keywords + "%"));
             } else {
                 queryFolder = false;
-                rawFileSelect = rawFileSelect.where(FILE_VO.NAME.like("%" + filename.name + "%").and(FILE_VO.EXT.like("%" + filename + "%")));
+                rawFileSelect = rawFileSelect.where(FILE_VO.NAME.like("%" + filename.name + "%").and(FILE_VO.EXT.like("%" + filename.ext + "%")));
             }
         }
         if (queryFolder) {
