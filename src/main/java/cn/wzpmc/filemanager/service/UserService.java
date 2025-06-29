@@ -193,7 +193,11 @@ public class UserService {
         }
         UserVo updateEntity = new UserVo();
         updateEntity.setId(userVo.getId());
-        updateEntity.setPassword(DigestUtils.sha1Hex(request.getNewPassword()));
+        String password = request.getNewPassword();
+        if (password == null || password.isEmpty()) {
+            return Result.failed(HttpStatus.BAD_REQUEST, "密码不可为空！");
+        }
+        updateEntity.setPassword(DigestUtils.sha1Hex(password));
         userMapper.update(updateEntity);
         return Result.success(true);
     }
