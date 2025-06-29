@@ -4,6 +4,7 @@ import cn.wzpmc.filemanager.annotation.Address;
 import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
 import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.fingerprint.FingerprintRequest;
+import cn.wzpmc.filemanager.entities.user.UserChangePasswordRequest;
 import cn.wzpmc.filemanager.entities.user.UserLoginRequest;
 import cn.wzpmc.filemanager.entities.user.UserRegisterRequest;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
@@ -43,6 +44,26 @@ public class UserController {
     @PutMapping("/register")
     public void register(@RequestBody UserRegisterRequest registerRequest, HttpServletResponse response, @Address String address) {
         userService.register(registerRequest, response, address);
+    }
+
+    /**
+     * 修改用户密码
+     * @param request 用户密码修改请求体
+     * @return 是否修改成功
+     */
+    @PostMapping("/password")
+    public Result<Boolean> changePassword(@RequestBody UserChangePasswordRequest request, @AuthorizationRequired UserVo userVo) {
+        return userService.changePassword(request, userVo);
+    }
+
+    /**
+     * 修改用户名
+     * @param newUsername 新的用户名
+     * @return 是否修改成功
+     */
+    @PostMapping("/username/{newUsername}")
+    public Result<Boolean> changeUsername(@PathVariable String newUsername, @AuthorizationRequired UserVo userVo) {
+        return userService.changeUsername(newUsername, userVo);
     }
 
     /**

@@ -3,6 +3,7 @@ package cn.wzpmc.filemanager.service;
 import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.fingerprint.FingerprintRequest;
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
+import cn.wzpmc.filemanager.entities.user.UserChangePasswordRequest;
 import cn.wzpmc.filemanager.entities.user.UserLoginRequest;
 import cn.wzpmc.filemanager.entities.user.UserRegisterRequest;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
@@ -184,5 +185,27 @@ public class UserService {
             return Result.success("删除成功", true);
         }
         return Result.failed(HttpStatus.NOT_FOUND, "浏览器指纹不存在");
+    }
+
+    public Result<Boolean> changePassword(UserChangePasswordRequest request, UserVo userVo) {
+        if (!userVo.getPassword().equals(DigestUtils.sha1Hex(request.getOldPassword()))) {
+            return Result.failed(HttpStatus.NOT_FOUND, "旧密码错误！");
+        }
+        UserVo updateEntity = new UserVo();
+        updateEntity.setId(userVo.getId());
+        updateEntity.setPassword(DigestUtils.sha1Hex(request.getNewPassword()));
+        userMapper.update(updateEntity);
+        return Result.success(true);
+    }
+
+    public Result<Boolean> changeUsername(String newUsername, UserVo userVo) {
+        if (userMapper.selectCountByCondition(USER_VO.NAME.eq(newUsername)) >= 1) {
+            return Result.failed(HttpStatus.CONFLICT, "用户名已存在！");
+        }
+        UserVo updateEntity = new UserVo();
+        updateEntity.setId(userVo.getId());
+        updateEntity.setName(newUsername);
+        userMapper.update(updateEntity);
+        return Result.success("修改成功", true);
     }
 }
