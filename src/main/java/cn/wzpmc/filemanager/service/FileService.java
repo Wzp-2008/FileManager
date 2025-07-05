@@ -224,6 +224,7 @@ public class FileService {
                 FILE_VO.UPLOADER.as("owner"),
                 FILE_VO.UPLOAD_TIME.as("time"),
                 string("FILE").as("type"),
+                FILE_VO.MIME.as("mime"),
                 USER_VO.NAME.as("owner_name"),
                 count(STATISTICS_VO.TIME).as("down_count")
         ).from(FILE_VO)
@@ -241,6 +242,7 @@ public class FileService {
                 FOLDER_VO.CREATOR.as("owner"),
                 FOLDER_VO.CREATE_TIME.as("time"),
                 string("FOLDER").as("type"),
+                string("folder").as("mime"),
                 USER_VO.NAME.as("owner_name"),
                 number(0).as("down_count")
         ).from(FOLDER_VO)

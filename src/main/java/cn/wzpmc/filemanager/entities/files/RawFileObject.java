@@ -47,13 +47,17 @@ public class RawFileObject {
      * 文件类型
      */
     private FileType type;
+    /**
+     * 文件mime类型
+     */
+    private String mime;
 
     public static RawFileObject of(FileVo file) {
-        return new RawFileObject(file.getId(), file.getName(), file.getExt(), file.getSize(), file.getUploader(), file.getFolder(), file.getUploadTime(), FileType.FILE);
+        return new RawFileObject(file.getId(), file.getName(), file.getExt(), file.getSize(), file.getUploader(), file.getFolder(), file.getUploadTime(), FileType.FILE, file.getMime());
     }
 
     public static RawFileObject of(FolderVo folder) {
-        return new RawFileObject(folder.getId(), folder.getName(), null, -1, folder.getCreator(), folder.getParent(), folder.getCreateTime(), FileType.FOLDER);
+        return new RawFileObject(folder.getId(), folder.getName(), null, -1, folder.getCreator(), folder.getParent(), folder.getCreateTime(), FileType.FOLDER, "folder");
     }
     public static String getRawFileName(RawFileObject object){
         return object.type.equals(FileType.FILE) ? object.getName() + '.' + object.getExt() : object.getName();
