@@ -2,6 +2,7 @@ package cn.wzpmc.filemanager.events;
 
 import cn.wzpmc.filemanager.config.FileManagerProperties;
 import cn.wzpmc.filemanager.mapper.InitializationMapper;
+import cn.wzpmc.filemanager.service.UserService;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import com.mybatisflex.core.audit.MessageCollector;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 public class StartEventListener {
     private final InitializationMapper initializationMapper;
     private final FileManagerProperties properties;
+    private final UserService userService;
 
     @EventListener
     public void onStart(ApplicationStartedEvent ignored) {
@@ -26,7 +28,6 @@ public class StartEventListener {
         initializationMapper.createFileTable();
         initializationMapper.createPrefTable();
         initializationMapper.createFingerprintTable();
-        initializationMapper.createRawFileView();
         //开启审计功能
         AuditManager.setAuditEnable(true);
         MessageCollector collector = new ConsoleMessageCollector();
@@ -34,5 +35,6 @@ public class StartEventListener {
         if (properties.isDev()) {
             log.info("当前为开发环境，关闭日志收集，如需启用请删除wzp.filemanager.dev配置项！");
         }
+        userService.tryGenFirstAdminKey();
     }
 }

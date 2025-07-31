@@ -52,13 +52,17 @@ public class UserService {
         this.randomUtils = randomUtils;
         this.statisticsService = statisticsService;
         this.prefsMapper = prefsMapper;
+        this.fingerprintMapper = fingerprintMapper;
+    }
+
+    public void tryGenFirstAdminKey() {
         long count = this.userMapper.selectCountByQuery(new QueryWrapper());
         if (count == 0) {
             String s = genInviteCode(UserVo.CONSOLE, "0.0.0.0");
             log.info("生成了管理员密钥：{}，有效期15分钟，若失效请使用控制台命令/key或重启后端重新生成！", s);
         }
-        this.fingerprintMapper = fingerprintMapper;
     }
+
     public void login(UserLoginRequest request, HttpServletResponse response, String address) {
         String username = request.getUsername();
         String password = request.getPassword();
