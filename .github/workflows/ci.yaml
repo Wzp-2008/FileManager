@@ -14,5 +14,5 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '21'
-          cache: 'gradle'
+      - run: sdk install gradle 8.10.2
       - run: gradle bootJar
