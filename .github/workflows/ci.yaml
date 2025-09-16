@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Set up Gradle init script for mirrors
-        run: echo "allprojects { repositories { maven { url 'https://maven.aliyun.com/repository/public/' } maven { url 'https://maven.aliyun.com/repository/google/' } maven { url 'https://maven.aliyun.com/repository/gradle-plugin/' } maven { url 'https://mirrors.huaweicloud.com/repository/maven/' } mavenCentral() } } buildscript { repositories { maven { url 'https://maven.aliyun.com/repository/public/' } maven { url 'https://maven.aliyun.com/repository/gradle-plugin/' } } }" > ~/.gradle/init.gradle
+      - name: Set up Gradle init script for mirrors'
+        run: mkdir -p ~/.gradle && echo "allprojects { repositories { maven { url 'https://maven.aliyun.com/repository/public/' } maven { url 'https://maven.aliyun.com/repository/google/' } maven { url 'https://maven.aliyun.com/repository/gradle-plugin/' } maven { url 'https://mirrors.huaweicloud.com/repository/maven/' } mavenCentral() } } buildscript { repositories { maven { url 'https://maven.aliyun.com/repository/public/' } maven { url 'https://maven.aliyun.com/repository/gradle-plugin/' } } }" > ~/.gradle/init.gradle
       - name: Cache Gradle files
         uses: actions/cache@v4
         with:
