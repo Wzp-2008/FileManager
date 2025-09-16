@@ -34,7 +34,7 @@ jobs:
         run: chmod +x gradlew
       - name: Build With Gradle
         run: ./gradlew bootJar --no-daemon --parallel --build-cache --no-scan
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v3
         with:
           name: "FMV2.jar"
           path: build/libs/FileManager-0.0.1-SNAPSHOT.jar
