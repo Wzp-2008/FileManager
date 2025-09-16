@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Set HTTP Proxy
         run: |
-          mkdir -r ~/.gradle
+          mkdir -p ~/.gradle
           echo "systemProp.http.proxyHost=192.168.5.6" >> ~/.gradle/gradle.properties
           echo "systemProp.http.proxyPort=7890" >> ~/.gradle/gradle.properties
           echo "systemProp.https.proxyHost=192.168.5.6" >> ~/.gradle/gradle.properties
