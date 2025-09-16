@@ -14,5 +14,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+      - name: Setup Executable Permission
+        run: chmod +x gradlew
       - name: Build With Gradle
         run: ./gradlew bootJar
