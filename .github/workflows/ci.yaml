@@ -10,31 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Set up Gradle init script for mirrors
+      - name: Set HTTP Proxy
         run: |
-          mkdir -p ~/.gradle && cat > ~/.gradle/init.gradle <<EOF
-          allprojects {
-            repositories {
-                // 阿里云镜像
-                maven { url 'https://maven.aliyun.com/repository/public/' }
-                maven { url 'https://maven.aliyun.com/repository/google/' }
-                maven { url 'https://maven.aliyun.com/repository/gradle-plugin/' }
-          
-                // 备用镜像源
-                maven { url 'https://mirrors.huaweicloud.com/repository/maven/' }
-                mavenCentral()
-              }
-          }
-          
-          buildscript {
-            repositories {
-              maven { url 'https://maven.aliyun.com/repository/public/' }
-              maven { url 'https://maven.aliyun.com/repository/gradle-plugin/' }
-            }
-          }
-          EOF
-      - name: Set up Gradle mirror for project
-        run: sed -i '1ipluginManagement {\n    repositories {\n        maven { url "https://maven.aliyun.com/repository/gradle-plugin/" }\n        maven { url "https://mirrors.huaweicloud.com/repository/gradle-plugin/" }\n        mavenCentral()\n    }\n}\n' settings.gradle
+          mkdir -r ~/.gradle
+          echo "systemProp.http.proxyHost=192.168.5.6" >> ~/.gradle/gradle.properties
+          echo "systemProp.http.proxyPort=7890" >> ~/.gradle/gradle.properties
+          echo "systemProp.https.proxyHost=192.168.5.6" >> ~/.gradle/gradle.properties
+          echo "systemProp.https.proxyPort=7890" >> ~/.gradle/gradle.properties
       - name: Cache Gradle files
         uses: actions/cache@v4
         with:
