@@ -10,6 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Set up Gradle init script for mirrors
+        run: echo "allprojects { repositories { maven { url 'https://maven.aliyun.com/repository/public/' } maven { url 'https://maven.aliyun.com/repository/google/' } maven { url 'https://maven.aliyun.com/repository/gradle-plugin/' } maven { url 'https://mirrors.huaweicloud.com/repository/maven/' } mavenCentral() } } buildscript { repositories { maven { url 'https://maven.aliyun.com/repository/public/' } maven { url 'https://maven.aliyun.com/repository/gradle-plugin/' } } }" > ~/.gradle/init.gradle
+      - name: Cache Gradle files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -17,4 +28,4 @@ jobs:
       - name: Setup Executable Permission
         run: chmod +x gradlew
       - name: Build With Gradle
-        run: ./gradlew bootJar
+        run: ./gradlew bootJar --no-daemon --parallel --build-cache --no-scan
