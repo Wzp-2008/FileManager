@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Set up Gradle init script for mirrors
         run: |
-          cat > ~/.gradle/init.gradle <<EOF
+          mkdir -p ~/.gradle && cat > ~/.gradle/init.gradle <<EOF
           allprojects {
             repositories {
                 // 阿里云镜像
