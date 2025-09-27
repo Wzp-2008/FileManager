@@ -30,8 +30,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -175,13 +175,7 @@ public class FileService {
             Result.failed(HttpCodes.FILE_NOT_FOUND).writeToResponse(response);
             return;
         }
-        String hash = fileObject.getHash();
-        File targetFile = new File(this.savePath, hash);
-        response.setContentLengthLong(fileObject.getSize());
-        response.setHeader("Content-Disposition", "attachment;filename=" + fileObject.generatorFileName());
-        try(FileInputStream fis = new FileInputStream(targetFile); ServletOutputStream outputStream = response.getOutputStream()){
-            StreamUtils.copy(fis, outputStream);
-        }
+        writeFileToResponse(fileObject, response);
     }
 
     public Result<Page<FileObjectVo>> getAllFile(int page, int num) {
@@ -279,5 +273,30 @@ public class FileService {
         String name = filenameExtend.getName();
         String type = filenameExtend.getType();
         return Result.success(this.fileMapper.getFileCountByNameAndType(name, type) == 0);
+    }
+
+    public void downloadFile(int id, HttpServletRequest request, HttpServletResponse response) {
+        FileObject fileById = this.fileMapper.getFileById(id);
+        if (fileById == null){
+            Result.failed(HttpCodes.FILE_NOT_FOUND).writeToResponse(response);
+            return;
+        }
+        String remoteAddr = request.getRemoteAddr();
+        String andDelete = this.redisTemplate.opsForValue().get(remoteAddr);
+        if (andDelete == null){
+            this.fileMapper.addDownloadCount(id);
+            this.redisTemplate.opsForValue().set(remoteAddr, "", Duration.ofMinutes(5));
+        }
+        writeFileToResponse(fileById, response);
+    }
+    @SneakyThrows
+    private void writeFileToResponse(FileObject fileObject, HttpServletResponse response) {
+        String hash = fileObject.getHash();
+        File targetFile = new File(this.savePath, hash);
+        response.setContentLengthLong(fileObject.getSize());
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + fileObject.generatorFileName() + '"');
+        try(FileInputStream fis = new FileInputStream(targetFile); ServletOutputStream outputStream = response.getOutputStream()){
+            StreamUtils.copy(fis, outputStream);
+        }
     }
 }

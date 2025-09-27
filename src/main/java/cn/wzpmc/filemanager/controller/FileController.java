@@ -50,4 +50,8 @@ public class FileController {
     public Result<Page<FileObjectVo>> searchFile(@RequestParam("page") int page, @RequestParam("num") int num, @RequestParam("type") SearchType type, @RequestParam("data") String data) {
         return service.search(page, num, type, data);
     }
+    @GetMapping("/direct/{id}")
+    public void downloadDirect(@PathVariable("id") int id, HttpServletRequest request, HttpServletResponse response) {
+        service.downloadFile(id, request, response);
+    }
 }

@@ -2,6 +2,7 @@ package cn.wzpmc.filemanager.entities;
 
 import cn.wzpmc.filemanager.enums.HttpCodes;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Data
+@JSONCompiled
 public class Result<T> {
     private int status;
     private String message;

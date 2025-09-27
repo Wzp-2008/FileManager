@@ -5,8 +5,10 @@ import cn.wzpmc.filemanager.entities.vo.UserLoginVo;
 import cn.wzpmc.filemanager.entities.vo.UserRegisterVo;
 import cn.wzpmc.filemanager.enums.Auth;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
 
 @Mapper
+@Component
 public interface UserMapper {
     void createDefault();
     User getUser(UserLoginVo loginVo);

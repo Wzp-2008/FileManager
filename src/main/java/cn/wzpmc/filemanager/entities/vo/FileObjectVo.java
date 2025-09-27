@@ -1,10 +1,12 @@
 package cn.wzpmc.filemanager.entities.vo;
 
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
+@JSONCompiled
 public class FileObjectVo {
     private int id;
     private String name;

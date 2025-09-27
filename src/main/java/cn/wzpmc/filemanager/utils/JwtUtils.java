@@ -84,4 +84,8 @@ public class JwtUtils {
         user.setId(id);
         return Optional.of(user);
     }
+
+    public interface Test {
+        User getUserById(Integer id);
+    }
 }

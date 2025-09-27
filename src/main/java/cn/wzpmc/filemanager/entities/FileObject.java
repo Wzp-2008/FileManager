@@ -1,5 +1,6 @@
 package cn.wzpmc.filemanager.entities;
 
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import lombok.Data;
 
 import java.net.URLEncoder;
@@ -8,6 +9,7 @@ import java.util.Date;
 import java.util.Objects;
 
 @Data
+@JSONCompiled
 public class FileObject {
     private int id;
     private String name;

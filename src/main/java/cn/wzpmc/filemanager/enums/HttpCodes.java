@@ -1,8 +1,10 @@
 package cn.wzpmc.filemanager.enums;
 
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import lombok.Getter;
 
 @Getter
+@JSONCompiled
 public enum HttpCodes {
     /**
      * 200

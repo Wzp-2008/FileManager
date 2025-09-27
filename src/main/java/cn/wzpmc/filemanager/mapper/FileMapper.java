@@ -3,11 +3,13 @@ package cn.wzpmc.filemanager.mapper;
 import cn.wzpmc.filemanager.entities.FileObject;
 import cn.wzpmc.filemanager.entities.vo.FileObjectVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 
 @Mapper
+@Component
 public interface FileMapper {
     void createDefault();
     void addFile(FileObject file);

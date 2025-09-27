@@ -2,6 +2,7 @@ package cn.wzpmc.filemanager.entities.vo;
 
 import cn.wzpmc.filemanager.entities.abs.PasswordObject;
 import cn.wzpmc.filemanager.enums.Auth;
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -9,6 +10,7 @@ import java.util.Objects;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@JSONCompiled
 public class UserRegisterVo extends PasswordObject {
     private String name;
     private Auth auth;

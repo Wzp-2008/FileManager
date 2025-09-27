@@ -35,7 +35,7 @@
         select count(*) from `new_file` where `name` = #{name} and `type` = #{type};
     </select>
     <select id="getFileById" resultType="cn.wzpmc.filemanager.entities.FileObject">
-        select * from `new_file` where `id` = #{id};
+        select * from `new_file` where `id` = #{id} and ``;
     </select>
     <select id="getAllFileCount" resultType="java.lang.Integer">
         select count(*) from `new_file`;

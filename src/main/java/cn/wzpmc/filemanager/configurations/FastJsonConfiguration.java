@@ -19,9 +19,9 @@ public class FastJsonConfiguration implements WebMvcConfigurer {
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
         fastJsonConfig.setDateFormat("yyyy-MM-dd HH:mm:ss");
         fastJsonConfig.setCharset(StandardCharsets.UTF_8);
-        JSONWriter.Feature[] writerFeatures = {JSONWriter.Feature.MapSortField, JSONWriter.Feature.IgnoreNonFieldGetter, JSONWriter.Feature.PrettyFormat};
+        JSONWriter.Feature[] writerFeatures = {JSONWriter.Feature.SortMapEntriesByKeys, JSONWriter.Feature.IgnoreNonFieldGetter, JSONWriter.Feature.PrettyFormat};
         if (!debug) {
-            writerFeatures = new JSONWriter.Feature[]{JSONWriter.Feature.MapSortField, JSONWriter.Feature.IgnoreNonFieldGetter};
+            writerFeatures = new JSONWriter.Feature[]{JSONWriter.Feature.SortMapEntriesByKeys, JSONWriter.Feature.IgnoreNonFieldGetter};
         }
         fastJsonConfig.setWriterFeatures(writerFeatures);
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
