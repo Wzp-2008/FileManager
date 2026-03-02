@@ -5,7 +5,7 @@ plugins {
 	id("org.springframework.boot") version "3.3.4"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("org.graalvm.buildtools.native") version "0.10.3"
-	id("org.asciidoctor.jvm.convert") version "3.3.2"
+	id("org.asciidoctor.jvm.convert") version "4.0.5"
 }
 
 group = "cn.wzpmc"
