@@ -35,6 +35,10 @@ public class StartEventListener {
         if (properties.isDev()) {
             log.info("当前为开发环境，关闭日志收集，如需启用请删除wzp.filemanager.dev配置项！");
         }
+        if (properties.isReadonly()) {
+            log.info("当前为只读模式，不保存任何数据，也不允许上传任何数据，如需关闭请删除wzp.filemanager.readonly配置项");
+            return;
+        }
         userService.tryGenFirstAdminKey();
     }
 }

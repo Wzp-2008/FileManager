@@ -1,5 +1,6 @@
 package cn.wzpmc.filemanager.service;
 
+import cn.wzpmc.filemanager.config.FileManagerProperties;
 import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.fingerprint.FingerprintRequest;
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
@@ -19,6 +20,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,7 @@ import static cn.wzpmc.filemanager.entities.vo.table.UserVoTableDef.USER_VO;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserMapper userMapper;
     private final JwtUtils jwtUtils;
@@ -43,17 +46,7 @@ public class UserService {
     private final StatisticsService statisticsService;
     private final PrefsMapper prefsMapper;
     private final FingerprintMapper fingerprintMapper;
-
-    @Autowired
-    public UserService(UserMapper userMapper, JwtUtils jwtUtils, StringRedisTemplate authTemplate, RandomUtils randomUtils, StatisticsService statisticsService, PrefsMapper prefsMapper, FingerprintMapper fingerprintMapper) {
-        this.userMapper = userMapper;
-        this.jwtUtils = jwtUtils;
-        this.authTemplate = authTemplate;
-        this.randomUtils = randomUtils;
-        this.statisticsService = statisticsService;
-        this.prefsMapper = prefsMapper;
-        this.fingerprintMapper = fingerprintMapper;
-    }
+    private final FileManagerProperties properties;
 
     public void tryGenFirstAdminKey() {
         long count = this.userMapper.selectCountByQuery(new QueryWrapper());
@@ -84,6 +77,10 @@ public class UserService {
         Result.success("登录成功", userVo).writeToResponse(response);
     }
     public void register(UserRegisterRequest request, HttpServletResponse response, String address) {
+        if (properties.isReadonly()) {
+            Result.failed(HttpStatus.LOCKED, "只读模式，不可注册").writeToResponse(response);
+            return;
+        }
         String username = request.getUsername();
         String password = request.getPassword();
         if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
@@ -120,6 +117,7 @@ public class UserService {
     }
 
     public Result<String> invite(UserVo userVo, String address) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可生成");
         String s = genInviteCode(userVo, address);
         return Result.success("生成了一个有效期15分钟的邀请码", s);
     }
@@ -142,6 +140,7 @@ public class UserService {
     }
 
     public Result<PrefsVo> updatePrefs(UserVo user, PrefsVo prefs) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可保存");
         long id = user.getId();
         if (prefsMapper.selectCountByCondition(PREFS_VO.USER_ID.eq(id)) > 0) {
             prefsMapper.updateByCondition(prefs, false, PREFS_VO.USER_ID.eq(id));
@@ -153,6 +152,7 @@ public class UserService {
     }
 
     public Result<Boolean> saveFingerprint(UserVo user, FingerprintRequest request, String address) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可保存");
         FingerprintVo fingerprintVo = new FingerprintVo();
         fingerprintVo.setUserId(user.getId());
         String fingerprint = request.getFingerprint();
@@ -185,6 +185,7 @@ public class UserService {
     }
 
     public Result<Boolean> tryRemoveFingerprint(UserVo user, String fingerprint) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可删除");
         int i = fingerprintMapper.deleteByCondition(FINGERPRINT_VO.FINGERPRINT.eq(fingerprint).and(FINGERPRINT_VO.USER_ID.eq(user.getId())));
         if (i > 0) {
             return Result.success("删除成功", true);
@@ -193,6 +194,7 @@ public class UserService {
     }
 
     public Result<Boolean> changePassword(UserChangePasswordRequest request, UserVo userVo) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可修改");
         if (!userVo.getPassword().equals(DigestUtils.sha1Hex(request.getOldPassword()))) {
             return Result.failed(HttpStatus.NOT_FOUND, "旧密码错误！");
         }
@@ -208,6 +210,7 @@ public class UserService {
     }
 
     public Result<Boolean> changeUsername(String newUsername, UserVo userVo) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可修改");
         if (userMapper.selectCountByCondition(USER_VO.NAME.eq(newUsername)) >= 1) {
             return Result.failed(HttpStatus.CONFLICT, "用户名已存在！");
         }

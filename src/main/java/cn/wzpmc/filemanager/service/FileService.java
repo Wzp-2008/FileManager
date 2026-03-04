@@ -130,6 +130,7 @@ public class FileService {
     @SneakyThrows
     @Transactional
     public Result<FileVo> simpleUpload(MultipartHttpServletRequest request, UserVo user, String address) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可上传");
         long folderParams = getFolderParams(request);
         ServletRequestContext servletRequestContext = new ServletRequestContext(request);
         FileUpload upload = new FileUpload();
@@ -284,6 +285,7 @@ public class FileService {
 
 
     public Result<FolderVo> mkdir(FolderCreateRequest request, UserVo user, String address) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可创建");
         String name = request.getName();
         long parent = request.getParent();
         if (name.isEmpty()) {
@@ -334,6 +336,7 @@ public class FileService {
 
     @Transactional
     public Result<Void> delete(long id, FileType type, UserVo user, String address) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可删除");
         long actorId = user.getId();
         if (type.equals(FileType.FILE)) {
             FileVo fileVo = fileMapper.selectOneById(id);
@@ -501,6 +504,7 @@ public class FileService {
     }
 
     public Result<List<CheckChunkResult>> checkChunkUploaded(List<String> hash) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可上传");
         List<ChunksVo> chunksVos = chunksMapper.selectListByCondition(CHUNKS_VO.HASH.in(hash));
         Map<String, Long> hashResult = new HashMap<>();
         chunksVos.forEach(e -> hashResult.put(e.getHash(), e.getId()));
@@ -510,6 +514,7 @@ public class FileService {
 
     @SneakyThrows
     public Result<Long> uploadChunk(MultipartFile block) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可上传");
         File savePath = properties.getSavePath();
         File blobDir = new File(savePath, "blobs");
         SizeStatisticsDigestInputStream sizeStatisticsDigestInputStream = new SizeStatisticsDigestInputStream(block.getInputStream(), DigestUtils.getSha1Digest());
@@ -543,6 +548,7 @@ public class FileService {
     @SneakyThrows
     @Transactional
     public Result<FileVo> saveFile(SaveChunksRequest chunks) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可上传");
         FilenameDescription filename = getFilename(chunks.getFilename());
         Optional<Result<FileVo>> illegalResult = filename.checkIllegal();
         if (illegalResult.isPresent()) {
@@ -626,6 +632,7 @@ public class FileService {
     }
 
     public Result<Boolean> moveFile(MoveFileRequest request, UserVo user) {
+        if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可移动");
         long originalFileId = request.getOriginalFileId();
         FileType fileType = request.getFileType();
         long userId = user.getId();

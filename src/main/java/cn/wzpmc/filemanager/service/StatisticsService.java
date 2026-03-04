@@ -18,6 +18,7 @@ public class StatisticsService {
 
     public void insertAction(@Nullable UserVo actor, Actions actions, @Nullable JSONObject params) {
         if (properties.isDev()) return;
+        if (properties.isReadonly()) throw new RuntimeException("只读模式，无法写入数据！");
         statisticsMapper.insert(new StatisticsVo(actor != null ? actor.getId() : null, actions, params));
     }
 

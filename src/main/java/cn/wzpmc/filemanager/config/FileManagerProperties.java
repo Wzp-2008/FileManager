@@ -15,6 +15,7 @@ public class FileManagerProperties {
     private String hmacKey = "RANDOM";
     private FFmpegConfiguration ffmpeg;
     private boolean dev = false;
+    private boolean readonly = false;
 
     @Bean
     public File savePath() {
