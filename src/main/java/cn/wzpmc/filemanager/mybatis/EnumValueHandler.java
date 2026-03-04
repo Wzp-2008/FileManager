@@ -32,7 +32,7 @@ public class EnumValueHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
                 return;
             }
         }
-        ps.setObject(i, parameter);
+        ps.setString(i, parameter.name());
     }
 
     @Override

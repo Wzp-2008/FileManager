@@ -5,6 +5,7 @@ plugins {
     id("org.springframework.boot") version "4.0.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.graalvm.buildtools.native") version "0.11.4"
+    id("org.asciidoctor.jvm.convert") version "4.0.5"
 }
 
 group = "cn.wzpmc"
@@ -67,7 +68,6 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
-    testImplementation("org.springframework.shell:spring-shell-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -77,4 +77,9 @@ tasks.withType<Test> {
 
 tasks.test {
     outputs.dir(project.extra["snippetsDir"]!!)
+}
+
+tasks.asciidoctor {
+    inputs.dir(project.extra["snippetsDir"]!!)
+    dependsOn(tasks.test)
 }

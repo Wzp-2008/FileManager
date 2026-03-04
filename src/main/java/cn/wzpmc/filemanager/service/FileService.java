@@ -271,7 +271,7 @@ public class FileService {
         }
         QueryWrapper from = new QueryWrapper()
                 .select()
-                .from(rawFileSelect.as("RAW_FILE"));
+                .from(rawFileSelect.as("RAW_FILE")).as("t");
         if (sort != SortField.ID) {
             from = from.orderBy(sort.column, reverse);
         }
