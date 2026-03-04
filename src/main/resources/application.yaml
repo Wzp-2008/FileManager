@@ -8,3 +8,5 @@ spring:
       resolve-lazily: true
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
+mybatis-flex:
+  type-handlers-package: cn.wzpmc.filemanager.mybatis

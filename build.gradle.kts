@@ -63,6 +63,8 @@ dependencies {
     implementation("org.apache.tika:tika-core:3.2.3")
     // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
     implementation("com.mysql:mysql-connector-j:9.6.0")
+    // Source: https://mvnrepository.com/artifact/org.postgresql/postgresql
+    implementation("org.postgresql:postgresql:42.7.10")
     compileOnly("org.projectlombok:lombok")
     /*developmentOnly("org.springframework.boot:spring-boot-devtools")*/
     annotationProcessor("org.projectlombok:lombok")

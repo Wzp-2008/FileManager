@@ -126,7 +126,7 @@ public class UserService {
         ValueOperations<String, String> ops = authTemplate.opsForValue();
         String s = this.randomUtils.generatorRandomString(8);
         log.info("生成了新的邀请码：{}", s);
-        statisticsService.insertAction(actor, Actions.INVITE, address);
+        statisticsService.insertAction(actor, Actions.INVITE, JSONObject.of("remoteAddr", address));
         ops.set(s, "", 15, TimeUnit.MINUTES);
         return s;
     }

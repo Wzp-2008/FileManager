@@ -1,11 +1,13 @@
 package cn.wzpmc.filemanager.entities.files.enums;
 
+import cn.wzpmc.filemanager.mybatis.PgEnumName;
 import com.mybatisflex.core.query.QueryColumn;
 import lombok.RequiredArgsConstructor;
 
 import static com.mybatisflex.core.query.QueryMethods.column;
 
 @RequiredArgsConstructor
+@PgEnumName("prefs_sort_field")
 public enum SortField {
     /**
      * 通过ID排序（默认）

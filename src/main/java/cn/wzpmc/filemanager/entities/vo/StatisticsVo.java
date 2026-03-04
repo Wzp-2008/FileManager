@@ -1,12 +1,13 @@
 package cn.wzpmc.filemanager.entities.vo;
 
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
 
 import java.util.Date;
 
@@ -27,7 +28,7 @@ public class StatisticsVo {
     /**
      * 操作参数（一般为JSON字符串）
      */
-    private String params;
+    private JSONObject params;
     /**
      * 操作时间
      */
@@ -40,7 +41,7 @@ public class StatisticsVo {
     @Column(value = "download_file_id", ignore = true)
     private Integer downloadFileId;
 
-    public StatisticsVo(@Nullable Long actor, Actions action, String params) {
+    public StatisticsVo(@Nullable Long actor, Actions action, JSONObject params) {
         this.actor = actor;
         this.action = action;
         this.params = params;

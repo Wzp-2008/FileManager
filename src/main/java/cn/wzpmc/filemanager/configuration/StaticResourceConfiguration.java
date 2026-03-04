@@ -5,6 +5,7 @@ import cn.wzpmc.filemanager.entities.vo.UserVo;
 import cn.wzpmc.filemanager.service.StatisticsService;
 import cn.wzpmc.filemanager.utils.AddressArgumentResolver;
 import cn.wzpmc.filemanager.utils.JwtUtils;
+import com.alibaba.fastjson2.JSONObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -42,11 +43,11 @@ public class StaticResourceConfiguration implements WebMvcConfigurer, HandlerInt
         if (authorization != null) {
             Optional<Integer> user = jwtUtils.getUser(authorization);
             if (user.isPresent()) {
-                this.accessService.insertAction(new UserVo(user.get()), Actions.ACCESS, remoteAddr);
+                this.accessService.insertAction(new UserVo(user.get()), Actions.ACCESS, JSONObject.of("remoteAddr", remoteAddr));
                 return HandlerInterceptor.super.preHandle(request, response, handler);
             }
         }
-        this.accessService.insertAction(Actions.ACCESS, remoteAddr);
+        this.accessService.insertAction(Actions.ACCESS, JSONObject.of("remoteAddr", remoteAddr));
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
 }

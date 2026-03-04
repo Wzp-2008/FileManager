@@ -228,9 +228,9 @@ public class FileService {
                 USER_VO.NAME.as("owner_name"),
                 count(STATISTICS_VO.TIME).as("down_count")
         ).from(FILE_VO)
-                .leftJoin(USER_VO).on(USER_VO.ID.eq(FILE_VO.UPLOADER).and(USER_VO.BANNED.eq(0)))
+                .leftJoin(USER_VO).on(USER_VO.ID.eq(FILE_VO.UPLOADER))
                 .leftJoin(STATISTICS_VO).on(STATISTICS_VO_EXT.DOWNLOAD_FILE_ID.eq(FILE_VO.ID))
-                .groupBy(FILE_VO.ID);
+                .groupBy(FILE_VO.ID, USER_VO.NAME);
     }
 
     private QueryWrapper getRawFolderSelector() {
@@ -246,7 +246,7 @@ public class FileService {
                 USER_VO.NAME.as("owner_name"),
                 number(0).as("down_count")
         ).from(FOLDER_VO)
-                .leftJoin(USER_VO).on(USER_VO.ID.eq(FOLDER_VO.CREATOR).and(USER_VO.BANNED.eq(0)));
+                .leftJoin(USER_VO).on(USER_VO.ID.eq(FOLDER_VO.CREATOR));
     }
 
     public Result<PageResult<FullRawFileObject>> getFilePager(long page, int num, long folder, SortField sort, boolean reverse, String keywords) {
@@ -269,7 +269,9 @@ public class FileService {
         if (queryFolder) {
             rawFileSelect = rawFileSelect.unionAll(rawFolderSelect);
         }
-        QueryWrapper from = new QueryWrapper().with("RAW_FILE").asSelect(rawFileSelect).select().from("RAW_FILE");
+        QueryWrapper from = new QueryWrapper()
+                .select()
+                .from(rawFileSelect.as("RAW_FILE"));
         if (sort != SortField.ID) {
             from = from.orderBy(sort.column, reverse);
         }

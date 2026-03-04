@@ -35,7 +35,7 @@ public class UserVo {
      * 用户是否被封禁
      * `尽管封了你也看不到就是了`
      */
-    @Column(isLogicDelete = true, onInsertValue = "0")
+    @Column(isLogicDelete = true, onInsertValue = "false")
     private boolean banned;
 
     @RelationOneToOne(selfField = "id", targetField = "userId", targetTable = "prefs")

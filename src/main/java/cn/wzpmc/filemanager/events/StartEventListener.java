@@ -3,6 +3,7 @@ package cn.wzpmc.filemanager.events;
 import cn.wzpmc.filemanager.config.FileManagerProperties;
 import cn.wzpmc.filemanager.mapper.InitializationMapper;
 import cn.wzpmc.filemanager.service.UserService;
+import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import com.mybatisflex.core.audit.MessageCollector;
@@ -22,10 +23,10 @@ public class StartEventListener {
 
     @EventListener
     public void onStart(ApplicationStartedEvent ignored) {
+        initializationMapper.createFileTable();
         initializationMapper.createUserTable();
         initializationMapper.createStatisticsTable();
         initializationMapper.createFolderTable();
-        initializationMapper.createFileTable();
         initializationMapper.createPrefTable();
         initializationMapper.createFingerprintTable();
         //开启审计功能
