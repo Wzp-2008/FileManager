@@ -290,7 +290,7 @@ public class FileService {
             return Result.failed(HttpStatus.BAD_REQUEST, "文件名不可为空！");
         }
         if (name.length() > 160) {
-            return Result.failed(HttpStatus.PAYLOAD_TOO_LARGE, "文件夹名称过长，无法创建！");
+            return Result.failed(HttpStatus.CONTENT_TOO_LARGE, "文件夹名称过长，无法创建！");
         }
         if (fileMapper.selectCountByCondition(FILE_VO.EXT.eq(null_()).and(FILE_VO.NAME.eq(name)).and(FILE_VO.FOLDER.eq(parent))) > 0) {
             return Result.failed(HttpStatus.CONFLICT, "创建文件夹失败，同名文件已存在！");
@@ -373,7 +373,7 @@ public class FileService {
         List<ChunksVo> chunksVos = null;
         if (!file.exists()) {
             chunksVos = chunksMapper.selectListByQuery(select(CHUNKS_VO.ALL_COLUMNS).from(CHUNK_FILE_VO).rightJoin(CHUNKS_VO).on(CHUNK_FILE_VO.CHUNK_ID.eq(CHUNKS_VO.ID)).where(CHUNK_FILE_VO.FILE_ID.eq(fileVo.getId())).orderBy(CHUNK_FILE_VO.INDEX.asc()));
-            if (chunksVos.isEmpty()) {
+            if (chunksVos == null || chunksVos.isEmpty()) {
                 Result.failed(HttpStatus.INTERNAL_SERVER_ERROR, "服务器错误，未找到文件，请联系服务器管理员处理！(shareLinkId=" + id + ", fileHash=" + hash + ", fileId=" + fileVo.getId() + ")").writeToResponse(response);
                 return;
             }
@@ -420,6 +420,9 @@ public class FileService {
 
     public Result<String> getFileLink(long id, String address, HttpServletRequest request) {
         FileVo fileVo = fileMapper.selectOneById(id);
+        if (fileVo == null) {
+            return Result.failed(HttpStatus.NOT_FOUND, "文件不存在！");
+        }
         long fileId = fileVo.getId();
         String identify = ID_ADDR_PREFIX + fileId + address;
         String link = idAddrLinkMapper.opsForValue().get(identify);
@@ -555,6 +558,7 @@ public class FileService {
         FileVo fileVo = new FileVo();
         List<Long> chunkIds = chunks.getChunks();
         List<ChunksVo> chunksVos = chunksMapper.selectListByIds(chunkIds);
+        assert chunksVos != null;
         List<ChunksVo> sortedChunks = chunkIds.stream().map(e -> chunksVos.stream().filter(a -> a.getId() == e).findFirst().orElseThrow()).toList();
         String mime;
         String sha512;
@@ -691,7 +695,7 @@ public class FileService {
 
         public <T> Optional<Result<T>> checkIllegal() {
             if (name.length() > 120 || ext.length() > 40) {
-                return Optional.of(Result.failed(HttpStatus.PAYLOAD_TOO_LARGE, "文件名过长，无法上传！"));
+                return Optional.of(Result.failed(HttpStatus.CONTENT_TOO_LARGE, "文件名过长，无法上传！"));
             }
             if (name.isEmpty()) {
                 return Optional.of(Result.failed(HttpStatus.BAD_REQUEST, "文件名为空，无法上传！"));

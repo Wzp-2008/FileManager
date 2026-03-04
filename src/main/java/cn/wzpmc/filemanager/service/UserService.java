@@ -75,6 +75,7 @@ public class UserService {
             return;
         }
         UserVo userVo = this.userMapper.selectOneWithRelationsByCondition(findUserCondition);
+        assert userVo != null;
         userVo.clearPassword();
         long id = userVo.getId();
         String token = this.jwtUtils.createToken(id);
