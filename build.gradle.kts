@@ -39,7 +39,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-web") {
         // remove jackson
-        exclude("org.springframework.book", "spring-boot-starter-json")
+        exclude("org.springframework.boot", "spring-boot-starter-json")
     }
     implementation("org.springframework.shell:spring-shell-starter")
     // https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-spring-boot3-starter
