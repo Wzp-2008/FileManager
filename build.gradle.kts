@@ -5,7 +5,6 @@ plugins {
     id("org.springframework.boot") version "4.0.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.graalvm.buildtools.native") version "0.11.4"
-    id("org.asciidoctor.jvm.convert") version "4.0.5"
 }
 
 group = "cn.wzpmc"
@@ -31,7 +30,6 @@ repositories {
 }
 
 extra["snippetsDir"] = file("build/generated-snippets")
-extra["springShellVersion"] = "4.0.1"
 val fastjsonVersion = "2.0.61"
 val mybatisFlexVersion = "1.11.6"
 dependencies {
@@ -41,7 +39,6 @@ dependencies {
         // remove jackson
         exclude("org.springframework.boot", "spring-boot-starter-json")
     }
-    implementation("org.springframework.shell:spring-shell-starter")
     // https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-spring-boot3-starter
     implementation("com.mybatis-flex:mybatis-flex-spring-boot4-starter:${mybatisFlexVersion}")
     annotationProcessor("com.mybatis-flex:mybatis-flex-processor:${mybatisFlexVersion}")
@@ -74,21 +71,10 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.shell:spring-shell-dependencies:${property("springShellVersion")}")
-    }
-}
-
 tasks.withType<Test> {
     useJUnitPlatform()
 }
 
 tasks.test {
     outputs.dir(project.extra["snippetsDir"]!!)
-}
-
-tasks.asciidoctor {
-    inputs.dir(project.extra["snippetsDir"]!!)
-    dependsOn(tasks.test)
 }
