@@ -11,6 +11,9 @@ spring:
     # url: jdbc:postgresql://127.0.0.1:5432/fsv2
     username: "fsv2" # db username
     password: "fsv2" # db password
+    # for pg sql:
+    # druid:
+    #  db-type: postgresql
   data:
     redis:
       host: "127.0.0.1" # redis host
