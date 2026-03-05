@@ -59,6 +59,7 @@ import javax.sql.DataSource;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +92,7 @@ public class FileService {
     private final JwtUtils jwtUtils;
     private FilePathService pathService;
     private final File savePath;
-    private final DataSource source;
+    private boolean pgSQL;
     public static final String ID_ADDR_PREFIX = "ID_ADDR_";
     public static final char PATH_SEPARATOR_CHAR = '/';
     public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
@@ -100,6 +101,14 @@ public class FileService {
     @Lazy
     public void setPathService(FilePathService pathService) {
         this.pathService = pathService;
+    }
+
+    @Autowired
+    @SneakyThrows
+    public void setDataSource(DataSource dataSource) {
+        Connection connection = dataSource.getConnection();
+        this.pgSQL = MybatisUtils.isPgSQL(connection);
+        connection.close();
     }
 
     protected void tryDeleteOrDeleteOnExit(File tmpFile) {
@@ -256,14 +265,8 @@ public class FileService {
                 .leftJoin(USER_VO).on(USER_VO.ID.eq(FOLDER_VO.CREATOR));
     }
 
-
-    @SneakyThrows
-    private boolean isPgSQL() {
-        return MybatisUtils.isPgSQL(source.getConnection());
-    }
-
     private QueryCondition getNameSearcher(QueryColumn col, String keywords) {
-        if (isPgSQL()) {
+        if (pgSQL) {
             if (keywords.length() <= 8) {
                 return getNameSearcherWithoutIndex(col, keywords);
             }
@@ -273,7 +276,7 @@ public class FileService {
     }
 
     private QueryCondition getNameSearcherWithoutIndex(QueryColumn col, String keywords) {
-        if (isPgSQL()) {
+        if (pgSQL) {
             return QueryCondition.create(col, "ilike ", "%" + keywords + "%");
         }
         return col.like(keywords);
