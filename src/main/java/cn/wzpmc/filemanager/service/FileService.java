@@ -55,7 +55,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -80,13 +83,11 @@ public class FileService {
     private final RedisTemplate<String, FileVo> linkMapper;
     private final ChunkFileMapper chunkFileMapper;
     private final ChunksMapper chunksMapper;
-    /*private final RedisTemplate<String, Long> linkCountMapper;*/
     private final StringRedisTemplate idAddrLinkMapper;
     private final JwtUtils jwtUtils;
     private FilePathService pathService;
     private final File savePath;
     public static final String ID_ADDR_PREFIX = "ID_ADDR_";
-    public static final String SHARE_PREFIX = "SHARE_";
     public static final char PATH_SEPARATOR_CHAR = '/';
     public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
 
@@ -441,17 +442,6 @@ public class FileService {
             idAddrLinkMapper.opsForValue().set(identify, link, 30, TimeUnit.MINUTES);
         }
         return Result.success("成功", link);
-    }
-
-    public Result<String> shareFile(Long id, Date lastCouldDownloadTime, int maxDownloadCount) {
-        FileVo fileVo = this.fileMapper.selectOneById(id);
-        if (fileVo == null) {
-            return Result.failed(HttpStatus.NOT_FOUND, "未知文件");
-        }
-        String linkName = randomUtils.generatorRandomFileName(10);
-        String innerId = randomUtils.generatorRandomString(30);
-        long expireAfterMs = lastCouldDownloadTime.getTime() - new Date().getTime();
-        return Result.success(linkName);
     }
 
     public Result<FullRawFileObject> resolveFileDetail(String path) {

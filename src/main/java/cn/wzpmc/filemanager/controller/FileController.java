@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -144,17 +143,6 @@ public class FileController {
     }
 
     /**
-     * 分享文件
-     * @deprecated
-     */
-    @GetMapping("/share")
-    @Deprecated
-    @AuthorizationRequired
-    public Result<String> shareFile(@RequestParam Long id, @RequestParam(defaultValue = "9999-12-31") Date lastCouldDownloadTime, @RequestParam(defaultValue = "-1") int maxDownloadCount) {
-        return fileService.shareFile(id, lastCouldDownloadTime, maxDownloadCount);
-    }
-
-    /**
      * 通过路径解析文件信息
      * @param path 需要解析的文件路径
      * @return 文件粗略信息
@@ -171,7 +159,7 @@ public class FileController {
      * @return 文件的路径
      */
     @GetMapping("/path/{id}")
-    public Result<String> findFilePathById(@PathVariable("id") long id, @RequestParam(value = "type", defaultValue = "FILE") FileType type) {
+    public Result<String> findFilePathById(@PathVariable long id, @RequestParam(value = "type", defaultValue = "FILE") FileType type) {
         return type.equals(FileType.FILE) ? fileService.findFilePathById(id) : fileService.findFolderPathById(id);
     }
 
