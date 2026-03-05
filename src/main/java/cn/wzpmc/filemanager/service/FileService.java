@@ -20,12 +20,15 @@ import cn.wzpmc.filemanager.mapper.ChunksMapper;
 import cn.wzpmc.filemanager.mapper.FileMapper;
 import cn.wzpmc.filemanager.mapper.FolderMapper;
 import cn.wzpmc.filemanager.utils.JwtUtils;
+import cn.wzpmc.filemanager.utils.MybatisUtils;
 import cn.wzpmc.filemanager.utils.RandomUtils;
 import cn.wzpmc.filemanager.utils.stream.SerialFileInputStream;
 import cn.wzpmc.filemanager.utils.stream.SizeStatisticsDigestInputStream;
 import com.alibaba.fastjson2.JSONObject;
 import com.mybatisflex.core.audit.http.HashUtil;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,6 +55,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.sql.DataSource;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -87,6 +91,7 @@ public class FileService {
     private final JwtUtils jwtUtils;
     private FilePathService pathService;
     private final File savePath;
+    private final DataSource source;
     public static final String ID_ADDR_PREFIX = "ID_ADDR_";
     public static final char PATH_SEPARATOR_CHAR = '/';
     public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
@@ -251,6 +256,29 @@ public class FileService {
                 .leftJoin(USER_VO).on(USER_VO.ID.eq(FOLDER_VO.CREATOR));
     }
 
+
+    @SneakyThrows
+    private boolean isPgSQL() {
+        return MybatisUtils.isPgSQL(source.getConnection());
+    }
+
+    private QueryCondition getNameSearcher(QueryColumn col, String keywords) {
+        if (isPgSQL()) {
+            if (keywords.length() <= 8) {
+                return getNameSearcherWithoutIndex(col, keywords);
+            }
+            return QueryCondition.create(col, "%", keywords);
+        }
+        return col.like(keywords);
+    }
+
+    private QueryCondition getNameSearcherWithoutIndex(QueryColumn col, String keywords) {
+        if (isPgSQL()) {
+            return QueryCondition.create(col, "ilike ", "%" + keywords + "%");
+        }
+        return col.like(keywords);
+    }
+
     public Result<PageResult<FullRawFileObject>> getFilePager(long page, int num, long folder, SortField sort, boolean reverse, String keywords) {
         QueryWrapper rawFileSelect = getRawFileSelector();
         QueryWrapper rawFolderSelect = getRawFolderSelector();
@@ -261,11 +289,11 @@ public class FileService {
         } else {
             FilenameDescription filename = getFilename(keywords);
             if (filename.ext.isEmpty()) {
-                rawFileSelect = rawFileSelect.where(FILE_VO.NAME.like("%" + keywords + "%").or(FILE_VO.EXT.like("%" + keywords + "%")));
-                rawFolderSelect.where(FOLDER_VO.NAME.like("%" + keywords + "%"));
+                rawFileSelect = rawFileSelect.where(getNameSearcher(FILE_VO.NAME, keywords).or(getNameSearcher(FILE_VO.EXT, keywords)));
+                rawFolderSelect.where(getNameSearcher(FOLDER_VO.NAME, keywords));
             } else {
                 queryFolder = false;
-                rawFileSelect = rawFileSelect.where(FILE_VO.NAME.like("%" + filename.name + "%").and(FILE_VO.EXT.like("%" + filename.ext + "%")));
+                rawFileSelect = rawFileSelect.where(getNameSearcherWithoutIndex(FILE_VO.NAME, filename.name).and(getNameSearcherWithoutIndex(FILE_VO.EXT, filename.ext)));
             }
         }
         if (queryFolder) {
