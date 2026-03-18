@@ -1,0 +1,2333 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FileManager-Ver2.0",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "文件操作相关接口"
+    },
+    {
+      "name": "用户相关接口"
+    }
+  ],
+  "paths": {
+    "/api/file/upload/check": {
+      "post": {
+        "summary": "检查文件是否可以上传",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "验证Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilePathDescription",
+                "description": "文件路径"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultBoolean",
+                  "description": "是否可以上传"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": false,
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/upload": {
+      "put": {
+        "summary": "上传一个文件",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "验证Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultFileVo",
+                  "description": "文件详情"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "ext": "",
+                    "mime": "",
+                    "hash": "",
+                    "uploader": 0,
+                    "folder": 0,
+                    "size": 0,
+                    "uploadTime": ""
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/get": {
+      "get": {
+        "summary": "分页获取文件",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "要获取第几页的文件",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "num",
+            "in": "query",
+            "description": "每一页的文件数量",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "folder",
+            "in": "query",
+            "description": "要获取的文件所在的文件夹",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "文件的排序方式 ID :通过ID排序（默认）\nNAME :通过文件夹排序\nEXT :通过文件扩展名排序\nTIME :通过文件上传时间排序\nUPLOADER :通过文件上传者排序\nDOWNLOAD_COUNT :通过文件下载次数排序\nSIZE :根据文件大小排序",
+            "required": true,
+            "example": "ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reverse",
+            "in": "query",
+            "description": "是否反向排序",
+            "required": true,
+            "example": "false",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultPageResultFullRawFileObject",
+                  "description": "分页后的文件列表"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "total": 0,
+                    "data": [
+                      {
+                        "id": 0,
+                        "name": "",
+                        "ext": "",
+                        "size": 0,
+                        "owner": 0,
+                        "parent": 0,
+                        "time": "",
+                        "type": "",
+                        "ownerName": "",
+                        "downCount": 0
+                      }
+                    ]
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/mkdir": {
+      "post": {
+        "summary": "创建一个文件夹",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "验证Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderCreateRequest",
+                "description": "创建文件夹的相关参数"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultFolderVo",
+                  "description": "创建的文件夹详情"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "parent": 0,
+                    "creator": 0,
+                    "createTime": ""
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/get/file": {
+      "get": {
+        "summary": "获取一个文件的简略信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "文件ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultFullRawFileObject",
+                  "description": "文件简略信息"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "ext": "",
+                    "size": 0,
+                    "owner": 0,
+                    "parent": 0,
+                    "time": "",
+                    "type": "",
+                    "ownerName": "",
+                    "downCount": 0
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/get/folder": {
+      "get": {
+        "summary": "获取一个文件夹的简略信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "文件夹ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultFullRawFileObject",
+                  "description": "文件简略信息"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "ext": "",
+                    "size": 0,
+                    "owner": 0,
+                    "parent": 0,
+                    "time": "",
+                    "type": "",
+                    "ownerName": "",
+                    "downCount": 0
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/detail/file": {
+      "get": {
+        "summary": "获取文件详细信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "文件ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultFileVo",
+                  "description": "文件详情"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "ext": "",
+                    "mime": "",
+                    "hash": "",
+                    "uploader": 0,
+                    "folder": 0,
+                    "size": 0,
+                    "uploadTime": ""
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/rm": {
+      "delete": {
+        "summary": "删除一个文件/文件夹",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "文件/文件夹ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "目标为文件/文件夹 FILE :文件\nFOLDER :文件夹",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "验证Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid",
+                  "description": "是否删除成功"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": null,
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/link": {
+      "get": {
+        "summary": "获取文件下载链接",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "文件ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString",
+                  "description": "文件下载链接ID"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": "",
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/download/{id}": {
+      "get": {
+        "summary": "通过下载文件ID下载文件",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "下载ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Range",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "null",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/share": {
+      "get": {
+        "summary": "分享文件",
+        "deprecated": true,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "lastCouldDownloadTime",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "9999-12-31",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxDownloadCount",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": -1,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString",
+                  "description": "文件下载链接ID"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": "",
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/path/resolve": {
+      "get": {
+        "summary": "通过路径解析文件信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "description": "需要解析的文件路径",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultFullRawFileObject",
+                  "description": "文件简略信息"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "ext": "",
+                    "size": 0,
+                    "owner": 0,
+                    "parent": 0,
+                    "time": "",
+                    "type": "",
+                    "ownerName": "",
+                    "downCount": 0
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/path/{id}": {
+      "get": {
+        "summary": "通过文件ID获取文件路径",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "文件ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "目标文件为文件/文件夹 FILE :文件\nFOLDER :文件夹",
+            "required": true,
+            "example": "FILE",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString",
+                  "description": "文件下载链接ID"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": "",
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/chunk/check": {
+      "post": {
+        "summary": "获取需要上传的区块列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "文件分块后的所有hash值"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListCheckChunkResult",
+                  "description": "需要上传的区块哈希和区块ID"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": [
+                    {
+                      "hash": "",
+                      "chunkId": 0
+                    }
+                  ],
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/chunk/upload": {
+      "post": {
+        "summary": "上传一个区块",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "description": "区块文件"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultLong",
+                  "description": "上传的区块ID"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": 0,
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/chunk/save": {
+      "put": {
+        "summary": "将区块保存为文件",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件操作相关接口"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveChunksRequest",
+                "description": "保存文件请求"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultFileVo",
+                  "description": "文件详情"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "ext": "",
+                    "mime": "",
+                    "hash": "",
+                    "uploader": 0,
+                    "folder": 0,
+                    "size": 0,
+                    "uploadTime": ""
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/login": {
+      "post": {
+        "summary": "登录接口",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户相关接口"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginRequest",
+                "description": "登录请求体"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultUserVo"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "password": "",
+                    "auth": "",
+                    "banned": false,
+                    "prefs": {
+                      "userId": 0,
+                      "sortField": "",
+                      "sortReverse": false
+                    }
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/register": {
+      "put": {
+        "summary": "注册接口",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户相关接口"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterRequest",
+                "description": "注册请求体"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultUserVo"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "password": "",
+                    "auth": "",
+                    "banned": false,
+                    "prefs": {
+                      "userId": 0,
+                      "sortField": "",
+                      "sortReverse": false
+                    }
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/invite": {
+      "get": {
+        "summary": "管理员用户生成邀请码接口",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "验证Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString",
+                  "description": "文件下载链接ID"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": "",
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/info": {
+      "get": {
+        "summary": "获取用户信息接口",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "验证Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultUserVo"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "password": "",
+                    "auth": "",
+                    "banned": false,
+                    "prefs": {
+                      "userId": 0,
+                      "sortField": "",
+                      "sortReverse": false
+                    }
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/info/{id}": {
+      "get": {
+        "summary": "获取指定用户信息接口",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "用户ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultUserVo"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "password": "",
+                    "auth": "",
+                    "banned": false,
+                    "prefs": {
+                      "userId": 0,
+                      "sortField": "",
+                      "sortReverse": false
+                    }
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/prefs": {
+      "post": {
+        "summary": "修改当前用户设置",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "验证Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrefsVo",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultPrefsVo",
+                  "description": "该用户的新设置"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "userId": 0,
+                    "sortField": "",
+                    "sortReverse": false
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/fingerprint/save": {
+      "post": {
+        "summary": "保存浏览器指纹",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "验证Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FingerprintRequest",
+                "description": "指纹保存请求体"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultBoolean",
+                  "description": "是否可以上传"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": false,
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/fingerprint/login": {
+      "get": {
+        "summary": "尝试使用浏览器指纹登录",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "fingerprint",
+            "in": "query",
+            "description": "浏览器指纹",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultUserVo"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": {
+                    "id": 0,
+                    "name": "",
+                    "password": "",
+                    "auth": "",
+                    "banned": false,
+                    "prefs": {
+                      "userId": 0,
+                      "sortField": "",
+                      "sortReverse": false
+                    }
+                  },
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/fingerprint/tryRemove": {
+      "delete": {
+        "summary": "尝试删除浏览器指纹",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户相关接口"
+        ],
+        "parameters": [
+          {
+            "name": "fingerprint",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "验证Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultBoolean",
+                  "description": "是否可以上传"
+                },
+                "example": {
+                  "status": 0,
+                  "msg": "",
+                  "data": false,
+                  "timestamp": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserLoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "",
+            "title": "用户名"
+          },
+          "password": {
+            "type": "string",
+            "description": "",
+            "title": "密码"
+          }
+        }
+      },
+      "ResultBoolean": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "请求的响应码"
+          },
+          "msg": {
+            "type": "string",
+            "description": "请求的响应信息"
+          },
+          "data": {
+            "type": "boolean",
+            "description": "请求的响应数据"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "请求生成的时间戳",
+            "format": "int64"
+          }
+        }
+      },
+      "UserRegisterRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "",
+            "title": "用户名"
+          },
+          "password": {
+            "type": "string",
+            "description": "",
+            "title": "密码"
+          },
+          "auth": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "admin",
+              "user"
+            ],
+            "title": "用户类型"
+          },
+          "inviteCode": {
+            "type": "string",
+            "description": "当auth为user时无需",
+            "title": "管理员用户邀请码"
+          }
+        }
+      },
+      "ResultVoid": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "description": "",
+            "type": "null"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          }
+        }
+      },
+      "PrepareUploadRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": ""
+          },
+          "ext": {
+            "type": "string",
+            "description": ""
+          },
+          "size": {
+            "type": "integer",
+            "description": ""
+          },
+          "folder": {
+            "type": "integer",
+            "description": ""
+          },
+          "fullSha1": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "FileVo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "description": ""
+          },
+          "ext": {
+            "type": "string",
+            "description": ""
+          },
+          "mime": {
+            "type": "string",
+            "description": ""
+          },
+          "hash": {
+            "type": "string",
+            "description": ""
+          },
+          "uploader": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "folder": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "uploadTime": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "RawFileObject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": ""
+          },
+          "name": {
+            "type": "string",
+            "description": ""
+          },
+          "ext": {
+            "type": "string",
+            "description": ""
+          },
+          "size": {
+            "type": "integer",
+            "description": ""
+          },
+          "owner": {
+            "type": "integer",
+            "description": ""
+          },
+          "parent": {
+            "type": "integer",
+            "description": ""
+          },
+          "time": {
+            "type": "string",
+            "description": ""
+          },
+          "type": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "FILE",
+              "FOLDER"
+            ]
+          }
+        }
+      },
+      "FilePathDescription": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "文件名"
+          },
+          "folderId": {
+            "type": "integer",
+            "description": "目标文件夹ID",
+            "format": "int64"
+          }
+        }
+      },
+      "ResultString": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "string",
+            "description": ""
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          }
+        }
+      },
+      "PageResultFileVo": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileVo",
+              "description": "cn.wzpmc.filemanager.entities.vo.FileVo"
+            },
+            "description": ""
+          }
+        }
+      },
+      "PageResultRawFileObject": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RawFileObject",
+              "description": "cn.wzpmc.filemanager.entities.files.RawFileObject"
+            },
+            "description": ""
+          }
+        }
+      },
+      "NamedRawFile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": ""
+          },
+          "name": {
+            "type": "string",
+            "description": ""
+          },
+          "ext": {
+            "type": "string",
+            "description": ""
+          },
+          "size": {
+            "type": "integer",
+            "description": ""
+          },
+          "owner": {
+            "type": "integer",
+            "description": ""
+          },
+          "parent": {
+            "type": "integer",
+            "description": ""
+          },
+          "time": {
+            "type": "string",
+            "description": ""
+          },
+          "type": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "FILE",
+              "FOLDER"
+            ]
+          },
+          "ownerName": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "FullRawFileObject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "description": ""
+          },
+          "ext": {
+            "type": "string",
+            "description": ""
+          },
+          "size": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "owner": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "parent": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "time": {
+            "type": "string",
+            "description": ""
+          },
+          "type": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "FILE",
+              "FOLDER"
+            ]
+          },
+          "ownerName": {
+            "type": "string",
+            "description": ""
+          },
+          "downCount": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          }
+        }
+      },
+      "CheckChunkResponse": {
+        "type": "object",
+        "properties": {
+          "has": {
+            "type": "boolean",
+            "description": ""
+          },
+          "uploadCode": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ResultPageResultFileVo": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageResultFileVo",
+            "description": ""
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "ResultPageResultRawFileObject": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageResultRawFileObject",
+            "description": ""
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "UserVo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "",
+            "format": "int64",
+            "title": "用户ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "",
+            "title": "用户名"
+          },
+          "password": {
+            "type": "string",
+            "description": "在作为登录\\注册请求返回时为空",
+            "title": "用户密码"
+          },
+          "auth": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "admin",
+              "user"
+            ],
+            "title": "用户的类型"
+          },
+          "banned": {
+            "type": "boolean",
+            "description": "（反正封了你也见不到就是了）",
+            "title": "用户是否被封禁"
+          },
+          "prefs": {
+            "$ref": "#/components/schemas/PrefsVo",
+            "description": ""
+          }
+        }
+      },
+      "PageResultNamedRawFile": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NamedRawFile",
+              "description": "cn.wzpmc.filemanager.entities.files.NamedRawFile"
+            },
+            "description": ""
+          }
+        }
+      },
+      "PageResultFullRawFileObject": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FullRawFileObject",
+              "description": "cn.wzpmc.filemanager.entities.files.FullRawFileObject"
+            },
+            "description": ""
+          }
+        }
+      },
+      "ResultCheckChunkResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/CheckChunkResponse",
+            "description": ""
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "FolderVo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "description": ""
+          },
+          "parent": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "creator": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ResultUserVo": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "当值为200时请求正常，否则错误",
+            "title": "状态码"
+          },
+          "msg": {
+            "type": "string",
+            "description": "当正常时可无视，当有错误时则为错误详情",
+            "title": "消息"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserVo",
+            "description": "",
+            "title": "数据"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "",
+            "format": "int64",
+            "title": "响应生成的时间戳"
+          }
+        }
+      },
+      "ResultPageResultNamedRawFile": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageResultNamedRawFile",
+            "description": ""
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "ResultPageResultFullRawFileObject": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageResultFullRawFileObject",
+            "description": ""
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          }
+        }
+      },
+      "FileObject": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": ""
+          },
+          "id": {
+            "type": "integer",
+            "description": ""
+          },
+          "uploader": {
+            "type": "string",
+            "description": ""
+          },
+          "createTime": {
+            "type": "string",
+            "description": ""
+          },
+          "type": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "FILE",
+              "FOLDER"
+            ]
+          },
+          "ext": {
+            "type": "string",
+            "description": ""
+          },
+          "mime": {
+            "type": "string",
+            "description": ""
+          },
+          "sha1": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "FolderCreateRequest": {
+        "type": "object",
+        "properties": {
+          "parent": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "description": ""
+          },
+          "existsReturn": {
+            "type": "boolean",
+            "description": "当文件夹存在时返回已存在的文件夹",
+            "default": false
+          }
+        }
+      },
+      "ResultFolderVo": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/FolderVo",
+            "description": ""
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          }
+        }
+      },
+      "ResultFileObject": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/FileObject",
+            "description": ""
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "DoneUploadRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ResultFileVo": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/FileVo",
+            "description": "cn.wzpmc.filemanager.entities.vo.FileVo"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          }
+        }
+      },
+      "ResultLong": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          }
+        }
+      },
+      "DeleteRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "FILE",
+              "FOLDER"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "ResultNamedRawFile": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/NamedRawFile",
+            "description": "cn.wzpmc.filemanager.entities.files.NamedRawFile"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "ResultFullRawFileObject": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/FullRawFileObject",
+            "description": "cn.wzpmc.filemanager.entities.files.FullRawFileObject"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          }
+        }
+      },
+      "ResultRawFileObject": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/RawFileObject",
+            "description": "cn.wzpmc.filemanager.entities.files.RawFileObject"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "CheckChunkResult": {
+        "type": "object",
+        "properties": {
+          "hash": {
+            "type": "string",
+            "description": "区块哈希值"
+          },
+          "chunkId": {
+            "type": "integer",
+            "description": "区块ID（当区块存在时，存在的区块ID）",
+            "format": "int64"
+          }
+        }
+      },
+      "ResultListCheckChunkResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "请求的响应码"
+          },
+          "msg": {
+            "type": "string",
+            "description": "请求的响应信息"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckChunkResult",
+              "description": "cn.wzpmc.filemanager.entities.chunk.CheckChunkResult"
+            },
+            "description": "请求的响应数据"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "请求生成的时间戳",
+            "format": "int64"
+          }
+        }
+      },
+      "SaveChunksRequest": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "description": "文件名"
+          },
+          "chunks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "区块列表"
+          },
+          "folderId": {
+            "type": "integer",
+            "description": "文件夹ID（根目录为-1）",
+            "format": "int64"
+          }
+        }
+      },
+      "PrefsVo": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "description": "用户ID",
+            "format": "int64"
+          },
+          "sortField": {
+            "type": "string",
+            "description": "排序方式",
+            "enum": [
+              "ID",
+              "NAME",
+              "EXT",
+              "TIME",
+              "UPLOADER",
+              "DOWNLOAD_COUNT",
+              "SIZE"
+            ]
+          },
+          "sortReverse": {
+            "type": "boolean",
+            "description": "反向排序"
+          }
+        }
+      },
+      "ResultPrefsVo": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "请求的响应码"
+          },
+          "msg": {
+            "type": "string",
+            "description": "请求的响应信息"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PrefsVo",
+            "description": ""
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "请求生成的时间戳",
+            "format": "int64"
+          }
+        }
+      },
+      "FingerprintRequest": {
+        "type": "object",
+        "properties": {
+          "fingerprint": {
+            "type": "string",
+            "description": "浏览器指纹"
+          }
+        }
+      }
+    },
+    "securitySchemes": {}
+  },
+  "servers": [],
+  "security": []
+}
