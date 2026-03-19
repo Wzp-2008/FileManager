@@ -11,7 +11,7 @@ import type {DialogStatus} from "./components/LoginRegisterDialogTypes";
 import RawFileComponent from "./components/RawFileComponent.vue";
 import UploadDialog from "./components/upload/UploadDialog.vue";
 import FileManagerSdk, {ROOT} from "./sdk";
-import type {FileObject, FolderObject, RawFile, User} from "./sdk/entities";
+import type {RawFile, User} from "./sdk/entities";
 import {getFingerprint} from "./sdk/utils";
 import {type SortDefinition, useMobileMediaQuery} from "./utils";
 import UserSettingsDialog from "./components/UserSettingsDialog.vue";
@@ -87,7 +87,7 @@ const fileRef = useTemplateRef("file");
 const refreshFiles = () => {
   fileRef.value?.refresh();
 };
-const onFileUploaded = (_: FileObject | FolderObject | null) => {
+const onFileUploaded = () => {
   refreshFiles();
 };
 const mkdir = () => {
@@ -128,37 +128,47 @@ const openSetting = () => {
       <h1 class="main-title">
         <span class="english-name">FileManager·</span>文件分享站
       </h1>
-      <el-dropdown ref="dropDownMenu" hide-on-click>
-        <div class="dropdown-text" @click="onUserTextClick">
-          <el-avatar src="/UserAvatar.jpg" alt="Logo"/>
-          <span v-if="isLogin">{{ userInformation!.name }}</span>
-          <span v-else>请登录</span>
+      <div class="head-right">
+        <div
+            v-if="currentFile.type === 'FOLDER' && isLogin && !isMobile"
+            class="header-actions">
+          <el-button type="primary" @click="isShowUpload = true">
+            上传列表
+          </el-button>
+          <el-button type="success" @click="mkdir">新建文件夹</el-button>
         </div>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <div v-if="isLogin">
-              <el-dropdown-item @click="openSetting">设置</el-dropdown-item>
-              <el-dropdown-item
-                  divided
-                  v-if="userInformation?.auth === 'admin'"
-                  @click="showInviteCodeDialog = true">
-                获取邀请码
-              </el-dropdown-item>
-              <el-dropdown-item divided style="color: red" @click="logout"
-              >退出登录
-              </el-dropdown-item>
-            </div>
-            <div v-else>
-              <el-dropdown-item @click="dialogStatus = 'LOGIN'"
-              >登录
-              </el-dropdown-item>
-              <el-dropdown-item @click="dialogStatus = 'REGISTER'" divided
-              >注册
-              </el-dropdown-item>
-            </div>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+        <el-dropdown ref="dropDownMenu" hide-on-click>
+          <div class="dropdown-text" @click="onUserTextClick">
+            <el-avatar src="/UserAvatar.jpg" alt="Logo"/>
+            <span v-if="isLogin">{{ userInformation!.name }}</span>
+            <span v-else>请登录</span>
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <div v-if="isLogin">
+                <el-dropdown-item @click="openSetting">设置</el-dropdown-item>
+                <el-dropdown-item
+                    divided
+                    v-if="userInformation?.auth === 'admin'"
+                    @click="showInviteCodeDialog = true">
+                  获取邀请码
+                </el-dropdown-item>
+                <el-dropdown-item divided style="color: red" @click="logout"
+                >退出登录
+                </el-dropdown-item>
+              </div>
+              <div v-else>
+                <el-dropdown-item @click="dialogStatus = 'LOGIN'"
+                >登录
+                </el-dropdown-item>
+                <el-dropdown-item @click="dialogStatus = 'REGISTER'" divided
+                >注册
+                </el-dropdown-item>
+              </div>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
     </el-header>
     <el-main class="main-container">
       <UploadDialog
@@ -167,15 +177,7 @@ const openSetting = () => {
           :current-folder-id="currentFile.id"
           @uploadedFile="onFileUploaded"/>
       <template v-if="currentFile.type === 'FOLDER'">
-        <div class="actions" v-if="!isMobile">
-          <template v-if="isLogin">
-            <el-button type="primary" @click="isShowUpload = true">
-              上传列表
-            </el-button>
-            <el-button type="success" @click="mkdir">新建文件夹</el-button>
-          </template>
-        </div>
-        <teleport to="body" v-else>
+        <teleport to="body" v-if="isMobile">
           <div class="mobile-actions">
             <template v-if="isLogin">
               <el-button
@@ -198,7 +200,6 @@ const openSetting = () => {
       </template>
       <RawFileComponent
           ref="file"
-          :user-information="userInformation"
           v-model="currentFile"/>
     </el-main>
   </el-container>
@@ -209,6 +210,18 @@ const openSetting = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.head-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .dropdown-text {
@@ -229,31 +242,33 @@ const openSetting = () => {
   padding-right 500ms;
 }
 
-@media screen and (max-width: 576px) {
+@media screen and (max-width: 720px) {
   .english-name {
     display: none;
   }
 
+  .main-title {
+    white-space: nowrap;
+  }
+}
+
+@media screen and (max-width: 576px) {
   .main-container {
     padding: 0 !important;
   }
 
-  .actions {
-    gap: 0 !important;
-    justify-content: center !important;
+  .head {
+    gap: 12px;
+  }
+
+  .head-right {
+    gap: 8px;
   }
 }
 
 .main-title {
   transition: all 0.5s;
   font-size: 1.5rem;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-bottom: 10px;
 }
 
 .mobile-actions {

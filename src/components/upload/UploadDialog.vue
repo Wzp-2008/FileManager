@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import {ElMessage, type UploadUserFile} from "element-plus";
 import FileManagerSdk from "../../sdk";
-import type {FileObject, FolderObject} from "../../sdk/entities";
-import {inject, reactive, ref} from "vue";
+import {computed, inject, reactive, ref} from "vue";
 import {useEventListener} from "@vueuse/core";
 import SingleFileProgress from "./SingleFileProgress.vue";
 import {
@@ -28,7 +27,7 @@ const {currentFolderId} = defineProps<{
 }>();
 const sdk = inject("sdk") as FileManagerSdk;
 const emit = defineEmits<{
-  (e: "uploadedFile", file: FileObject | FolderObject | null): void;
+  (e: "uploadedFile"): void;
 }>();
 const showMask = ref<boolean>(false);
 const dataTransferHandler = useDataTransferItemHandler();
@@ -46,7 +45,7 @@ const onUploadComplete = (task: TaskMixed) => {
   }, 5000);
 };
 const onUploadSuccess = (task: TaskMixed) => {
-  emit("uploadedFile", null);
+  emit("uploadedFile");
   if (task instanceof FolderUploadTask) {
     if (task.abortController.signal.aborted) {
       ElMessage.warning(
@@ -79,7 +78,6 @@ const uploadEntries = async (
             })
             .catch((err) => {
               onUploadError(e);
-              console.log(err);
               throw err;
             })
             .finally(() => onUploadComplete(e));
@@ -135,25 +133,29 @@ const selectFolder = () => {
   getFolders().then(uploadEntries);
 };
 const isPhone = useMobileMediaQuery();
+const drawerSize = computed(() =>
+    isPhone.value ? "80%" : "clamp(360px, 36vw, 520px)",
+);
 </script>
 
 <template>
   <el-drawer
       v-model="isShow"
-      :size="isPhone ? '80%' : '30%'"
+      :size="drawerSize"
       direction="rtl"
       title="上传列表">
-    <el-button type="primary" @click="selectFile">上传文件</el-button>
-    <el-button type="warning" @click="selectFolder"
-    >上传文件夹（测试）
-    </el-button>
-    <div v-for="data of customFiles">
+    <div class="upload-actions">
+      <el-button type="primary" @click="selectFile">上传文件</el-button>
+      <el-button type="warning" @click="selectFolder"
+      >上传文件夹（测试）
+      </el-button>
+    </div>
+    <div v-for="(data, index) of customFiles" :key="`${data.name}-${index}`">
       <SingleFileProgress :data="data" @removed="onFileRemoved"/>
     </div>
-    <div>
-      <span style="color: gray; font-size: 0.75em"
-      >请上传文件名小于255长度的文件<br>不支持上传没有文件名只有扩展名（如`.abc`）的文件</span
-      >
+    <div class="upload-tips">
+      <span>请上传文件名小于255长度的文件</span><br>
+      <span>不支持上传没有文件名只有扩展名（如`.abc`）的文件</span>
     </div>
   </el-drawer>
   <teleport v-if="showMask" to="html">
@@ -188,5 +190,38 @@ const isPhone = useMobileMediaQuery();
   font-size: 1.2rem;
   color: var(--el-color-warning);
   font-weight: bold;
+}
+
+.upload-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  margin-bottom: 12px;
+}
+
+.upload-actions :deep(.el-button) {
+  margin: 0 !important;
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.upload-tips {
+  color: gray;
+  font-size: 0.75em;
+  line-height: 1.6;
+}
+
+@media screen and (max-width: 400px) {
+  .upload-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .upload-actions :deep(.el-button) {
+    width: 100%;
+    flex: none;
+  }
 }
 </style>

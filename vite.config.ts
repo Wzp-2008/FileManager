@@ -4,7 +4,12 @@ import Components from "unplugin-vue-components/vite";
 import {ElementPlusResolver} from "unplugin-vue-components/resolvers";
 import vue from "@vitejs/plugin-vue";
 import legacy from "@vitejs/plugin-legacy";
-import {readFileSync} from "fs";
+import {existsSync, readFileSync} from "fs";
+import {resolve} from "path";
+
+const keyPath = resolve(process.cwd(), "ssl/key.pem");
+const certPath = resolve(process.cwd(), "ssl/cert.pem");
+const hasLocalHttpsCert = existsSync(keyPath) && existsSync(certPath);
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -20,19 +25,21 @@ export default defineConfig({
         }),
     ],
     server: {
-        host: "local.wzpmc.cn",
+        host: process.env.VITE_HOST ?? (hasLocalHttpsCert ? "local.wzpmc.cn" : "127.0.0.1"),
         proxy: {
             "/api": {
-                target: "http://127.0.0.1:8080/",
+                target: "https://wzpmc.cn:83",
                 changeOrigin: true,
                 secure: false,
                 ssl: false,
                 // rewrite: (path) => path.replace(/^\/api/, '')
             },
         },
-        https: {
-            key: readFileSync("ssl/key.pem"),
-            cert: readFileSync("ssl/cert.pem"),
-        },
+        https: hasLocalHttpsCert
+            ? {
+                  key: readFileSync(keyPath),
+                  cert: readFileSync(certPath),
+              }
+            : undefined,
     },
 });
