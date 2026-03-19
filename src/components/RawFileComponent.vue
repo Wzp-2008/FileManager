@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import {useEventListener} from "@vueuse/core";
+import {useEventListener, useSessionStorage} from "@vueuse/core";
 import {ElMessage} from "element-plus";
-import {computed, defineAsyncComponent, inject, onBeforeMount, ref, useTemplateRef} from "vue";
+import {computed, defineAsyncComponent, inject, onBeforeMount, provide, ref, type Ref, useTemplateRef} from "vue";
 import FileManagerSdk, {ROOT} from "../sdk";
 import type {NamedRawFile, RawFile} from "../sdk/entities";
 import FolderComponent from "./file/FolderComponent.vue";
@@ -11,6 +11,18 @@ const sdk = inject("sdk") as FileManagerSdk;
 const currentFileObject = defineModel<RawFile>();
 const pathList = ref<string[]>([]);
 const currentPath = computed(() => "/" + pathList.value.join("/"));
+const pendingRestorePage = ref<number | null>(null);
+provide("pendingRestorePage", pendingRestorePage as Ref<number | null>);
+const skipFileParentRestoreByHash = ref<boolean>(false);
+provide("skipFileParentRestoreByHash", skipFileParentRestoreByHash as Ref<boolean>);
+const pageStack = useSessionStorage<number[]>("pages", []);
+const updatePages = (pages: number[]) => {
+  pageStack.value = pages;
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("pages", JSON.stringify(pages));
+  }
+};
+provide("updatePages", updatePages as (pages: number[]) => void);
 const pathLoad = ref<boolean>(false);
 const hasError = ref<string>();
 const folderRef = useTemplateRef("folder");
@@ -63,6 +75,18 @@ const onParentChange = async (newFileObject: NamedRawFile) => {
 };
 useEventListener("hashchange", async () => {
   if (location.hash === "#" + currentPath.value) return;
+  if (currentFileObject.value?.type === "FILE") {
+    const targetPath = "/" + location.hash.replace("#", "").split("/").filter(Boolean).join("/");
+    const parentPath = "/" + currentPath.value.split("/").filter(Boolean).slice(0, -1).join("/");
+    if (targetPath === parentPath) {
+      if (skipFileParentRestoreByHash.value) {
+        skipFileParentRestoreByHash.value = false;
+      } else if (pageStack.value.length > 0) {
+        pendingRestorePage.value = pageStack.value[pageStack.value.length - 1];
+        updatePages(pageStack.value.slice(0, -1));
+      }
+    }
+  }
   await updatePathByHash();
 });
 const refresh = async () => {

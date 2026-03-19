@@ -1,20 +1,20 @@
 <script lang="ts" setup>
 import FileManagerSdk from "../sdk";
 import type {User} from "../sdk/entities";
-import {inject, ref} from "vue";
-import {ElInput, ElMessage, ElMessageBox} from "element-plus";
+import {inject, ref, type Ref} from "vue";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 const dialogVisible = defineModel<boolean>();
 const sdk = inject("sdk") as FileManagerSdk;
-const userInformation = inject("userInfo") as User;
-const currentUsername = ref<string>(userInformation.name);
+const userInformation = inject("userInfo") as Ref<User>;
+const currentUsername = ref<string>(userInformation.value.name);
 const currentPassword = ref<string>("********");
 const isChangeUsername = ref<boolean>(false);
 const completeChangeUsername = () => {
   sdk
       .changeUsername(currentUsername.value)
       .then(() => {
-        userInformation.name = currentUsername.value;
+        userInformation.value.name = currentUsername.value;
         isChangeUsername.value = false;
         ElMessage.success("修改成功！");
       })
@@ -57,13 +57,6 @@ const completeChangePassword = () => {
       class="settings-dialog"
       title="用户设置"
       width="500">
-    <h2>
-      <span style="font-weight: normal"
-      >你好{{ userInformation.auth === "user" ? "" : "管理员" }}</span
-      ><span style="color: var(--el-text-color-primary)">{{
-        userInformation.name
-      }}</span>
-    </h2>
     <div class="settings">
       <div>用户名：</div>
       <el-input

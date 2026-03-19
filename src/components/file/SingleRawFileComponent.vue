@@ -5,15 +5,21 @@ import {canIDelete, humanitySize} from "../../sdk/utils.ts";
 import {ElMessageBox} from "element-plus";
 import {getClass} from "file-icons-js";
 import mime from "mime-types";
-import {inject} from "vue";
+import {inject, type Ref} from "vue";
 import type FileManagerSdk from "../../sdk";
 
 const {row} = defineProps<{
   row: NamedRawFile;
 }>();
-const userInformation = inject("userInfo") as User | null;
+const userInformation = inject("userInfo") as Ref<User | null>;
 const sdk = inject("sdk") as FileManagerSdk;
-const emit = defineEmits<{ (e: "remove", self: NamedRawFile): void }>();
+const emit = defineEmits<{
+  (e: "open", self: NamedRawFile): void;
+  (e: "remove", self: NamedRawFile): void;
+}>();
+const openThis = () => {
+  emit("open", row);
+};
 const downloadThis = () => {
   if (row.type === "FILE") {
     sdk.openFullDownloadLink(row.id);
@@ -50,7 +56,7 @@ const getIcon = () => {
 </script>
 
 <template>
-  <div class="file-entry">
+  <div class="file-entry" @click="openThis">
     <div class="file-name">
       <el-icon class="file-icon">
         <Folder v-if="row.type === 'FOLDER'"/>
@@ -75,7 +81,7 @@ const getIcon = () => {
         v-if="row.name !== '..' && row.owner !== -1"
         class="file-action compact-remove">
       <el-button
-          v-if="canIDelete(userInformation, row)"
+          v-if="canIDelete(userInformation ?? null, row)"
           type="danger"
           @click.stop="removeThis"
       >删除
@@ -86,7 +92,7 @@ const getIcon = () => {
           @click.stop="downloadThis"
       >下载
       </el-button>
-      <el-button v-if="row.type === 'FILE'">详情</el-button>
+      <el-button v-if="row.type === 'FILE'" @click.stop="openThis">详情</el-button>
     </div>
   </div>
 </template>
