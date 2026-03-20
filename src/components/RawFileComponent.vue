@@ -1,12 +1,23 @@
 <script lang="ts" setup>
-import {useEventListener, useSessionStorage} from "@vueuse/core";
-import {ElMessage} from "element-plus";
-import {computed, defineAsyncComponent, inject, onBeforeMount, provide, ref, type Ref, useTemplateRef} from "vue";
-import FileManagerSdk, {ROOT} from "../sdk";
-import type {NamedRawFile, RawFile} from "../sdk/entities";
+import { useEventListener, useSessionStorage } from "@vueuse/core";
+import { ElMessage } from "element-plus";
+import {
+  computed,
+  defineAsyncComponent,
+  inject,
+  onBeforeMount,
+  provide,
+  ref,
+  type Ref,
+  useTemplateRef,
+} from "vue";
+import FileManagerSdk, { ROOT } from "../sdk";
+import type { NamedRawFile, RawFile } from "../sdk/entities";
 import FolderComponent from "./file/FolderComponent.vue";
 
-const FileComponent = defineAsyncComponent(() => import("./file/FileComponent.vue"))
+const FileComponent = defineAsyncComponent(
+  () => import("./file/FileComponent.vue"),
+);
 const sdk = inject("sdk") as FileManagerSdk;
 const currentFileObject = defineModel<RawFile>();
 const pathList = ref<string[]>([]);
@@ -14,7 +25,10 @@ const currentPath = computed(() => "/" + pathList.value.join("/"));
 const pendingRestorePage = ref<number | null>(null);
 provide("pendingRestorePage", pendingRestorePage as Ref<number | null>);
 const skipFileParentRestoreByHash = ref<boolean>(false);
-provide("skipFileParentRestoreByHash", skipFileParentRestoreByHash as Ref<boolean>);
+provide(
+  "skipFileParentRestoreByHash",
+  skipFileParentRestoreByHash as Ref<boolean>,
+);
 const pageStack = useSessionStorage<number[]>("pages", []);
 const updatePages = (pages: number[]) => {
   pageStack.value = pages;
@@ -35,7 +49,7 @@ const updatePathByHash = async () => {
   } else {
     try {
       const file = await sdk.getFileByPath(
-          decodeURIComponent(currentPath.value),
+        decodeURIComponent(currentPath.value),
       );
       currentFileObject.value = file.data;
     } catch (err) {
@@ -53,19 +67,19 @@ const onParentChange = async (newFileObject: NamedRawFile) => {
   whileParentChangeLoading.value = true;
   if (newFileObject.parent === currentFileObject.value!.id) {
     pathList.value.push(
-        newFileObject.name +
+      newFileObject.name +
         (newFileObject.type === "FILE" && newFileObject.parent
-            ? "." + newFileObject.ext
-            : ""),
+          ? "." + newFileObject.ext
+          : ""),
     );
   } else if (currentFileObject.value!.parent === newFileObject.id) {
     pathList.value.pop();
   } else if (newFileObject.id == -1) {
     pathList.value = [];
   } else {
-    const {data} = await sdk.getPathById(
-        newFileObject.id,
-        newFileObject.type,
+    const { data } = await sdk.getPathById(
+      newFileObject.id,
+      newFileObject.type,
     );
     pathList.value = data.split("/").filter(Boolean);
   }
@@ -76,8 +90,10 @@ const onParentChange = async (newFileObject: NamedRawFile) => {
 useEventListener("hashchange", async () => {
   if (location.hash === "#" + currentPath.value) return;
   if (currentFileObject.value?.type === "FILE") {
-    const targetPath = "/" + location.hash.replace("#", "").split("/").filter(Boolean).join("/");
-    const parentPath = "/" + currentPath.value.split("/").filter(Boolean).slice(0, -1).join("/");
+    const targetPath =
+      "/" + location.hash.replace("#", "").split("/").filter(Boolean).join("/");
+    const parentPath =
+      "/" + currentPath.value.split("/").filter(Boolean).slice(0, -1).join("/");
     if (targetPath === parentPath) {
       if (skipFileParentRestoreByHash.value) {
         skipFileParentRestoreByHash.value = false;
@@ -100,12 +116,12 @@ defineExpose({
 <template>
   <div v-if="pathLoad">
     <FileComponent
-        v-if="currentFileObject!.type === 'FILE'"
-        :file="currentFileObject!"/>
+      v-if="currentFileObject!.type === 'FILE'"
+      :file="currentFileObject!" />
     <FolderComponent
-        v-else
-        ref="folder"
-        :folder="currentFileObject!"
-        @parent-change="onParentChange"/>
+      v-else
+      ref="folder"
+      :folder="currentFileObject!"
+      @parent-change="onParentChange" />
   </div>
 </template>

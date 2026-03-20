@@ -1,20 +1,22 @@
 <script lang="ts" setup>
-import type {FileObject, RawFile, User} from "../../sdk/entities";
+import type { FileObject, RawFile, User } from "../../sdk/entities";
 import FileManagerSdk from "../../sdk";
-import {Back} from "@element-plus/icons-vue";
-import {computed, inject, onBeforeMount, ref, type Ref} from "vue";
-import {canIDelete, humanitySize} from "../../sdk/utils.ts";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {useSessionStorage} from "@vueuse/core";
-import {useCompactMediaQuery} from "../../utils.ts";
+import { Back } from "@element-plus/icons-vue";
+import { computed, inject, onBeforeMount, ref, type Ref } from "vue";
+import { canIDelete, humanitySize } from "../../sdk/utils.ts";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { useSessionStorage } from "@vueuse/core";
+import { useCompactMediaQuery } from "../../utils.ts";
 
-const {file} = defineProps<{
+const { file } = defineProps<{
   file: RawFile;
 }>();
 const sdk = inject("sdk") as FileManagerSdk;
 const userInformation = inject("userInfo") as Ref<User | null>;
 const pendingRestorePage = inject("pendingRestorePage") as Ref<number | null>;
-const skipFileParentRestoreByHash = inject("skipFileParentRestoreByHash") as Ref<boolean>;
+const skipFileParentRestoreByHash = inject(
+  "skipFileParentRestoreByHash",
+) as Ref<boolean>;
 const updatePages = inject("updatePages") as (pages: number[]) => void;
 const fileDetailInformation = ref<FileObject>();
 const ownerInformation = ref<User>();
@@ -45,14 +47,14 @@ const download = () => {
 };
 const deleteFile = () => {
   ElMessageBox.confirm(
-      `你确定要删除文件<span style="word-break: break-all;font-weight: bold">${file.name}.${file.ext!!}</span>吗？`,
-      "删除",
-      {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-        dangerouslyUseHTMLString: true,
-      },
+    `你确定要删除文件<span style="word-break: break-all;font-weight: bold">${file.name}.${file.ext!!}</span>吗？`,
+    "删除",
+    {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+      dangerouslyUseHTMLString: true,
+    },
   ).then(() => {
     sdk.deleteFile(file.id, "FILE").then(() => {
       ElMessage.success("删除成功！");
@@ -68,7 +70,8 @@ const back = () => {
   skipFileParentRestoreByHash.value = true;
   const currentHash = location.hash || "#/";
   const lastSlashIndex = currentHash.lastIndexOf("/");
-  location.hash = lastSlashIndex <= 1 ? "#/" : currentHash.slice(0, lastSlashIndex);
+  location.hash =
+    lastSlashIndex <= 1 ? "#/" : currentHash.slice(0, lastSlashIndex);
 };
 const isPhone = useCompactMediaQuery();
 const copyHash = () => {
@@ -96,41 +99,41 @@ const summaryPills = computed(() => {
   if (!detail) {
     return [];
   }
-  return [
-    humanitySize(detail.size),
-    fileTypeLabel.value,
-  ];
+  return [humanitySize(detail.size), fileTypeLabel.value];
 });
 const canDelete = computed(() =>
-    canIDelete(userInformation?.value ?? null, {type: "FILE", owner: file.owner}),
+  canIDelete(userInformation?.value ?? null, {
+    type: "FILE",
+    owner: file.owner,
+  }),
 );
 </script>
 
 <template>
   <section
-      v-loading="!fileDetailInformation || !ownerInformation"
-      class="detail-shell">
+    v-loading="!fileDetailInformation || !ownerInformation"
+    class="detail-shell">
     <article
-        v-if="!!fileDetailInformation && !!ownerInformation"
-        class="detail-card">
+      v-if="!!fileDetailInformation && !!ownerInformation"
+      class="detail-card">
       <div class="detail-toolbar">
         <button class="back-button" type="button" @click="back">
           <el-icon size="30">
-            <Back/>
+            <Back />
           </el-icon>
           <span>返回上一级</span>
         </button>
         <div class="toolbar-actions">
           <el-button
-              :size="isPhone ? 'small' : 'default'"
-              type="warning"
-              @click="copyLinks">
+            :size="isPhone ? 'small' : 'default'"
+            type="warning"
+            @click="copyLinks">
             复制链接
           </el-button>
           <el-button
-              :size="isPhone ? 'small' : 'default'"
-              type="success"
-              @click="download">
+            :size="isPhone ? 'small' : 'default'"
+            type="success"
+            @click="download">
             下载
           </el-button>
         </div>
@@ -140,13 +143,11 @@ const canDelete = computed(() =>
           <div class="detail-badge">文件详情</div>
           <h2 :title="fullFileName" class="file-name">{{ fullFileName }}</h2>
           <p class="detail-caption">
-            由 {{ ownerInformation.name }} 于 {{ fileDetailInformation.uploadTime }} 上传
+            由 {{ ownerInformation.name }} 于
+            {{ fileDetailInformation.uploadTime }} 上传
           </p>
           <div class="meta-pills">
-            <span
-                v-for="pill in summaryPills"
-                :key="pill"
-                class="meta-pill">
+            <span v-for="pill in summaryPills" :key="pill" class="meta-pill">
               {{ pill }}
             </span>
           </div>
@@ -159,21 +160,17 @@ const canDelete = computed(() =>
             <div class="hash-caption">可用于校验下载文件完整性</div>
           </div>
           <el-button
-              plain
-              size="small"
-              class="hash-copy-button"
-              @click="copyHash">
+            plain
+            size="small"
+            class="hash-copy-button"
+            @click="copyHash">
             复制
           </el-button>
         </div>
         <code class="hash-value">{{ fileDetailInformation.hash }}</code>
       </div>
       <div v-if="canDelete" class="actions">
-        <el-button
-            type="danger"
-            @click="deleteFile"
-        >删除
-        </el-button>
+        <el-button type="danger" @click="deleteFile">删除 </el-button>
       </div>
     </article>
   </section>
@@ -188,8 +185,8 @@ const canDelete = computed(() =>
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--el-border-color-lighter);
   box-shadow:
-      0 10px 24px rgba(15, 23, 42, 0.08),
-      0 1px 2px rgba(15, 23, 42, 0.04);
+    0 10px 24px rgba(15, 23, 42, 0.08),
+    0 1px 2px rgba(15, 23, 42, 0.04);
   border-radius: 24px;
   padding: 24px;
 }
@@ -224,7 +221,9 @@ const canDelete = computed(() =>
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: transform 250ms ease, background-color 250ms ease;
+  transition:
+    transform 250ms ease,
+    background-color 250ms ease;
 }
 
 .back-button:hover {

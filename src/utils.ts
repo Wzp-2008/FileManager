@@ -1,5 +1,5 @@
-import {useMediaQuery} from "@vueuse/core";
-import type {SortField} from "./sdk/entities";
+import { useMediaQuery } from "@vueuse/core";
+import type { SortField } from "./sdk/entities";
 
 export type SortDefinition = { sort?: SortField; reverse?: boolean };
 export const useMobileMediaQuery = () => useMediaQuery("(max-width: 576px)");

@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import {Folder} from "@element-plus/icons-vue";
-import type {NamedRawFile, User} from "../../sdk/entities";
-import {canIDelete, humanitySize} from "../../sdk/utils.ts";
-import {ElMessageBox} from "element-plus";
-import {getClass} from "file-icons-js";
+import { Folder } from "@element-plus/icons-vue";
+import type { NamedRawFile, User } from "../../sdk/entities";
+import { canIDelete, humanitySize } from "../../sdk/utils.ts";
+import { ElMessageBox } from "element-plus";
+import { getClass } from "file-icons-js";
 import mime from "mime-types";
-import {inject, type Ref} from "vue";
+import { inject, type Ref } from "vue";
 import type FileManagerSdk from "../../sdk";
 
-const {row} = defineProps<{
+const { row } = defineProps<{
   row: NamedRawFile;
 }>();
 const userInformation = inject("userInfo") as Ref<User | null>;
@@ -27,14 +27,14 @@ const downloadThis = () => {
 };
 const removeThis = () => {
   ElMessageBox.confirm(
-      `你确定要删除${row.type === "FILE" ? "文件" : "文件夹"}<span style="word-break: break-all;font-weight: bold">${row.name}${row.type === "FILE" ? "." + row.ext : ""}</span>吗？`,
-      "删除",
-      {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-        dangerouslyUseHTMLString: true,
-      },
+    `你确定要删除${row.type === "FILE" ? "文件" : "文件夹"}<span style="word-break: break-all;font-weight: bold">${row.name}${row.type === "FILE" ? "." + row.ext : ""}</span>吗？`,
+    "删除",
+    {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+      dangerouslyUseHTMLString: true,
+    },
   ).then(() => {
     emit("remove", row);
   });
@@ -59,13 +59,13 @@ const getIcon = () => {
   <div class="file-entry" @click="openThis">
     <div class="file-name">
       <el-icon class="file-icon">
-        <Folder v-if="row.type === 'FOLDER'"/>
+        <Folder v-if="row.type === 'FOLDER'" />
         <!--        <Document v-if="row.type === 'FILE'" />-->
         <div v-else :class="getIcon()" style="transform: translateX(2px)"></div>
       </el-icon>
       <span class="file-name-full-text"
-      ><span class="file-name-text">{{ row.name }}</span
-      ><span v-if="row.type === 'FILE' && row.ext">.{{ row.ext }}</span></span
+        ><span class="file-name-text">{{ row.name }}</span
+        ><span v-if="row.type === 'FILE' && row.ext">.{{ row.ext }}</span></span
       >
     </div>
     <div class="phone-remove" style="display: flex; align-items: center">
@@ -78,21 +78,23 @@ const getIcon = () => {
       {{ row.ownerName }}
     </div>
     <div
-        v-if="row.name !== '..' && row.owner !== -1"
-        class="file-action compact-remove">
+      v-if="row.name !== '..' && row.owner !== -1"
+      class="file-action compact-remove">
       <el-button
-          v-if="canIDelete(userInformation ?? null, row)"
-          type="danger"
-          @click.stop="removeThis"
-      >删除
+        v-if="canIDelete(userInformation ?? null, row)"
+        type="danger"
+        @click.stop="removeThis"
+        >删除
       </el-button>
       <el-button
-          v-if="row.type === 'FILE'"
-          type="success"
-          @click.stop="downloadThis"
-      >下载
+        v-if="row.type === 'FILE'"
+        type="success"
+        @click.stop="downloadThis"
+        >下载
       </el-button>
-      <el-button v-if="row.type === 'FILE'" @click.stop="openThis">详情</el-button>
+      <el-button v-if="row.type === 'FILE'" @click.stop="openThis"
+        >详情</el-button
+      >
     </div>
   </div>
 </template>

@@ -1,14 +1,13 @@
 <template>
   <el-pagination
-      v-model:current-page="currentPage"
-      :layout="layout"
-      :pager-count="pagerCount"
-      :page-size="pageSize"
-      :total="total"
-      background
-      class="pagination"
-      size="small"
-  />
+    v-model:current-page="currentPage"
+    :layout="layout"
+    :pager-count="pagerCount"
+    :page-size="pageSize"
+    :total="total"
+    background
+    class="pagination"
+    size="small" />
 </template>
 <style scoped>
 .pagination {
@@ -43,8 +42,8 @@
 }
 </style>
 <script lang="ts" setup>
-import {computed} from "vue";
-import {useMediaQuery} from "@vueuse/core";
+import { computed } from "vue";
+import { useMediaQuery } from "@vueuse/core";
 
 defineProps<{ pageSize: number; total: number }>();
 const currentPage = defineModel<number>();

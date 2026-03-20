@@ -2,7 +2,7 @@
   <el-dialog v-model="show" append-to-body title="获取邀请码">
     <div v-if="loading" class="loading">
       <el-icon class="is-loading" size="large">
-        <Loading/>
+        <Loading />
       </el-icon>
       <el-text size="large">正在获取</el-text>
     </div>
@@ -42,13 +42,13 @@
 }
 </style>
 <script lang="ts" setup>
-import {Loading} from "@element-plus/icons-vue";
-import {ElMessage} from "element-plus";
-import {inject, ref, watch} from "vue";
+import { Loading } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
+import { inject, ref, watch } from "vue";
 import type FileManagerSdk from "../sdk";
 
 const sdk = inject("sdk") as FileManagerSdk;
-const show = defineModel({default: false});
+const show = defineModel({ default: false });
 const loading = ref(false);
 const code = ref("");
 const load = async () => {
@@ -64,16 +64,16 @@ const load = async () => {
   }
 };
 watch(
-    show,
-    (v) => {
-      if (!v) return;
-      load();
-    },
-    {immediate: true},
+  show,
+  (v) => {
+    if (!v) return;
+    load();
+  },
+  { immediate: true },
 );
 const copy = () =>
-    navigator.clipboard
-        .writeText(code.value)
-        .then(() => ElMessage.success("复制成功"))
-        .catch((e) => ElMessage.error("复制失败:" + e));
+  navigator.clipboard
+    .writeText(code.value)
+    .then(() => ElMessage.success("复制成功"))
+    .catch((e) => ElMessage.error("复制失败:" + e));
 </script>

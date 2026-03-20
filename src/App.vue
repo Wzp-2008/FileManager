@@ -1,25 +1,32 @@
 <script setup lang="ts">
-import {Folder, Upload} from "@element-plus/icons-vue";
-import {noop, StorageSerializers, useLocalStorage} from "@vueuse/core";
-import type {DropdownInstance} from "element-plus";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {isEqual} from "lodash-es";
-import {computed, onBeforeMount, provide, ref, useTemplateRef, watch} from "vue";
+import { Folder, Upload } from "@element-plus/icons-vue";
+import { noop, StorageSerializers, useLocalStorage } from "@vueuse/core";
+import type { DropdownInstance } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { isEqual } from "lodash-es";
+import {
+  computed,
+  onBeforeMount,
+  provide,
+  ref,
+  useTemplateRef,
+  watch,
+} from "vue";
 import InviteCodeDialog from "./components/InviteCodeDialog.vue";
 import LoginRegisterDialog from "./components/LoginRegisterDialog.vue";
-import type {DialogStatus} from "./components/LoginRegisterDialogTypes";
+import type { DialogStatus } from "./components/LoginRegisterDialogTypes";
 import RawFileComponent from "./components/RawFileComponent.vue";
 import UploadDialog from "./components/upload/UploadDialog.vue";
-import FileManagerSdk, {ROOT} from "./sdk";
-import type {RawFile, User} from "./sdk/entities";
-import {getFingerprint} from "./sdk/utils";
-import {type SortDefinition, useMobileMediaQuery} from "./utils";
+import FileManagerSdk, { ROOT } from "./sdk";
+import type { RawFile, User } from "./sdk/entities";
+import { getFingerprint } from "./sdk/utils";
+import { type SortDefinition, useMobileMediaQuery } from "./utils";
 import UserSettingsDialog from "./components/UserSettingsDialog.vue";
 
 const sdk = new FileManagerSdk();
-provide("sdk", sdk)
+provide("sdk", sdk);
 const userInformation = ref<User | null>(null);
-provide("userInfo", userInformation)
+provide("userInfo", userInformation);
 const isLogin = computed<boolean>(() => !!userInformation.value);
 const isMobile = useMobileMediaQuery();
 const currentFile = ref<RawFile>(ROOT);
@@ -29,41 +36,43 @@ const currentSort = useLocalStorage<SortDefinition | null>("sort", null, {
 const showInviteCodeDialog = ref<boolean>(false);
 const showUserSettingsDialog = ref<boolean>(false);
 watch(
-    currentSort,
-    async (v, ov) => {
-      if (isEqual(v, ov)) return;
-      if (!userInformation.value) return;
-      await sdk.updateUserPrefs(
-          v
-              ? {
-                sortField: v.sort,
-                sortReverse: v.reverse,
-              }
-              : {},
-      );
-    },
-    {deep: true},
+  currentSort,
+  async (v, ov) => {
+    if (isEqual(v, ov)) return;
+    if (!userInformation.value) return;
+    await sdk.updateUserPrefs(
+      v
+        ? {
+            sortField: v.sort,
+            sortReverse: v.reverse,
+          }
+        : {},
+    );
+  },
+  { deep: true },
 );
 onBeforeMount(async () => {
   const userResponse = await sdk.getUserInformation().catch(noop);
   if (userResponse) {
     userInformation.value = userResponse.data;
-    const {prefs} = userResponse.data;
+    const { prefs } = userResponse.data;
     currentSort.value = prefs
-        ? {
+      ? {
           sort: prefs.sortField,
           reverse: prefs.sortReverse,
         }
-        : null;
+      : null;
   }
   if (userInformation.value) return;
-  getFingerprint().then(fingerprint => sdk.tryLoginWithFingerprint(fingerprint)).then((data) => {
-    if (!data) {
-      return;
-    }
-    ElMessage.success("你已成功通过指纹登录！");
-    userInformation.value = data.data;
-  });
+  getFingerprint()
+    .then((fingerprint) => sdk.tryLoginWithFingerprint(fingerprint))
+    .then((data) => {
+      if (!data) {
+        return;
+      }
+      ElMessage.success("你已成功通过指纹登录！");
+      userInformation.value = data.data;
+    });
 });
 const dropDownMenu = ref<DropdownInstance>();
 const dialogStatus = ref<DialogStatus>("HIDDEN");
@@ -95,22 +104,22 @@ const mkdir = () => {
     confirmButtonText: "确认",
     cancelButtonText: "取消",
   })
-      .then(({value}) => {
-        if (!value) {
-          throw "文件夹名称不可为空！";
-        }
-        return sdk.mkdir(value, currentFile.value.id);
-      })
-      .then(
-          () => {
-            ElMessage.success("创建成功！");
-            refreshFiles();
-          },
-          (e) => {
-            if (e === "cancel") return;
-            ElMessage.error(e);
-          },
-      );
+    .then(({ value }) => {
+      if (!value) {
+        throw "文件夹名称不可为空！";
+      }
+      return sdk.mkdir(value, currentFile.value.id);
+    })
+    .then(
+      () => {
+        ElMessage.success("创建成功！");
+        refreshFiles();
+      },
+      (e) => {
+        if (e === "cancel") return;
+        ElMessage.error(e);
+      },
+    );
 };
 const openSetting = () => {
   showUserSettingsDialog.value = true;
@@ -118,11 +127,9 @@ const openSetting = () => {
 </script>
 
 <template>
-  <LoginRegisterDialog v-model="dialogStatus" @login="onLogin"/>
-  <InviteCodeDialog v-model="showInviteCodeDialog"/>
-  <UserSettingsDialog
-      v-if="isLogin"
-      v-model="showUserSettingsDialog"/>
+  <LoginRegisterDialog v-model="dialogStatus" @login="onLogin" />
+  <InviteCodeDialog v-model="showInviteCodeDialog" />
+  <UserSettingsDialog v-if="isLogin" v-model="showUserSettingsDialog" />
   <el-container>
     <el-header class="head">
       <h1 class="main-title">
@@ -130,8 +137,8 @@ const openSetting = () => {
       </h1>
       <div class="head-right">
         <div
-            v-if="currentFile.type === 'FOLDER' && isLogin && !isMobile"
-            class="header-actions">
+          v-if="currentFile.type === 'FOLDER' && isLogin && !isMobile"
+          class="header-actions">
           <el-button type="primary" @click="isShowUpload = true">
             上传列表
           </el-button>
@@ -139,7 +146,7 @@ const openSetting = () => {
         </div>
         <el-dropdown ref="dropDownMenu" hide-on-click>
           <div class="dropdown-text" @click="onUserTextClick">
-            <el-avatar src="/UserAvatar.jpg" alt="Logo"/>
+            <el-avatar src="/UserAvatar.jpg" alt="Logo" />
             <span v-if="isLogin">{{ userInformation!.name }}</span>
             <span v-else>请登录</span>
           </div>
@@ -148,21 +155,21 @@ const openSetting = () => {
               <div v-if="isLogin">
                 <el-dropdown-item @click="openSetting">设置</el-dropdown-item>
                 <el-dropdown-item
-                    divided
-                    v-if="userInformation?.auth === 'admin'"
-                    @click="showInviteCodeDialog = true">
+                  divided
+                  v-if="userInformation?.auth === 'admin'"
+                  @click="showInviteCodeDialog = true">
                   获取邀请码
                 </el-dropdown-item>
                 <el-dropdown-item divided style="color: red" @click="logout"
-                >退出登录
+                  >退出登录
                 </el-dropdown-item>
               </div>
               <div v-else>
                 <el-dropdown-item @click="dialogStatus = 'LOGIN'"
-                >登录
+                  >登录
                 </el-dropdown-item>
                 <el-dropdown-item @click="dialogStatus = 'REGISTER'" divided
-                >注册
+                  >注册
                 </el-dropdown-item>
               </div>
             </el-dropdown-menu>
@@ -172,35 +179,33 @@ const openSetting = () => {
     </el-header>
     <el-main class="main-container">
       <UploadDialog
-          v-if="isLogin"
-          v-model="isShowUpload"
-          :current-folder-id="currentFile.id"
-          @uploadedFile="onFileUploaded"/>
+        v-if="isLogin"
+        v-model="isShowUpload"
+        :current-folder-id="currentFile.id"
+        @uploadedFile="onFileUploaded" />
       <template v-if="currentFile.type === 'FOLDER'">
         <teleport to="body" v-if="isMobile">
           <div class="mobile-actions">
             <template v-if="isLogin">
               <el-button
-                  type="primary"
-                  circle
-                  size="large"
-                  @click="isShowUpload = true">
+                type="primary"
+                circle
+                size="large"
+                @click="isShowUpload = true">
                 <el-icon size="large">
-                  <Upload/>
+                  <Upload />
                 </el-icon>
               </el-button>
               <el-button type="success" circle size="large" @click="mkdir">
                 <el-icon size="large">
-                  <Folder/>
+                  <Folder />
                 </el-icon>
               </el-button>
             </template>
           </div>
         </teleport>
       </template>
-      <RawFileComponent
-          ref="file"
-          v-model="currentFile"/>
+      <RawFileComponent ref="file" v-model="currentFile" />
     </el-main>
   </el-container>
 </template>
@@ -238,8 +243,9 @@ const openSetting = () => {
 }
 
 .main-container {
-  transition: padding-left,
-  padding-right 500ms;
+  transition:
+    padding-left,
+    padding-right 500ms;
 }
 
 @media screen and (max-width: 720px) {

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import {ElMessage, type UploadUserFile} from "element-plus";
+import { ElMessage, type UploadUserFile } from "element-plus";
 import FileManagerSdk from "../../sdk";
-import {computed, inject, reactive, ref} from "vue";
-import {useEventListener} from "@vueuse/core";
+import { computed, inject, reactive, ref } from "vue";
+import { useEventListener } from "@vueuse/core";
 import SingleFileProgress from "./SingleFileProgress.vue";
 import {
   type BaseEntry,
@@ -15,14 +15,14 @@ import {
   useFileSelect,
   useFolderSelect,
 } from "../../file.ts";
-import {useMobileMediaQuery} from "../../utils.ts";
+import { useMobileMediaQuery } from "../../utils.ts";
 
 type MixedResponse = ResponseFile | ResponseFolder;
 type TaskMixed = BaseFileUploadTask<MixedResponse>;
 
 const customFiles = ref<TaskMixed[]>([]);
 const isShow = defineModel<boolean>();
-const {currentFolderId} = defineProps<{
+const { currentFolderId } = defineProps<{
   currentFolderId: number;
 }>();
 const sdk = inject("sdk") as FileManagerSdk;
@@ -49,7 +49,7 @@ const onUploadSuccess = (task: TaskMixed) => {
   if (task instanceof FolderUploadTask) {
     if (task.abortController.signal.aborted) {
       ElMessage.warning(
-          `文件夹${task.name}的上传被取消，但是已经上传部分文件，如需要删除请联系管理员处理！`,
+        `文件夹${task.name}的上传被取消，但是已经上传部分文件，如需要删除请联系管理员处理！`,
       );
       return;
     }
@@ -62,26 +62,26 @@ const onUploadError = (task: TaskMixed) => {
   }
 };
 const uploadEntries = async (
-    entries: BaseEntry[],
+  entries: BaseEntry[],
 ): Promise<MixedResponse[]> => {
   const tasks = entries.map((e) => reactive(createUploadTask(e)));
   customFiles.value.push(...tasks);
   isShow.value = true;
   const result = await Promise.allSettled(
-      tasks.map(async (e) => {
-        ElMessage.info(`开始上传${e.name}`);
-        return e
-            .start(sdk, currentFolderId)
-            .then((data) => {
-              onUploadSuccess(e);
-              return data;
-            })
-            .catch((err) => {
-              onUploadError(e);
-              throw err;
-            })
-            .finally(() => onUploadComplete(e));
-      }),
+    tasks.map(async (e) => {
+      ElMessage.info(`开始上传${e.name}`);
+      return e
+        .start(sdk, currentFolderId)
+        .then((data) => {
+          onUploadSuccess(e);
+          return data;
+        })
+        .catch((err) => {
+          onUploadError(e);
+          throw err;
+        })
+        .finally(() => onUploadComplete(e));
+    }),
   );
   return result.filter((e) => e.status === "fulfilled").map((e) => e.value);
 };
@@ -92,15 +92,15 @@ useEventListener("drop", (e) => {
   const fileDataTransfer = getFileDataTransfer(e.dataTransfer);
   if (fileDataTransfer.length === 0) return;
   const result = Promise.allSettled(
-      fileDataTransfer.map((e) => dataTransferHandler(e)),
+    fileDataTransfer.map((e) => dataTransferHandler(e)),
   );
   result
-      .then((res) =>
-          res
-              .filter((e) => e.status === "fulfilled")
-              .map((e: PromiseFulfilledResult<BaseEntry>) => e.value),
-      )
-      .then(uploadEntries);
+    .then((res) =>
+      res
+        .filter((e) => e.status === "fulfilled")
+        .map((e: PromiseFulfilledResult<BaseEntry>) => e.value),
+    )
+    .then(uploadEntries);
 });
 useEventListener("dragover", (e) => {
   e.preventDefault();
@@ -134,27 +134,27 @@ const selectFolder = () => {
 };
 const isPhone = useMobileMediaQuery();
 const drawerSize = computed(() =>
-    isPhone.value ? "80%" : "clamp(360px, 36vw, 520px)",
+  isPhone.value ? "80%" : "clamp(360px, 36vw, 520px)",
 );
 </script>
 
 <template>
   <el-drawer
-      v-model="isShow"
-      :size="drawerSize"
-      direction="rtl"
-      title="上传列表">
+    v-model="isShow"
+    :size="drawerSize"
+    direction="rtl"
+    title="上传列表">
     <div class="upload-actions">
       <el-button type="primary" @click="selectFile">上传文件</el-button>
       <el-button type="warning" @click="selectFolder"
-      >上传文件夹（测试）
+        >上传文件夹（测试）
       </el-button>
     </div>
     <div v-for="(data, index) of customFiles" :key="`${data.name}-${index}`">
-      <SingleFileProgress :data="data" @removed="onFileRemoved"/>
+      <SingleFileProgress :data="data" @removed="onFileRemoved" />
     </div>
     <div class="upload-tips">
-      <span>请上传文件名小于255长度的文件</span><br>
+      <span>请上传文件名小于255长度的文件</span><br />
       <span>不支持上传没有文件名只有扩展名（如`.abc`）的文件</span>
     </div>
   </el-drawer>

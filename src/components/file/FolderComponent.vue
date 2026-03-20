@@ -1,15 +1,24 @@
 <script lang="ts" setup>
-import {Bottom, Search, Top} from "@element-plus/icons-vue";
-import {StorageSerializers, useLocalStorage, useSessionStorage} from "@vueuse/core";
-import {isEqual} from "lodash-es";
-import {computed, inject, ref, type Ref, watch} from "vue";
-import FileManagerSdk, {ROOT} from "../../sdk";
-import type {NamedRawFile, RawFile, SortField,} from "../../sdk/entities";
-import {type SortDefinition, useLessHeightQuery, useMobileMediaQuery, useMoreHeightQuery} from "../../utils.ts";
+import { Bottom, Search, Top } from "@element-plus/icons-vue";
+import {
+  StorageSerializers,
+  useLocalStorage,
+  useSessionStorage,
+} from "@vueuse/core";
+import { isEqual } from "lodash-es";
+import { computed, inject, ref, type Ref, watch } from "vue";
+import FileManagerSdk, { ROOT } from "../../sdk";
+import type { NamedRawFile, RawFile, SortField } from "../../sdk/entities";
+import {
+  type SortDefinition,
+  useLessHeightQuery,
+  useMobileMediaQuery,
+  useMoreHeightQuery,
+} from "../../utils.ts";
 import SingleRawFileComponent from "./SingleRawFileComponent.vue";
 import FolderPagination from "./FolderPagination.vue";
 
-const {folder} = defineProps<{
+const { folder } = defineProps<{
   folder: RawFile;
 }>();
 const sdk = inject("sdk") as FileManagerSdk;
@@ -25,16 +34,18 @@ const page = ref<number>(1);
 const isLessHeight = useLessHeightQuery();
 const isMoreHeight = useMoreHeightQuery();
 const isMobile = useMobileMediaQuery();
-const pageSize = ref<number>(isMobile.value ? isLessHeight.value ? 7 : isMoreHeight.value ? 12 : 10 : 10);
+const pageSize = ref<number>(
+  isMobile.value ? (isLessHeight.value ? 7 : isMoreHeight.value ? 12 : 10) : 10,
+);
 const getCurrentPage = async () => {
   const sortValue = currentSort.value;
-  const {data} = await sdk.getFolderFilesPager(
-      pageSize.value,
-      page.value,
-      folder.id,
-      currentDisplaySearchContent.value,
-      sortValue?.sort,
-      sortValue?.reverse,
+  const { data } = await sdk.getFolderFilesPager(
+    pageSize.value,
+    page.value,
+    folder.id,
+    currentDisplaySearchContent.value,
+    sortValue?.sort,
+    sortValue?.reverse,
   );
   currentPageData.value = data.data;
   total.value = data.total;
@@ -101,26 +112,26 @@ watch([page, currentSort, currentDisplaySearchContent], load, {
   deep: true,
 });
 watch(
-    () => folder.id,
-    (newId, oldId) => {
-      if (newId === oldId) return;
-      if (pendingRestorePage.value !== null) {
-        const restorePage = pendingRestorePage.value;
-        pendingRestorePage.value = null;
-        if (page.value !== restorePage) {
-          page.value = restorePage;
-          return;
-        }
-      } else if (page.value !== 1) {
-        page.value = 1;
+  () => folder.id,
+  (newId, oldId) => {
+    if (newId === oldId) return;
+    if (pendingRestorePage.value !== null) {
+      const restorePage = pendingRestorePage.value;
+      pendingRestorePage.value = null;
+      if (page.value !== restorePage) {
+        page.value = restorePage;
         return;
       }
-      void load(newId, oldId);
-    },
-    {immediate: true},
+    } else if (page.value !== 1) {
+      page.value = 1;
+      return;
+    }
+    void load(newId, oldId);
+  },
+  { immediate: true },
 );
 const changeSort = (sort: SortField) => {
-  const {value} = currentSort;
+  const { value } = currentSort;
   if (value && sort === value.sort) {
     if (value.reverse) {
       currentSort.value = null;
@@ -130,13 +141,13 @@ const changeSort = (sort: SortField) => {
     load();
     return;
   }
-  currentSort.value = {sort, reverse: false};
+  currentSort.value = { sort, reverse: false };
 };
 const applySearch = () => {
   page.value = 1;
   currentDisplaySearchContent.value = searchContent.value.trim();
 };
-defineExpose({refresh: load});
+defineExpose({ refresh: load });
 </script>
 
 <template>
@@ -145,21 +156,21 @@ defineExpose({refresh: load});
       <div class="toolbar-left">
         <div class="search-box">
           <el-input
-              v-model="searchContent"
-              :prefix-icon="Search"
-              :size="isMobile ? 'default' : 'small'"
-              clearable
-              placeholder="搜索文件名或扩展名"
-              @change="applySearch"
-              @clear="applySearch"
-              @keyup.enter="applySearch">
+            v-model="searchContent"
+            :prefix-icon="Search"
+            :size="isMobile ? 'default' : 'small'"
+            clearable
+            placeholder="搜索文件名或扩展名"
+            @change="applySearch"
+            @clear="applySearch"
+            @keyup.enter="applySearch">
             <template #append>
               <el-button
-                  :icon="Search"
-                  :size="isMobile ? 'default' : 'small'"
-                  aria-label="搜索"
-                  type="primary"
-                  @click="applySearch">
+                :icon="Search"
+                :size="isMobile ? 'default' : 'small'"
+                aria-label="搜索"
+                type="primary"
+                @click="applySearch">
                 <span v-if="!isMobile">搜索</span>
               </el-button>
             </template>
@@ -168,10 +179,7 @@ defineExpose({refresh: load});
       </div>
       <div class="toolbar-right pc-toolbar-right">
         <span class="result-count">共 {{ total }} 个文件</span>
-        <FolderPagination
-            v-model="page"
-            :page-size="pageSize"
-            :total="total"/>
+        <FolderPagination v-model="page" :page-size="pageSize" :total="total" />
       </div>
     </div>
     <div v-loading="!currentPageLoaded" class="file-list">
@@ -179,61 +187,59 @@ defineExpose({refresh: load});
         <div class="sort-field-name" @click="changeSort('NAME')">
           文件名
           <el-icon v-if="currentSort?.sort === 'NAME'">
-            <Bottom v-if="currentSort.reverse"/>
-            <Top v-else/>
+            <Bottom v-if="currentSort.reverse" />
+            <Top v-else />
           </el-icon>
         </div>
         <div class="sort-field-name phone-remove" @click="changeSort('SIZE')">
           大小
           <el-icon>
             <el-icon v-if="currentSort?.sort === 'SIZE'">
-              <Bottom v-if="currentSort.reverse"/>
-              <Top v-else/>
+              <Bottom v-if="currentSort.reverse" />
+              <Top v-else />
             </el-icon>
           </el-icon>
         </div>
         <div
-            class="sort-field-name"
-            style="min-width: 150px"
-            @click="changeSort('TIME')">
+          class="sort-field-name"
+          style="min-width: 150px"
+          @click="changeSort('TIME')">
           上传时间
           <el-icon>
             <el-icon v-if="currentSort?.sort === 'TIME'">
-              <Bottom v-if="currentSort.reverse"/>
-              <Top v-else/>
+              <Bottom v-if="currentSort.reverse" />
+              <Top v-else />
             </el-icon>
           </el-icon>
         </div>
         <div
-            class="sort-field-name sort-field-uploader"
-            @click="changeSort('UPLOADER')">
+          class="sort-field-name sort-field-uploader"
+          @click="changeSort('UPLOADER')">
           上传者
           <el-icon>
             <el-icon v-if="currentSort?.sort === 'UPLOADER'">
-              <Bottom v-if="currentSort.reverse"/>
-              <Top v-else/>
+              <Bottom v-if="currentSort.reverse" />
+              <Top v-else />
             </el-icon>
           </el-icon>
         </div>
-        <div
-            class="compact-remove action-header"
-            style="text-align: right">
+        <div class="compact-remove action-header" style="text-align: right">
           操作
         </div>
       </div>
       <SingleRawFileComponent
-          v-if="folder.id !== -1 && currentDisplaySearchContent === ''"
-          :row="parentRow"
-          @open="jumpIntoParent()"/>
+        v-if="folder.id !== -1 && currentDisplaySearchContent === ''"
+        :row="parentRow"
+        @open="jumpIntoParent()" />
       <SingleRawFileComponent
-          v-for="row in currentPageData"
-          :key="`${row.type}-${row.id}`"
-          :row="row"
-          @open="jumpInto(row)"
-          @remove="deleteFile"/>
+        v-for="row in currentPageData"
+        :key="`${row.type}-${row.id}`"
+        :row="row"
+        @open="jumpInto(row)"
+        @remove="deleteFile" />
     </div>
     <div class="mobile-footer">
-      <FolderPagination v-model="page" :page-size="pageSize" :total="total"/>
+      <FolderPagination v-model="page" :page-size="pageSize" :total="total" />
     </div>
   </div>
 </template>
@@ -282,8 +288,8 @@ defineExpose({refresh: load});
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--el-border-color-lighter);
   box-shadow:
-      0 10px 24px rgba(15, 23, 42, 0.06),
-      0 1px 2px rgba(15, 23, 42, 0.04);
+    0 10px 24px rgba(15, 23, 42, 0.06),
+    0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .toolbar-left {
@@ -366,8 +372,8 @@ defineExpose({refresh: load});
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--el-border-color-lighter);
   box-shadow:
-      0 8px 20px rgba(15, 23, 42, 0.05),
-      0 1px 2px rgba(15, 23, 42, 0.04);
+    0 8px 20px rgba(15, 23, 42, 0.05),
+    0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 @media screen and (max-width: 1300px) {

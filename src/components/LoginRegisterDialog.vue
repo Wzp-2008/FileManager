@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import type {FormInstance, FormRules} from "element-plus";
-import {ElMessage} from "element-plus";
-import {computed, inject, ref, watch} from "vue";
-import type {User} from "../sdk/entities";
-import type {UserRegisterRequest} from "../sdk/request";
-import {getFingerprint} from "../sdk/utils.ts";
-import type {DialogStatus} from "./LoginRegisterDialogTypes";
+import type { FormInstance, FormRules } from "element-plus";
+import { ElMessage } from "element-plus";
+import { computed, inject, ref, watch } from "vue";
+import type { User } from "../sdk/entities";
+import type { UserRegisterRequest } from "../sdk/request";
+import { getFingerprint } from "../sdk/utils.ts";
+import type { DialogStatus } from "./LoginRegisterDialogTypes";
 import type FileManagerSdk from "../sdk";
 
 const model = defineModel<DialogStatus>();
@@ -14,10 +14,10 @@ const emit = defineEmits<{
   (e: "login", user: User): void;
 }>();
 const isShowDialog = computed(() =>
-    model.value ? model.value !== "HIDDEN" : false,
+  model.value ? model.value !== "HIDDEN" : false,
 );
 const isLoginOrRegister = computed(() =>
-    model.value ? model.value === "LOGIN" : false,
+  model.value ? model.value === "LOGIN" : false,
 );
 const dialogVisible = ref<boolean>(false);
 watch(isShowDialog, (v) => {
@@ -63,22 +63,22 @@ const loginOrRegister = () => {
     if (!model.value || !isValid) return;
     if (model.value === "LOGIN") {
       sdk
-          .login(userInformationForm.value)
-          .then((res) => {
-            ElMessage.success("登录成功！");
-            model.value = "HIDDEN";
-            onLoginSuccess(res.data);
-          })
-          .catch((err) => ElMessage.error(err));
+        .login(userInformationForm.value)
+        .then((res) => {
+          ElMessage.success("登录成功！");
+          model.value = "HIDDEN";
+          onLoginSuccess(res.data);
+        })
+        .catch((err) => ElMessage.error(err));
     } else if (model.value === "REGISTER") {
       sdk
-          .register(userInformationForm.value)
-          .then((res) => {
-            ElMessage.success("注册成功！");
-            model.value = "HIDDEN";
-            onLoginSuccess(res.data);
-          })
-          .catch((err) => ElMessage.error(err));
+        .register(userInformationForm.value)
+        .then((res) => {
+          ElMessage.success("注册成功！");
+          model.value = "HIDDEN";
+          onLoginSuccess(res.data);
+        })
+        .catch((err) => ElMessage.error(err));
     }
   });
 };
@@ -101,7 +101,7 @@ const validateRules = computed<FormRules<UserRegisterRequest>>(() => {
     },
     inviteCode: {
       required:
-          !isLoginOrRegister.value && userInformationForm.value.auth === "admin",
+        !isLoginOrRegister.value && userInformationForm.value.auth === "admin",
       len: 8,
       message: "请输入正确的管理员用户邀请码",
       trigger: "change",
@@ -114,33 +114,29 @@ const rememberDevice = ref<boolean>(false);
 
 <template>
   <el-dialog
-      v-model="dialogVisible"
-      :title="modelValue === 'LOGIN' ? '登录' : '注册'"
-      append-to-body
-      class="login-dialog"
-      width="500"
-      @close="onDialogClose"
-  >
+    v-model="dialogVisible"
+    :title="modelValue === 'LOGIN' ? '登录' : '注册'"
+    append-to-body
+    class="login-dialog"
+    width="500"
+    @close="onDialogClose">
     <el-form
-        ref="mainForm"
-        :model="userInformationForm"
-        :rules="validateRules"
-        class="main-form"
-        label-width="auto"
-        @submit="loginOrRegister"
-    >
+      ref="mainForm"
+      :model="userInformationForm"
+      :rules="validateRules"
+      class="main-form"
+      label-width="auto"
+      @submit="loginOrRegister">
       <el-form-item label="用户名" prop="username">
         <el-input
-            v-model="userInformationForm.username"
-            @keydown.enter="loginOrRegister"
-        />
+          v-model="userInformationForm.username"
+          @keydown.enter="loginOrRegister" />
       </el-form-item>
       <el-form-item label="密码" prop="password">
         <el-input
-            v-model="userInformationForm.password"
-            type="password"
-            @keydown.enter="loginOrRegister"
-        />
+          v-model="userInformationForm.password"
+          type="password"
+          @keydown.enter="loginOrRegister" />
       </el-form-item>
       <div v-if="!isLoginOrRegister">
         <el-form-item label="类型" prop="auth">
@@ -150,19 +146,18 @@ const rememberDevice = ref<boolean>(false);
           </el-select>
         </el-form-item>
         <el-form-item
-            v-if="userInformationForm.auth === 'admin'"
-            label="邀请码"
-            prop="inviteCode"
-        >
-          <el-input v-model="userInformationForm.inviteCode" type="password"/>
+          v-if="userInformationForm.auth === 'admin'"
+          label="邀请码"
+          prop="inviteCode">
+          <el-input v-model="userInformationForm.inviteCode" type="password" />
         </el-form-item>
       </div>
-      <el-checkbox v-model="rememberDevice" label="记住设备（实验性）"/>
+      <el-checkbox v-model="rememberDevice" label="记住设备（实验性）" />
     </el-form>
     <template #footer>
       <div class="dialog-footer dialog-buttons">
         <el-button class="cancel-button" @click="model = 'HIDDEN'"
-        >取消
+          >取消
         </el-button>
         <div class="switch-login-button-group">
           <el-button type="primary" @click="loginOrRegister">
@@ -170,10 +165,10 @@ const rememberDevice = ref<boolean>(false);
             <span v-else>注册</span>
           </el-button>
           <el-button
-              :type="isLoginOrRegister ? 'success' : 'warning'"
-              @click="changeType"
-          ><span v-if="isLoginOrRegister">切换到注册</span
-          ><span v-else>切换到登录</span></el-button
+            :type="isLoginOrRegister ? 'success' : 'warning'"
+            @click="changeType"
+            ><span v-if="isLoginOrRegister">切换到注册</span
+            ><span v-else>切换到登录</span></el-button
           >
         </div>
       </div>

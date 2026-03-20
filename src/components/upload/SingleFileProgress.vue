@@ -1,11 +1,16 @@
 <script lang="ts" setup>
-import type {UploadUserFile} from "element-plus";
-import {CircleCheck, CircleClose, Close, Document,} from "@element-plus/icons-vue";
+import type { UploadUserFile } from "element-plus";
+import {
+  CircleCheck,
+  CircleClose,
+  Close,
+  Document,
+} from "@element-plus/icons-vue";
 
 const emit = defineEmits<{
   (e: "removed", data: UploadUserFile): void;
 }>();
-const {data} = defineProps<{ data: UploadUserFile }>();
+const { data } = defineProps<{ data: UploadUserFile }>();
 </script>
 
 <template>
@@ -13,33 +18,33 @@ const {data} = defineProps<{ data: UploadUserFile }>();
     <div class="file">
       <div class="file-name">
         <el-icon class="file-icon">
-          <Document/>
+          <Document />
         </el-icon>
         {{ data.name }}
       </div>
       <el-icon
-          v-if="data.status === 'success'"
-          class="success-icon"
-          color="green">
-        <CircleCheck/>
+        v-if="data.status === 'success'"
+        class="success-icon"
+        color="green">
+        <CircleCheck />
       </el-icon>
       <el-icon
-          v-else-if="data.status === 'fail'"
-          class="success-icon"
-          color="red">
-        <CircleClose/>
+        v-else-if="data.status === 'fail'"
+        class="success-icon"
+        color="red">
+        <CircleClose />
       </el-icon>
       <el-icon
-          v-if="data.status === 'uploading'"
-          class="remove-icon"
-          @click="emit('removed', data)">
-        <Close/>
+        v-if="data.status === 'uploading'"
+        class="remove-icon"
+        @click="emit('removed', data)">
+        <Close />
       </el-icon>
     </div>
     <el-progress
-        v-if="data.status === 'uploading' || data.status === 'ready'"
-        :percentage="data.percentage"
-        :stroke-width="4"/>
+      v-if="data.status === 'uploading' || data.status === 'ready'"
+      :percentage="data.percentage"
+      :stroke-width="4" />
   </div>
 </template>
 
