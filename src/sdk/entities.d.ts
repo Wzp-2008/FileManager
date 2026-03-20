@@ -167,6 +167,20 @@ export interface User {
 }
 
 /**
+ * 检查区块上传情况条目
+ */
+export interface ChunkCheckEntry {
+  /**
+   * 对应区块的哈希（MD5）
+   */
+  hash: string;
+  /**
+   * 若区块存在则此字段为区块ID，否则为undefined
+   */
+  chunkId?: number;
+}
+
+/**
  * 排序列
  */
 export type SortField =

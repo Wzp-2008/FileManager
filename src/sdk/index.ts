@@ -1,6 +1,7 @@
 import Axios, { type AxiosProgressEvent, CanceledError } from "axios";
 import type { AxiosInstance, AxiosResponse } from "axios";
 import type {
+  ChunkCheckEntry,
   FileObject,
   FolderObject,
   NamedRawFile,
@@ -16,7 +17,6 @@ import type { UserLoginRequest, UserRegisterRequest } from "./request";
 import { hashPassword } from "./utils";
 import { ConcurrencyManager } from "axios-concurrency";
 import { hash } from "spark-md5";
-
 /**
  * 文件分享站主SDK
  */
@@ -350,6 +350,60 @@ class FileManagerSdk {
       oldPassword: hash(oldPassword),
       newPassword: hash(newPassword),
     });
+  }
+
+  /**
+   * 检查需要上传哪些区块
+   * @param chunksHash 所有区块的哈希（MD5）列表
+   * @param cancelSignal 取消信号，通过AbortController创建
+   */
+  async checkChunks(
+    chunksHash: string[],
+    cancelSignal: AbortSignal,
+  ): Promise<AxiosResponse<ChunkCheckEntry[]>> {
+    return this.#requester.post("/api/file/chunk/check", chunksHash, {
+      signal: cancelSignal,
+    });
+  }
+
+  /**
+   * 上传单个区块
+   * @param chunk 区块
+   * @param cancelSignal 取消信号，通过AbortController创建
+   */
+  async uploadChunk(
+    chunk: Blob,
+    cancelSignal: AbortSignal,
+  ): Promise<AxiosResponse<number>> {
+    const form = new FormData();
+    form.append("block", chunk);
+    return this.#requester.post("/api/file/chunk/upload", form, {
+      signal: cancelSignal,
+    });
+  }
+
+  /**
+   * 将已经上传的区块合并成一个文件
+   * @param filename 文件名
+   * @param chunks 区块ID列表
+   * @param folderId 文件夹ID（默认为-1，即根目录）
+   * @param cancelSignal 取消信号，通过AbortController创建
+   */
+  async saveChunksToFile(
+    filename: string,
+    chunks: number[],
+    folderId: number = -1,
+    cancelSignal: AbortSignal,
+  ): Promise<AxiosResponse<FileObject>> {
+    return this.#requester.put(
+      "/api/file/chunk/save",
+      {
+        filename,
+        chunks,
+        folderId,
+      },
+      { signal: cancelSignal },
+    );
   }
 }
 

@@ -10,9 +10,10 @@ import {
   type UploadUserFile,
 } from "element-plus";
 import type { FileObject } from "./sdk/entities";
-import type { AxiosResponse } from "axios";
+import type { AxiosProgressEvent, AxiosResponse } from "axios";
 import FileManagerSdk from "./sdk";
 import { wrap, type WrapValue } from "./sdk/utils.ts";
+import { computeChunkMd5sWithWorker } from "./sdk/file.ts";
 
 export interface BaseEntry {
   kind: "file" | "folder";
@@ -184,17 +185,72 @@ export class FileUploadTask extends AbstractUploadTask<ResponseFile> {
     this.file = file;
   }
 
+  static async chunkUploadFile(
+    sdk: FileManagerSdk,
+    file: BaseFile,
+    folderId: number,
+    signal: AbortSignal,
+    onProgress: (e: AxiosProgressEvent) => void,
+  ): Promise<AxiosResponse<FileObject>> {
+    const [md5, chunks] = await computeChunkMd5sWithWorker(
+      await file.toFile(),
+      (e) => {
+        onProgress({
+          bytes: -1,
+          lengthComputable: false,
+          loaded: -1,
+          progress: e,
+        });
+      },
+      signal,
+    );
+    const checkRespData = await sdk.checkChunks(
+      md5.map((e) => e.hash),
+      signal,
+    );
+    const chunkIds = [];
+    for (const e of checkRespData.data) {
+      if (signal.aborted) {
+        throw signal.reason;
+      }
+      if (e.chunkId) {
+        chunkIds.push(e.chunkId);
+        continue;
+      }
+      const targetResultBlockIndex = md5.find((n) => n.hash === e.hash);
+      if (!targetResultBlockIndex)
+        throw new Error(`Could not find chunk ${e.hash}`);
+      const targetBlock = chunks[targetResultBlockIndex.index];
+      if (!targetBlock) throw new Error(`Could not find chunk ${e.hash}`);
+      const uploadResp = await sdk.uploadChunk(targetBlock, signal);
+      chunkIds.push(uploadResp.data);
+      onProgress({
+        bytes: -1,
+        lengthComputable: false,
+        loaded: -1,
+        progress: chunkIds.length / checkRespData.data.length,
+      });
+    }
+
+    return await sdk.saveChunksToFile(
+      file.getName(),
+      chunkIds,
+      folderId,
+      signal,
+    );
+  }
+
   async start(sdk: FileManagerSdk, folderId: number): Promise<ResponseFile> {
     this.status = "uploading";
-    return sdk
-      .upload(
-        await this.file.toFile(),
-        folderId,
-        this.abortController.signal,
-        (e) => {
-          this.percentage = Math.floor(e.progress ? e.progress * 100 : 0);
-        },
-      )
+    return FileUploadTask.chunkUploadFile(
+      sdk,
+      this.file,
+      folderId,
+      this.abortController.signal,
+      (e) => {
+        this.percentage = Math.floor(e.progress ? e.progress * 100 : 0);
+      },
+    )
       .then((e) => {
         this.status = "success";
         this.percentage = 100;
@@ -257,12 +313,12 @@ export class FolderUploadTask extends AbstractUploadTask<ResponseFolder> {
         if (child.kind === "folder") {
           return this.uploadFolder(sdk, child as BaseFolder, currentLayerId);
         }
-        const file = await (child as BaseFile).toFile();
         const currentFileProgress = wrap(0);
         this.currentStatusList.push(currentFileProgress);
         return [
-          await sdk.upload(
-            file,
+          await FileUploadTask.chunkUploadFile(
+            sdk,
+            child as BaseFile,
             currentLayerId,
             this.abortController.signal,
             (e) => {
