@@ -13,7 +13,7 @@ import {
 } from "vue";
 import FileManagerSdk, { ROOT } from "../sdk";
 import type { NamedRawFile, RawFile } from "../sdk/entities";
-import FolderComponent from "./file/FolderComponent.vue";
+import FileTableComponent from "./file/FileTableComponent.vue";
 
 const FileComponent = defineAsyncComponent(
   () => import("./file/FileComponent.vue"),
@@ -118,7 +118,7 @@ defineExpose({
     <FileComponent
       v-if="currentFileObject!.type === 'FILE'"
       :file="currentFileObject!" />
-    <FolderComponent
+    <FileTableComponent
       v-else
       ref="folder"
       :folder="currentFileObject!"

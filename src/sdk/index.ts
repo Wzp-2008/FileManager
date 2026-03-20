@@ -123,6 +123,7 @@ class FileManagerSdk {
    * @param searchContent 搜索内容（默认为空）
    * @param sort 排序方式（默认为ID）
    * @param reverse 反向排序（默认为false）
+   * @param cancelSignal 取消信号
    */
   async getFolderFilesPager(
     num: number,
@@ -131,9 +132,11 @@ class FileManagerSdk {
     searchContent: string = "",
     sort: SortField = "ID",
     reverse: boolean = false,
+    cancelSignal: AbortSignal | null = null,
   ): Promise<AxiosResponse<Pager<NamedRawFile>>> {
     return this.#requester.get("/api/file/get", {
       params: { num, page, folder, keywords: searchContent, sort, reverse },
+      signal: cancelSignal ? cancelSignal : undefined,
     });
   }
 

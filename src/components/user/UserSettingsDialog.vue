@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import FileManagerSdk from "../sdk";
-import type { User } from "../sdk/entities";
+import FileManagerSdk from "../../sdk";
+import type { User } from "../../sdk/entities";
 import { inject, ref, type Ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 

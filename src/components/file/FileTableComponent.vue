@@ -15,7 +15,7 @@ import {
   useMobileMediaQuery,
   useMoreHeightQuery,
 } from "../../utils.ts";
-import SingleRawFileComponent from "./SingleRawFileComponent.vue";
+import FileTableEntryComponent from "./FileTableEntryComponent.vue";
 import FolderPagination from "./FolderPagination.vue";
 
 const { folder } = defineProps<{
@@ -37,15 +37,21 @@ const isMobile = useMobileMediaQuery();
 const pageSize = ref<number>(
   isMobile.value ? (isLessHeight.value ? 7 : isMoreHeight.value ? 12 : 10) : 10,
 );
+let abortController: AbortController | null = null;
 const getCurrentPage = async () => {
   const sortValue = currentSort.value;
+  if (abortController) {
+    abortController.abort();
+  }
+  abortController = new AbortController();
   const { data } = await sdk.getFolderFilesPager(
     pageSize.value,
     page.value,
     folder.id,
-    currentDisplaySearchContent.value,
+    searchContent.value,
     sortValue?.sort,
     sortValue?.reverse,
+    abortController.signal,
   );
   currentPageData.value = data.data;
   total.value = data.total;
@@ -108,7 +114,7 @@ const deleteFile = async (file: NamedRawFile) => {
 const currentSort = useLocalStorage<SortDefinition | null>("sort", null, {
   serializer: StorageSerializers.object,
 });
-watch([page, currentSort, currentDisplaySearchContent], load, {
+watch([page, currentSort, searchContent], load, {
   deep: true,
 });
 watch(
@@ -143,8 +149,9 @@ const changeSort = (sort: SortField) => {
   }
   currentSort.value = { sort, reverse: false };
 };
-const applySearch = () => {
+const applySearch = (e: Event) => {
   page.value = 1;
+  (e.target as HTMLElement).blur();
   currentDisplaySearchContent.value = searchContent.value.trim();
 };
 defineExpose({ refresh: load });
@@ -163,18 +170,7 @@ defineExpose({ refresh: load });
             placeholder="搜索文件名或扩展名"
             @change="applySearch"
             @clear="applySearch"
-            @keyup.enter="applySearch">
-            <template #append>
-              <el-button
-                :icon="Search"
-                :size="isMobile ? 'default' : 'small'"
-                aria-label="搜索"
-                type="primary"
-                @click="applySearch">
-                <span v-if="!isMobile">搜索</span>
-              </el-button>
-            </template>
-          </el-input>
+            @keyup.enter="applySearch" />
         </div>
       </div>
       <div class="toolbar-right pc-toolbar-right">
@@ -227,11 +223,11 @@ defineExpose({ refresh: load });
           操作
         </div>
       </div>
-      <SingleRawFileComponent
+      <FileTableEntryComponent
         v-if="folder.id !== -1 && currentDisplaySearchContent === ''"
         :row="parentRow"
         @open="jumpIntoParent()" />
-      <SingleRawFileComponent
+      <FileTableEntryComponent
         v-for="row in currentPageData"
         :key="`${row.type}-${row.id}`"
         :row="row"
@@ -326,19 +322,12 @@ defineExpose({ refresh: load });
   width: min(100%, var(--search-max-width));
 }
 
-.search-box :deep(.el-input-group__append) {
-  padding: 0;
-  border-radius: 0 12px 12px 0;
-  overflow: hidden;
-  background: transparent;
-}
-
 .search-box :deep(.el-input) {
-  --el-input-height: 42px;
+  --el-input-height: 30px;
 }
 
 .search-box :deep(.el-input__wrapper) {
-  border-radius: 12px 0 0 12px;
+  border-radius: 10px;
   padding-left: 12px;
 }
 
@@ -434,6 +423,9 @@ defineExpose({ refresh: load });
     --search-max-width: 100%;
     --toolbar-left-width: 100%;
     --search-button-padding-inline: 12px;
+    background: none;
+    border: none;
+    box-shadow: none;
   }
 
   .toolbar-left {
@@ -452,6 +444,7 @@ defineExpose({ refresh: load });
 @media screen and (max-width: 576px) {
   .file-list-actions {
     --toolbar-padding: 12px;
+    margin-bottom: 0;
   }
 
   .table-head {

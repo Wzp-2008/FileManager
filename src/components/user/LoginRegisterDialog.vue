@@ -2,11 +2,11 @@
 import type { FormInstance, FormRules } from "element-plus";
 import { ElMessage } from "element-plus";
 import { computed, inject, ref, watch } from "vue";
-import type { User } from "../sdk/entities";
-import type { UserRegisterRequest } from "../sdk/request";
-import { getFingerprint } from "../sdk/utils.ts";
+import type { User } from "../../sdk/entities";
+import type { UserRegisterRequest } from "../../sdk/request";
+import { getFingerprint } from "../../sdk/utils.ts";
 import type { DialogStatus } from "./LoginRegisterDialogTypes";
-import type FileManagerSdk from "../sdk";
+import type FileManagerSdk from "../../sdk";
 
 const model = defineModel<DialogStatus>();
 const sdk = inject("sdk") as FileManagerSdk;

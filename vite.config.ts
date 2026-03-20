@@ -27,7 +27,7 @@ export default defineConfig({
   server: {
     host:
       process.env.VITE_HOST ??
-      (hasLocalHttpsCert ? "local.wzpmc.cn" : "127.0.0.1"),
+      (hasLocalHttpsCert ? "local.wzpmc.cn" : "0.0.0.0"),
     proxy: {
       "/api": {
         target: "https://wzpmc.cn:83",

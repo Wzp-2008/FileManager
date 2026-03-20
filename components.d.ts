@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BaseFileComponent: typeof import('./src/components/BaseFileComponent.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
@@ -32,15 +33,17 @@ declare module 'vue' {
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElText: typeof import('element-plus/es')['ElText']
     FileComponent: typeof import('./src/components/file/FileComponent.vue')['default']
+    FileTableComponent: typeof import('./src/components/file/FileTableComponent.vue')['default']
+    FileTableEntryComponent: typeof import('./src/components/file/FileTableEntryComponent.vue')['default']
     FolderComponent: typeof import('./src/components/file/FolderComponent.vue')['default']
     FolderPagination: typeof import('./src/components/file/FolderPagination.vue')['default']
-    InviteCodeDialog: typeof import('./src/components/InviteCodeDialog.vue')['default']
-    LoginRegisterDialog: typeof import('./src/components/LoginRegisterDialog.vue')['default']
+    InviteCodeDialog: typeof import('./src/components/user/InviteCodeDialog.vue')['default']
+    LoginRegisterDialog: typeof import('./src/components/user/LoginRegisterDialog.vue')['default']
     RawFileComponent: typeof import('./src/components/RawFileComponent.vue')['default']
     SingleFileProgress: typeof import('./src/components/upload/SingleFileProgress.vue')['default']
     SingleRawFileComponent: typeof import('./src/components/file/SingleRawFileComponent.vue')['default']
     UploadDialog: typeof import('./src/components/upload/UploadDialog.vue')['default']
-    UserSettingsDialog: typeof import('./src/components/UserSettingsDialog.vue')['default']
+    UserSettingsDialog: typeof import('./src/components/user/UserSettingsDialog.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

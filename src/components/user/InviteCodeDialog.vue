@@ -45,7 +45,7 @@
 import { Loading } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { inject, ref, watch } from "vue";
-import type FileManagerSdk from "../sdk";
+import type FileManagerSdk from "../../sdk";
 
 const sdk = inject("sdk") as FileManagerSdk;
 const show = defineModel({ default: false });

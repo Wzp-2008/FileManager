@@ -12,16 +12,16 @@ import {
   useTemplateRef,
   watch,
 } from "vue";
-import InviteCodeDialog from "./components/InviteCodeDialog.vue";
-import LoginRegisterDialog from "./components/LoginRegisterDialog.vue";
-import type { DialogStatus } from "./components/LoginRegisterDialogTypes";
-import RawFileComponent from "./components/RawFileComponent.vue";
+import InviteCodeDialog from "./components/user/InviteCodeDialog.vue";
+import LoginRegisterDialog from "./components/user/LoginRegisterDialog.vue";
+import type { DialogStatus } from "./components/user/LoginRegisterDialogTypes";
+import BaseFileComponent from "./components/BaseFileComponent.vue";
 import UploadDialog from "./components/upload/UploadDialog.vue";
 import FileManagerSdk, { ROOT } from "./sdk";
 import type { RawFile, User } from "./sdk/entities";
 import { getFingerprint } from "./sdk/utils";
 import { type SortDefinition, useMobileMediaQuery } from "./utils";
-import UserSettingsDialog from "./components/UserSettingsDialog.vue";
+import UserSettingsDialog from "./components/user/UserSettingsDialog.vue";
 
 const sdk = new FileManagerSdk();
 provide("sdk", sdk);
@@ -205,7 +205,7 @@ const openSetting = () => {
           </div>
         </teleport>
       </template>
-      <RawFileComponent ref="file" v-model="currentFile" />
+      <BaseFileComponent ref="file" v-model="currentFile" />
     </el-main>
   </el-container>
 </template>
