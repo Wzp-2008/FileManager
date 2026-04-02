@@ -48,7 +48,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-${{ env.IS_GITEA }}-
             ${{ runner.os }}-gradle-
-
+      - name: Cache Bun files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/cache
+          key: ${{ runner.os }}-bun-${{ env.IS_GITEA }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-${{ env.IS_GITEA }}-
+            ${{ runner.os }}-bun-
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -88,19 +96,19 @@ jobs:
 
       # ===== 上传产物 =====
       - name: Upload backend jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: FileManager.jar
           path: FileManager.jar
 
       - name: Upload frontend dist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: frontend-src/dist
 
       - name: Upload combined package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: FileManager-with-static
           path: release
