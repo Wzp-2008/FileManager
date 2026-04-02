@@ -5,35 +5,64 @@ on:
       - master
       - ci
   workflow_dispatch:
+
 jobs:
   Building:
     runs-on: ubuntu-latest
+
+    # 统一定义代理参数，便于维护
+    env:
+      PROXY_HOST: 192.168.5.6
+      PROXY_PORT: 7890
+      # 根据实际情况调整判定条件：
+      # 1) Gitea 常见：github.server_url 不是 https://github.com
+      # 2) 也可结合 github.server_url 包含你内网域名进一步收敛
+      IS_GITEA: ${{ github.server_url != 'https://github.com' }}
+
     steps:
       - uses: actions/checkout@v5
-      - name: Set HTTP Proxy
+
+      # 仅 Gitea 环境配置 Gradle 代理
+      - name: Set Gradle Proxy (Gitea only)
+        if: env.IS_GITEA == 'true'
         run: |
           mkdir -p ~/.gradle
-          echo "systemProp.http.proxyHost=192.168.5.6" >> ~/.gradle/gradle.properties
-          echo "systemProp.http.proxyPort=7890" >> ~/.gradle/gradle.properties
-          echo "systemProp.https.proxyHost=192.168.5.6" >> ~/.gradle/gradle.properties
-          echo "systemProp.https.proxyPort=7890" >> ~/.gradle/gradle.properties
+          {
+            echo "systemProp.http.proxyHost=${PROXY_HOST}"
+            echo "systemProp.http.proxyPort=${PROXY_PORT}"
+            echo "systemProp.https.proxyHost=${PROXY_HOST}"
+            echo "systemProp.https.proxyPort=${PROXY_PORT}"
+          } >> ~/.gradle/gradle.properties
+
+      # 可选：调试输出，确认当前判定
+      - name: Show CI Server Info
+        run: |
+          echo "github.server_url=${{ github.server_url }}"
+          echo "github.repository=${{ github.repository }}"
+          echo "IS_GITEA=${IS_GITEA}"
+
       - name: Cache Gradle files
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ env.IS_GITEA }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
+            ${{ runner.os }}-gradle-${{ env.IS_GITEA }}-
             ${{ runner.os }}-gradle-
+
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+
       - name: Setup Executable Permission
         run: chmod +x gradlew
+
       - name: Build With Gradle
         run: ./gradlew bootJar --no-daemon --parallel --build-cache --no-scan
+
       - uses: actions/upload-artifact@v7
         with:
           name: "FMV2.jar"
