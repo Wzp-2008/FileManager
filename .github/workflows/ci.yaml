@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - ci
+      - v2-web
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,16 @@ jobs:
       IS_GITEA: ${{ github.server_url != 'https://github.com' }}
 
     steps:
-      - uses: actions/checkout@v5
+      # 1) 检出当前分支（后端）
+      - name: Checkout backend
+        uses: actions/checkout@v5
+
+      # 2) 额外检出前端分支 v2-web 到 frontend-src 目录
+      - name: Checkout frontend (v2-web)
+        uses: actions/checkout@v5
+        with:
+          ref: v2-web
+          path: frontend-src
 
       - name: Set Gradle Proxy (Gitea only)
         if: env.IS_GITEA == 'true'
@@ -45,13 +54,55 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      # ===== 前端构建（来自 v2-web） =====
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend-src/package-lock.json
+
+      - name: Set npm CN Mirror (Gitea only)
+        if: env.IS_GITEA == 'true'
+        run: npm config set registry https://registry.npmmirror.com
+
+      - name: Build Frontend
+        working-directory: frontend-src
+        run: npm run build
+
+      # ===== 后端构建 =====
       - name: Setup Executable Permission
         run: chmod +x gradlew
 
       - name: Build With Gradle
         run: ./gradlew bootJar --no-daemon --parallel --build-cache --no-scan
 
-      - uses: actions/upload-artifact@v7
+      - name: Prepare backend artifact
+        run: |
+          cp build/libs/FileManager-0.0.1-SNAPSHOT.jar FileManager.jar
+
+      # 组合包：FileManager.jar + static(=前端dist)
+      - name: Prepare combined package
+        run: |
+          rm -rf release
+          mkdir -p release/static
+          cp FileManager.jar release/FileManager.jar
+          cp -r frontend-src/dist/* release/static/
+
+      # ===== 上传产物 =====
+      - name: Upload backend jar
+        uses: actions/upload-artifact@v4
         with:
-          name: "FMV2.jar"
-          path: build/libs/FileManager-0.0.1-SNAPSHOT.jar
+          name: FileManager.jar
+          path: FileManager.jar
+
+      - name: Upload frontend dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: frontend-src/dist
+
+      - name: Upload combined package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FileManager-with-static
+          path: release
