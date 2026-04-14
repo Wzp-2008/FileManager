@@ -86,14 +86,6 @@ jobs:
         run: |
           cp build/libs/FileManager-0.0.1-SNAPSHOT.jar FileManager.jar
 
-      # 组合包：FileManager.jar + static(=前端dist)
-      - name: Prepare combined package
-        run: |
-          rm -rf release
-          mkdir -p release/static
-          cp FileManager.jar release/FileManager.jar
-          cp -r frontend-src/dist/* release/static/
-
       # ===== 上传产物 =====
       - name: Upload backend jar
         uses: actions/upload-artifact@v7
@@ -106,6 +98,24 @@ jobs:
         with:
           name: dist
           path: frontend-src/dist
+
+      - name: Remove map file
+        run: |
+          rm -rf frontend-src/dist/*.map
+
+      - name: Upload frontend dist (without map file)
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-static
+          path: frontend-src/dist
+
+      # 组合包：FileManager.jar + static(=前端dist)
+      - name: Prepare combined package
+        run: |
+          rm -rf release
+          mkdir -p release/static
+          cp FileManager.jar release/FileManager.jar
+          cp -r frontend-src/dist/* release/static/
 
       - name: Upload combined package
         uses: actions/upload-artifact@v7
