@@ -28,6 +28,8 @@ public class StartEventListener {
         initializationMapper.createFolderTable();
         initializationMapper.createPrefTable();
         initializationMapper.createFingerprintTable();
+        initializationMapper.createChunksTable();
+        initializationMapper.createChunkFileTable();
         //开启审计功能
         AuditManager.setAuditEnable(true);
         MessageCollector collector = new ConsoleMessageCollector();

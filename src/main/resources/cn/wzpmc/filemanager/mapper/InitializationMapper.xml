@@ -268,4 +268,26 @@
         "user_id" integer NOT NULL -- 用户ID
         );
     </insert>
+    <insert id="createChunksTable" databaseId="postgres">
+        create table if not exists chunks
+        (
+        id serial
+        constraint chunks_pk
+        primary key,
+        hash char(32) not null,
+        size integer not null
+        );
+        create unique index hash_i
+        on chunks (hash);
+    </insert>
+    <insert id="createChunkFileTable" databaseId="postgres">
+        create table if not exists chunk_file
+        (
+        chunk_id integer not null,
+        file_id integer not null,
+        index integer not null,
+        constraint chunk_file_pk
+        primary key (chunk_id, file_id)
+        );
+    </insert>
 </mapper>
