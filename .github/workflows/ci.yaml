@@ -101,7 +101,7 @@ jobs:
 
       - name: Remove map file
         run: |
-          rm -rf frontend-src/dist/*.map
+          find frontend-src/dist -type f -name '*.map' -delete
 
       - name: Upload frontend dist (without map file)
         uses: actions/upload-artifact@v7
