@@ -277,7 +277,7 @@
         hash char(32) not null,
         size integer not null
         );
-        create unique index hash_i
+        create unique index if not exists hash_i
         on chunks (hash);
     </insert>
     <insert id="createChunkFileTable" databaseId="postgres">
