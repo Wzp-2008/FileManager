@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 ssl/
+
+# Auto Import Plugin for Vite
+auto-imports.d.ts
+components.d.ts
