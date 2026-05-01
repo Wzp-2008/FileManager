@@ -42,6 +42,7 @@ dependencies {
     }
     // https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-spring-boot3-starter
     implementation("com.mybatis-flex:mybatis-flex-spring-boot4-starter:${mybatisFlexVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
     annotationProcessor("com.mybatis-flex:mybatis-flex-processor:${mybatisFlexVersion}")
     // provide the autoconfigure for jdbc(datasource) in 4.x
     implementation("org.springframework.boot:spring-boot-starter-jdbc")

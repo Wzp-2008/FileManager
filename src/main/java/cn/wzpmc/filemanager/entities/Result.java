@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.socket.TextMessage;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -133,5 +134,9 @@ public class Result<T> {
 
     public void writeToOutputStream(OutputStream stream) throws IOException {
         stream.write(JSON.toJSONString(this).getBytes(StandardCharsets.UTF_8));
+    }
+
+    public TextMessage wsMessage() {
+        return new TextMessage(JSON.toJSONString(this));
     }
 }

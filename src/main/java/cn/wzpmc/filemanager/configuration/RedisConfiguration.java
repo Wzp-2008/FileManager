@@ -1,5 +1,6 @@
 package cn.wzpmc.filemanager.configuration;
 
+import cn.wzpmc.filemanager.entities.p2p.RawChannelDescription;
 import cn.wzpmc.filemanager.entities.vo.FileVo;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,17 @@ public class RedisConfiguration {
     public RedisConfiguration(RedisConnectionFactory redisConnectionFactory) {
         this.redisConnectionFactory = redisConnectionFactory;
     }
+
     @Bean
     public RedisTemplate<String, FileVo> linkMapper() {
         RedisTemplate<String, FileVo> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, RawChannelDescription> channelMapper() {
+        RedisTemplate<String, RawChannelDescription> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         return template;
     }
