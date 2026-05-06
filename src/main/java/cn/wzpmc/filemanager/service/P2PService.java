@@ -21,7 +21,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -80,13 +80,16 @@ public class P2PService {
 
         @SneakyThrows
         public void sendPing(WebSocketSession session) {
-            ScheduledFuture<?> scheduledFuture = taskScheduler.scheduleWithFixedDelay(() -> {
+            if (!session.isOpen()) {
+                return;
+            }
+            ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(() -> {
                 try {
                     session.close();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            }, Duration.ofSeconds(30));
+            }, Instant.now().plusSeconds(30));
             UUID uuid = UUID.randomUUID();
             session.getAttributes().put("ping", uuid);
             pingScheduler.put(uuid, scheduledFuture);
@@ -141,7 +144,7 @@ public class P2PService {
             UUID uuid = new UUID(byteBuf.readLong(), byteBuf.readLong());
             ScheduledFuture<?> remove = pingScheduler.remove(uuid);
             remove.cancel(true);
-            taskScheduler.scheduleWithFixedDelay(() -> sendPing(session), Duration.ofSeconds(10));
+            taskScheduler.schedule(() -> sendPing(session), Instant.now().plusSeconds(10));
         }
 
         private void handleLogin(WebSocketSession session, String key) throws IOException {
