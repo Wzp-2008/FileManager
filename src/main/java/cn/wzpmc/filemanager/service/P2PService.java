@@ -6,24 +6,28 @@ import cn.wzpmc.filemanager.entities.vo.UserVo;
 import cn.wzpmc.filemanager.utils.RandomUtils;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +49,8 @@ public class P2PService {
     @RequiredArgsConstructor
     public class ChannelWebSocketHandler extends TextWebSocketHandler {
         private final Map<UUID, WebSocketSession> sessions = new ConcurrentHashMap<>();
+        private final Map<UUID, ScheduledFuture<?>> pingScheduler = new ConcurrentHashMap<>();
+        private final TaskScheduler taskScheduler;
 
         @Override
         public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -71,9 +77,31 @@ public class P2PService {
             }
         }
 
+        @SneakyThrows
+        public void sendPing(WebSocketSession session) {
+            ScheduledFuture<?> scheduledFuture = taskScheduler.scheduleWithFixedDelay(() -> {
+                try {
+                    session.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }, Duration.ofSeconds(30));
+            UUID uuid = UUID.randomUUID();
+            session.getAttributes().put("ping", uuid);
+            pingScheduler.put(uuid, scheduledFuture);
+            session.sendMessage(new PingMessage(Unpooled.buffer().writeLong(uuid.getMostSignificantBits()).writeLong(uuid.getLeastSignificantBits()).nioBuffer()));
+        }
+
         @Override
         public void afterConnectionClosed(WebSocketSession session, @NonNull CloseStatus status) throws Exception {
             Map<String, Object> attributes = session.getAttributes();
+            UUID pingUUID = (UUID) attributes.get("ping");
+            if (pingUUID != null) {
+                ScheduledFuture<?> task = pingScheduler.remove(pingUUID);
+                if (task != null) {
+                    task.cancel(true);
+                }
+            }
             String channelId = (String) attributes.get("channelId");
             UUID uid = (UUID) attributes.get("uid");
             if (channelId == null || uid == null) return;
@@ -104,6 +132,15 @@ public class P2PService {
                 JSONObject data = jsonObject.getJSONObject("data");
                 sendTo(uuid, ChannelEvent.ofData(uid, data));
             }
+        }
+
+        @Override
+        protected void handlePongMessage(@NonNull WebSocketSession session, PongMessage message) {
+            ByteBuf byteBuf = Unpooled.copiedBuffer(message.getPayload());
+            UUID uuid = new UUID(byteBuf.readLong(), byteBuf.readLong());
+            ScheduledFuture<?> remove = pingScheduler.remove(uuid);
+            remove.cancel(true);
+            taskScheduler.scheduleWithFixedDelay(() -> sendPing(session), Duration.ofSeconds(10));
         }
 
         private void handleLogin(WebSocketSession session, String key) throws IOException {

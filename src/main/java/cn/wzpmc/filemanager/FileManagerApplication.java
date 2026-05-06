@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @MapperScan("cn.wzpmc.filemanager.mapper")
 @EnableTransactionManagement
 @EnableAsync
+@EnableScheduling
 public class FileManagerApplication {
 
     public static void main(String[] args) {
