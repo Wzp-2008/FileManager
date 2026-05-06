@@ -61,6 +61,7 @@ public class P2PService {
                 session.close(CloseStatus.NOT_ACCEPTABLE);
                 return;
             }
+            sendPing(session);
             assert id != null;
             Map<String, Object> attr = session.getAttributes();
             attr.put("channelId", id);
