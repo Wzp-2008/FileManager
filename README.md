@@ -1,48 +1,80 @@
-# fs-ui
+# File Sharing Station V3 / 文件分享站 V3
 
-This template should help get you started developing with Vue 3 in Vite.
+A self-hosted file sharing and management web application. This is the **v3 frontend**, rebuilt with Vue 3 + Nuxt UI, connecting to the FileManager Spring Boot backend.
 
-## Recommended IDE Setup
+一个自托管的文件分享与管理 Web 应用。这是 **v3 版本前端**，使用 Vue 3 + Nuxt UI 重构，对接 FileManager Spring Boot 后端。
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+> Language: [中文](./README.zh.md) | **English**
 
-## Recommended Browser Setup
+---
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Features
 
-## Type Support for `.vue` Imports in TS
+- **File browsing** — table view with sort, search, and pagination; breadcrumb path navigation
+- **File upload** — chunked upload with MD5 deduplication, drag-and-drop files and folders, directory-tree upload via File System Access API
+- **File management** — create folders, delete files/folders, download with secure links, SHA-512 integrity verification
+- **P2P transfer** — WebRTC-based peer-to-peer file transfer with WebSocket signaling
+- **Authentication** — JWT token auth, browser fingerprint auto-login, admin invite code registration
+- **User preferences** — persistent sort settings, change username/password
+- **Admin** — generate invite codes, manage all files
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Tech Stack
 
-## Customize configuration
+| Layer | Technology |
+|---|---|
+| Framework | Vue 3 (Composition API, `<script setup>`) |
+| Language | TypeScript 6 |
+| Build | Vite 8 |
+| UI Library | Nuxt UI v4 |
+| CSS | Tailwind CSS 4 |
+| State | Pinia 3 |
+| Lint / Format | oxlint + oxfmt + ESLint |
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Prerequisites
 
-## Project Setup
+- **Node.js** >= 20.19.0 or >= 22.12.0
+- **Bun** (package manager)
+- **FileManager backend** running — see backend README (`master` branch, same repo)
 
-```sh
+## Getting Started
+
+```bash
+# Install dependencies
 bun install
-```
 
-### Compile and Hot-Reload for Development
-
-```sh
+# Start dev server
 bun dev
-```
 
-### Type-Check, Compile and Minify for Production
-
-```sh
+# Build for production
 bun run build
-```
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
+# Lint
 bun lint
+
+# Format
+bun format
 ```
+
+The dev server runs on `http://localhost:5173` by default. API requests are proxied to the backend — configure the proxy target in `vite.config.ts`.
+
+## Backend Integration
+
+This frontend connects to the **FileManager** Spring Boot backend (same repo, `master` branch). Key API facts:
+
+- **Base path:** `/api`
+- **Auth:** JWT token delivered via `Add-Authorization` response header, sent back via `Authorization` request header
+- **Proxy:** Vite dev server proxies `/api` to the backend (default `http://127.0.0.1:8080`)
+
+See the backend README for API documentation and deployment.
+
+## Related Branches
+
+| Branch | Description |
+|---|---|
+| `master` | Backend (Spring Boot) |
+| `v2-web` | V2 frontend (Vue 3 + Element Plus) |
+| `v3-web` (current) | V3 frontend (Vue 3 + Nuxt UI) |
+
+## License
+
+MIT — see [LICENSE](./LICENSE)
