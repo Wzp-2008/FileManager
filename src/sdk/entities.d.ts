@@ -191,3 +191,13 @@ export type SortField =
   | "UPLOADER" // 上传者
   | "DOWNLOAD_COUNT" // 下载数量
   | "SIZE"; // 文件大小
+
+export interface ChannelCreateResponse {
+  channelId: string,
+  senderKey: string
+}
+export interface ChannelInitCommand {
+  sender: string,
+  filename: string,
+  size: number
+}

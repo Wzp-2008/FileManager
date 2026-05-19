@@ -34,3 +34,9 @@ export interface Result<T> {
    */
   timestamp: number;
 }
+
+export interface ChannelEvent<T> {
+  cmd: string;
+  data: T;
+  from: "CONSOLE" | string
+}

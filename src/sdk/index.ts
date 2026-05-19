@@ -1,6 +1,7 @@
-import Axios, { type AxiosProgressEvent, CanceledError } from "axios";
-import type { AxiosInstance, AxiosResponse } from "axios";
+import type {AxiosInstance, AxiosResponse} from "axios";
+import Axios, {type AxiosProgressEvent, CanceledError} from "axios";
 import type {
+  ChannelCreateResponse,
   ChunkCheckEntry,
   FileObject,
   FolderObject,
@@ -11,12 +12,13 @@ import type {
   User,
   UserPrefs,
 } from "./entities";
-import { ElMessage } from "element-plus";
-import type { Pager, Result } from "./network";
-import type { UserLoginRequest, UserRegisterRequest } from "./request";
-import { hashPassword } from "./utils";
-import { ConcurrencyManager } from "axios-concurrency";
-import { hash } from "spark-md5";
+import {ElMessage} from "element-plus";
+import type {Pager, Result} from "./network";
+import type {UserLoginRequest, UserRegisterRequest} from "./request";
+import {hashPassword} from "./utils";
+import {ConcurrencyManager} from "axios-concurrency";
+import {hash} from "spark-md5";
+
 /**
  * 文件分享站主SDK
  */
@@ -34,9 +36,9 @@ class FileManagerSdk {
 
   /**
    * 构造方法
-   * @param baseURL 后端基础url（默认为/）
+   * @param baseURL 后端基础url（默认为./）
    */
-  constructor(baseURL: string = "/") {
+  constructor(baseURL: string = "./") {
     this.#baseUrl = baseURL;
     this.#requester = Axios.create({ baseURL });
     const MAX_CONCURRENT_REQUESTS = 5;
@@ -404,6 +406,22 @@ class FileManagerSdk {
       },
       { signal: cancelSignal },
     );
+  }
+
+  /**
+   * 创建P2P文件传输通道
+   * @param filename 文件名
+   * @param size 文件大小
+   * @return 通道ID
+   */
+  async createChannel(
+      filename: string,
+      size: number
+  ): Promise<AxiosResponse<ChannelCreateResponse>> {
+    return this.#requester.post("/api/channel/create", {
+      filename,
+      size
+    })
   }
 }
 

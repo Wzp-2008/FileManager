@@ -31,10 +31,11 @@ export default defineConfig({
     port: 5174,
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:10883",
+        target: "http://127.0.0.1:8080",
         changeOrigin: true,
         secure: false,
         ssl: false,
+        ws: true
         // rewrite: (path) => path.replace(/^\/api/, '')
       },
     },
