@@ -2,7 +2,7 @@ package cn.wzpmc.filemanager.utils;
 
 import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
 import cn.wzpmc.filemanager.exceptions.AuthorizationException;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.jspecify.annotations.NonNull;

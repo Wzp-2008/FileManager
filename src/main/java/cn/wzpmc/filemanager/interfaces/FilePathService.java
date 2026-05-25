@@ -3,7 +3,7 @@ package cn.wzpmc.filemanager.interfaces;
 import cn.wzpmc.filemanager.entities.files.FullRawFileObject;
 import cn.wzpmc.filemanager.entities.files.RawFileObject;
 import org.jspecify.annotations.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 文件路径服务接口（需实现）

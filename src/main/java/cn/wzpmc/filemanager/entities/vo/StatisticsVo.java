@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
