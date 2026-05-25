@@ -7,7 +7,7 @@ import cn.wzpmc.filemanager.mapper.FolderMapper;
 import cn.wzpmc.filemanager.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 

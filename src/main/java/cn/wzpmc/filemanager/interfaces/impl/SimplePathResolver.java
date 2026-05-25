@@ -5,7 +5,7 @@ import cn.wzpmc.filemanager.entities.vo.FolderVo;
 import cn.wzpmc.filemanager.interfaces.FilePathService;
 import cn.wzpmc.filemanager.mapper.FolderMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.List;

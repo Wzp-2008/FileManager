@@ -4,7 +4,7 @@ import cn.wzpmc.filemanager.config.FileManagerProperties;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import com.alibaba.fastjson2.support.spring6.http.converter.FastJsonHttpMessageConverter;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -29,7 +29,7 @@ public class FastJsonConfiguration implements WebMvcConfigurer {
      * @param builder the builder to configure
      */
     @Override
-    public void configureMessageConverters(@NonNull HttpMessageConverters.ServerBuilder builder) {
+    public void configureMessageConverters(HttpMessageConverters.@NonNull ServerBuilder builder) {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
         FastJsonConfig config = createFastjsonConfig();
         config.setDateFormat("yyyy-MM-dd HH:mm:ss");

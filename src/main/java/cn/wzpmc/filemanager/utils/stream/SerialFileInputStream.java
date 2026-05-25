@@ -1,6 +1,6 @@
 package cn.wzpmc.filemanager.utils.stream;
 
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
