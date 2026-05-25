@@ -14,7 +14,13 @@ import lombok.Data;
 @JSONCompiled
 @Data
 public class FingerprintVo {
+    /**
+     * 浏览器指纹
+     */
     @Id
     private String fingerprint;
+    /**
+     * 用户ID
+     */
     private long userId;
 }

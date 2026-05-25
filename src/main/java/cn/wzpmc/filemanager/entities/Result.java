@@ -123,6 +123,11 @@ public class Result<T> {
         return this;
     }
 
+    /**
+     * 将JSON写出到响应
+     *
+     * @param response 响应信息
+     */
     public void writeToResponse(HttpServletResponse response) {
         response.addHeader("Content-Type", "application/json; charset=utf-8");
         try (ServletOutputStream outputStream = response.getOutputStream()) {
@@ -132,10 +137,21 @@ public class Result<T> {
         }
     }
 
+    /**
+     * 将JSON写出到输出流
+     *
+     * @param stream 输出流
+     * @throws IOException 当IO错误时抛出
+     */
     public void writeToOutputStream(OutputStream stream) throws IOException {
         stream.write(JSON.toJSONString(this).getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * 将JSON转换为websocket消息
+     *
+     * @return WebSocket消息
+     */
     public TextMessage wsMessage() {
         return new TextMessage(JSON.toJSONString(this));
     }

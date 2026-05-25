@@ -11,8 +11,17 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 public class ChannelEvent<T> {
+    /**
+     * 从谁来
+     */
     private String from;
+    /**
+     * 指令
+     */
     private String cmd;
+    /**
+     * 内容
+     */
     private T data;
 
     public static TextMessage ofConsole(String cmd, Object data) {

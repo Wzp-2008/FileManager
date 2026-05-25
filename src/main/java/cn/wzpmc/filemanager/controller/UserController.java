@@ -28,6 +28,7 @@ public class UserController {
 
     /**
      * 登录接口
+     *
      * @param loginRequest 登录请求体
      * @response {@link Result<UserVo>}
      */
@@ -38,6 +39,7 @@ public class UserController {
 
     /**
      * 注册接口
+     *
      * @param registerRequest 注册请求体
      * @response {@link Result<UserVo>}
      */
@@ -48,6 +50,7 @@ public class UserController {
 
     /**
      * 修改用户密码
+     *
      * @param request 用户密码修改请求体
      * @return 是否修改成功
      */
@@ -58,6 +61,7 @@ public class UserController {
 
     /**
      * 修改用户名
+     *
      * @param newUsername 新的用户名
      * @return 是否修改成功
      */
@@ -68,6 +72,7 @@ public class UserController {
 
     /**
      * 管理员用户生成邀请码接口
+     *
      * @return 邀请码
      */
     @GetMapping("/invite")
@@ -77,6 +82,7 @@ public class UserController {
 
     /**
      * 获取用户信息接口
+     *
      * @return 用户信息
      */
     @GetMapping("/info")
@@ -86,6 +92,7 @@ public class UserController {
 
     /**
      * 获取指定用户信息接口
+     *
      * @param id 用户ID
      * @return 该ID的用户信息
      */
@@ -96,6 +103,7 @@ public class UserController {
 
     /**
      * 修改当前用户设置
+     *
      * @param prefs 新的用户设置
      * @return 该用户的新设置
      */
@@ -106,6 +114,7 @@ public class UserController {
 
     /**
      * 保存浏览器指纹
+     *
      * @param request 指纹保存请求体
      * @param address 请求的地址
      * @return 是否保存成功
@@ -117,8 +126,9 @@ public class UserController {
 
     /**
      * 尝试使用浏览器指纹登录
+     *
      * @param fingerprint 浏览器指纹
-     * @param address 请求的地址
+     * @param address     请求的地址
      * @return 登录后的用户
      */
     @GetMapping("/fingerprint/login")
@@ -128,6 +138,7 @@ public class UserController {
 
     /**
      * 尝试删除浏览器指纹
+     *
      * @param user 用户信息
      * @return 是否删除成功
      */

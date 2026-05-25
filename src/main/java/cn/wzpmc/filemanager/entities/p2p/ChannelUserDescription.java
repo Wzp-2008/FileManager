@@ -8,7 +8,13 @@ import java.util.UUID;
 
 @Data
 public class ChannelUserDescription {
+    /**
+     * 接收者列表
+     */
     private List<UUID> receiver;
+    /**
+     * 发送者
+     */
     private UUID sender;
 
     public ChannelUserDescription() {

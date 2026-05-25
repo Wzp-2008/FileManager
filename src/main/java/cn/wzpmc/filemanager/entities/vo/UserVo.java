@@ -24,6 +24,7 @@ public class UserVo {
     private String name;
     /**
      * 用户密码
+     *
      * @ignore
      */
     private String password;
@@ -38,6 +39,9 @@ public class UserVo {
     @Column(isLogicDelete = true, onInsertValue = "false")
     private boolean banned;
 
+    /**
+     * 用户偏好设置
+     */
     @RelationOneToOne(selfField = "id", targetField = "userId", targetTable = "prefs")
     private PrefsVo prefs;
 
