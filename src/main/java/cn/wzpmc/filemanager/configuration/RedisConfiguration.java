@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
+/**
+ * redis数据库相关配置
+ */
 @Configuration
 @Getter
 public class RedisConfiguration {
@@ -19,6 +22,9 @@ public class RedisConfiguration {
         this.redisConnectionFactory = redisConnectionFactory;
     }
 
+    /**
+     * @return 下载链接存储仓库
+     */
     @Bean
     public RedisTemplate<String, FileVo> linkMapper() {
         RedisTemplate<String, FileVo> template = new RedisTemplate<>();
@@ -26,6 +32,9 @@ public class RedisConfiguration {
         return template;
     }
 
+    /**
+     * @return P2P文件传输通道仓库
+     */
     @Bean
     public RedisTemplate<String, RawChannelDescription> channelMapper() {
         RedisTemplate<String, RawChannelDescription> template = new RedisTemplate<>();

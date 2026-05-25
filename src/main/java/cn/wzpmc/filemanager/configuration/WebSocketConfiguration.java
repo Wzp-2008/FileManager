@@ -7,6 +7,9 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
+/**
+ * P2P 信令WebSocket配置
+ */
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSocket
@@ -15,6 +18,7 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        // 设置允许/api/channel（P2P通道WebSocket URL）允许所有人访问
         registry.addHandler(handler, "/api/channel").setAllowedOrigins("*");
     }
 }

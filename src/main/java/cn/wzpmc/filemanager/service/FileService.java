@@ -590,8 +590,9 @@ public class FileService {
         String mime;
         String sha512;
         long size;
-        FileOutputStream fileOutputStream = new FileOutputStream("test.bin");
-        try (SerialFileInputStream serialFileInputStream = openSerialFileInputStreamByChunks(sortedChunks)) {
+        File tmpFile = new File(savePath, "chunk-tmp-" + randomUtils.generatorRandomFileName(10));
+        try (FileOutputStream fileOutputStream = new FileOutputStream(tmpFile);
+             SerialFileInputStream serialFileInputStream = openSerialFileInputStreamByChunks(sortedChunks)) {
             Tika tika = new Tika();
             mime = tika.detect(serialFileInputStream);
             serialFileInputStream.reset();
@@ -601,8 +602,11 @@ public class FileService {
                 sha512 = HexUtils.toHexString(sizeStatisticsDigestInputStream.getMessageDigest().digest());
                 size = sizeStatisticsDigestInputStream.getSize();
             }
+            if (!tmpFile.renameTo(new File(savePath, sha512))) {
+                log.error("cannot move chunk tmp file to saved file");
+                return Result.failed(HttpStatus.INTERNAL_SERVER_ERROR, "保存区块失败");
+            }
         }
-        fileOutputStream.close();
 
         fileVo.setName(name);
         fileVo.setExt(ext);
