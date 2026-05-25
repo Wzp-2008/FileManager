@@ -37,6 +37,7 @@ public class FileController {
 
     /**
      * 检查文件是否可以上传
+     *
      * @param description 文件路径
      * @return 是否可以上传
      */
@@ -48,6 +49,7 @@ public class FileController {
 
     /**
      * 上传一个文件
+     *
      * @param file Multipart格式的文件对象
      * @return 文件详情
      */
@@ -58,11 +60,12 @@ public class FileController {
 
     /**
      * 分页获取文件
-     * @param page 要获取第几页的文件
-     * @param num 每一页的文件数量
-     * @param folder 要获取的文件所在的文件夹
-     * @param sort 文件的排序方式
-     * @param reverse 是否反向排序
+     *
+     * @param page     要获取第几页的文件
+     * @param num      每一页的文件数量
+     * @param folder   要获取的文件所在的文件夹
+     * @param sort     文件的排序方式
+     * @param reverse  是否反向排序
      * @param keywords 搜索关键词
      * @return 分页后的文件列表
      */
@@ -73,6 +76,7 @@ public class FileController {
 
     /**
      * 创建一个文件夹
+     *
      * @param request 创建文件夹的相关参数
      * @return 创建的文件夹详情
      */
@@ -83,6 +87,7 @@ public class FileController {
 
     /**
      * 获取一个文件的简略信息
+     *
      * @param id 文件ID
      * @return 文件简略信息
      */
@@ -93,6 +98,7 @@ public class FileController {
 
     /**
      * 获取一个文件夹的简略信息
+     *
      * @param id 文件夹ID
      * @return 文件夹简略信息
      */
@@ -103,6 +109,7 @@ public class FileController {
 
     /**
      * 获取文件详细信息
+     *
      * @param id 文件ID
      * @return 文件详细信息
      */
@@ -113,7 +120,8 @@ public class FileController {
 
     /**
      * 删除一个文件/文件夹
-     * @param id 文件/文件夹ID
+     *
+     * @param id   文件/文件夹ID
      * @param type 目标为文件/文件夹
      * @return 是否删除成功
      */
@@ -124,6 +132,7 @@ public class FileController {
 
     /**
      * 获取文件下载链接
+     *
      * @param id 文件ID
      * @return 文件下载链接ID
      */
@@ -134,6 +143,7 @@ public class FileController {
 
     /**
      * 通过下载文件ID下载文件
+     *
      * @param id 下载ID
      * @see #getFileLink(long, String, HttpServletRequest)
      */
@@ -143,7 +153,18 @@ public class FileController {
     }
 
     /**
+     * 通过文件夹ID下载文件夹压缩包
+     *
+     * @param id 文件夹ID
+     */
+    @GetMapping("/download/folder/{id}")
+    public void downloadFolder(@PathVariable long id, @RequestHeader(value = "Range", defaultValue = "null") String range, HttpServletResponse response) {
+        fileService.downloadFolder(id, range, response);
+    }
+
+    /**
      * 通过路径解析文件信息
+     *
      * @param path 需要解析的文件路径
      * @return 文件粗略信息
      */
@@ -154,7 +175,8 @@ public class FileController {
 
     /**
      * 通过文件ID获取文件路径
-     * @param id 文件ID
+     *
+     * @param id   文件ID
      * @param type 目标文件为文件/文件夹
      * @return 文件的路径
      */
@@ -165,6 +187,7 @@ public class FileController {
 
     /**
      * 获取需要上传的区块列表
+     *
      * @param hash 文件分块后的所有hash值
      * @return 需要上传的区块哈希和区块ID
      */
@@ -176,6 +199,7 @@ public class FileController {
 
     /**
      * 上传一个区块
+     *
      * @param block 区块文件
      * @return 上传的区块ID
      */
@@ -188,6 +212,7 @@ public class FileController {
 
     /**
      * 将区块保存为文件
+     *
      * @param request 保存文件请求
      * @return 保存后的文件
      */
@@ -199,6 +224,7 @@ public class FileController {
 
     /**
      * 移动文件位置
+     *
      * @param request 文件位置请求
      * @return 是否移动成功
      */

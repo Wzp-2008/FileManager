@@ -22,6 +22,7 @@ import cn.wzpmc.filemanager.mapper.FolderMapper;
 import cn.wzpmc.filemanager.utils.JwtUtils;
 import cn.wzpmc.filemanager.utils.MybatisUtils;
 import cn.wzpmc.filemanager.utils.RandomUtils;
+import cn.wzpmc.filemanager.utils.stream.CopyOutputStream;
 import cn.wzpmc.filemanager.utils.stream.SerialFileInputStream;
 import cn.wzpmc.filemanager.utils.stream.SizeStatisticsDigestInputStream;
 import com.alibaba.fastjson2.JSONObject;
@@ -66,6 +67,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static cn.wzpmc.filemanager.entities.vo.table.ChunkFileVoTableDef.CHUNK_FILE_VO;
 import static cn.wzpmc.filemanager.entities.vo.table.ChunksVoTableDef.CHUNKS_VO;
@@ -713,6 +716,89 @@ public class FileService {
         targetVo.setParent(newParentId);
         folderMapper.update(targetVo);
         return Result.success("移动成功");
+    }
+
+    @SneakyThrows
+    public void downloadFolder(long folderId, String range, HttpServletResponse response) {
+        FolderVo folderVo = this.folderMapper.selectOneById(folderId);
+        if (folderVo == null) {
+            Result.failed(HttpStatus.NOT_FOUND, "文件夹不存在！").writeToResponse(response);
+            return;
+        }
+        ContentDisposition disposition = ContentDisposition.attachment().filename(folderVo.getName() + ".zip", StandardCharsets.UTF_8).build();
+        response.addHeader("Content-Disposition", disposition.toString());
+        File zipCache = new File(getFolderZipCacheFolder(), String.valueOf(folderId));
+        File zipCacheFlag = new File(getFolderZipCacheFolder(), folderId + ".flag");
+        if (zipCache.isFile() && zipCacheFlag.isFile()) {
+            String[] unitRanges = range.split("=");
+            String[] minMax = unitRanges[1].split("-");
+            long size = zipCache.length();
+            long min = 0, max = size - 1;
+            if (minMax.length > 0) {
+                min = Long.parseLong(minMax[0]);
+            }
+            if (minMax.length > 1) {
+                max = Long.parseLong(minMax[1]);
+            }
+            response.setStatus(206);
+            response.addHeader("Content-Range", "bytes " + min + "-" + max + "/" + size);
+            response.addHeader("Accept-Ranges", "bytes");
+            response.addHeader("Content-Length", String.valueOf(max - min + 1));
+            try (ServletOutputStream outputStream = response.getOutputStream()) {
+                try (InputStream stream = new FileInputStream(zipCache)) {
+                    StreamUtils.copyRange(stream, outputStream, min, max);
+                }
+            } catch (IOException e) {
+                if (!response.isCommitted()) {
+                    response.reset();
+                }
+            }
+            return;
+        }
+        response.setStatus(200);
+        FileOutputStream fos = new FileOutputStream(zipCache);
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(new CopyOutputStream(response.getOutputStream(), fos))) {
+            addEntriesToZip(folderVo, zipOutputStream);
+        }
+        fos.close();
+        if (!zipCacheFlag.createNewFile()) {
+            log.warn("Cannot create flag file for zip");
+        }
+    }
+
+    private void addEntriesToZip(FolderVo folderVo, ZipOutputStream zipOutputStream) throws IOException {
+        addEntriesToZip(folderVo, zipOutputStream, folderVo.getName());
+    }
+
+    private void addEntriesToZip(FolderVo folderVo, ZipOutputStream zipOutputStream, String currentPath) throws IOException {
+        long folderId = folderVo.getId();
+        for (FileVo fileVo : this.fileMapper.selectListByCondition(FILE_VO.FOLDER.eq(folderId))) {
+            String hash = fileVo.getHash();
+            String fullName = fileVo.getName();
+            String ext = fileVo.getExt();
+            if (ext != null) {
+                fullName += '.' + ext;
+            }
+            zipOutputStream.putNextEntry(new ZipEntry(currentPath + File.separator + fullName));
+            try (FileInputStream fis = new FileInputStream(new File(savePath, hash))) {
+                StreamUtils.copy(fis, zipOutputStream);
+                zipOutputStream.flush();
+                zipOutputStream.closeEntry();
+            }
+        }
+        for (FolderVo childFolder : this.folderMapper.selectListByCondition(FOLDER_VO.PARENT.eq(folderId))) {
+            addEntriesToZip(childFolder, zipOutputStream, currentPath + File.separator + folderVo.getName());
+        }
+    }
+
+    private File getFolderZipCacheFolder() {
+        File file = new File(this.savePath, "cache-folder");
+        if (!file.isDirectory()) {
+            if (!file.mkdir()) {
+                throw new RuntimeException("Error while create folder zip cache dir");
+            }
+        }
+        return file;
     }
 
     private record FilenameDescription(String name, String ext) {
