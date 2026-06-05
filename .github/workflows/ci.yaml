@@ -27,16 +27,42 @@ jobs:
           ref: v2-web
           path: frontend-src
 
-      - name: Set Gradle Proxy (Gitea only)
+      - name: Set Gradle Mirror (Gitea only)
         if: env.IS_GITEA == 'true'
         run: |
           mkdir -p ~/.gradle
-          {
-            echo "systemProp.http.proxyHost=${PROXY_HOST}"
-            echo "systemProp.http.proxyPort=${PROXY_PORT}"
-            echo "systemProp.https.proxyHost=${PROXY_HOST}"
-            echo "systemProp.https.proxyPort=${PROXY_PORT}"
-          } >> ~/.gradle/gradle.properties
+          cat > ~/.gradle/init.gradle << 'EOF'
+          // 阿里云gradle插件镜像仓库地址
+          final PLUGIN_SOURCE = "https://maven.aliyun.com/repository/gradle-plugin"
+          // 阿里云maven镜像仓库地址
+          final PUBLIC_REPOSITORY = "https://maven.aliyun.com/repository/public"
+          // 阿里云google镜像仓库地址
+          final GOOGLE_REPOSITORY = "https://maven.aliyun.com/repository/google"
+          final PRIVATE_REPO = "https://wzpmc.cn:90/repository/maven-public/"
+          
+          gradle.settingsEvaluated { settings ->
+              settings.pluginManagement.repositories { repos ->
+                  // 插件解析仓库：先你的私服，再阿里云，再原有配置
+                  repos.maven { url PRIVATE_REPO }
+                  repos.maven { url PLUGIN_SOURCE }
+                  repos.maven { url GOOGLE_REPOSITORY }
+                  // 其他保持原样
+                  repos.gradlePluginPortal()
+                  repos.mavenCentral()
+              }
+          
+              settings.dependencyResolutionManagement { drm ->
+                  // 不设置 repositoriesMode，保留项目自己的 repositories 配置
+                  drm.repositories { repos ->
+                      repos.maven { url PRIVATE_REPO }
+                      repos.maven { url PUBLIC_REPOSITORY }
+                      repos.maven { url GOOGLE_REPOSITORY }
+                      repos.google()
+                      repos.mavenCentral()
+                  }
+              }
+          }
+          EOF
 
       - name: Cache Gradle files
         uses: actions/cache@v4
