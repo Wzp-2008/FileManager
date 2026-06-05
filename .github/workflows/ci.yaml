@@ -116,7 +116,7 @@ jobs:
       - name: Upload backend jar
         uses: actions/upload-artifact@v7
         with:
-          name: FileManager.jar
+          name: FileManager
           path: FileManager.jar
 
       - name: Upload frontend dist
