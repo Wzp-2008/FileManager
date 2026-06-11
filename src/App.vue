@@ -1,19 +1,26 @@
 <script setup lang="ts">
-import {Folder, Upload} from "@element-plus/icons-vue";
-import {noop, StorageSerializers, useLocalStorage} from "@vueuse/core";
-import type {DropdownInstance} from "element-plus";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {isEqual} from "lodash-es";
-import {computed, onBeforeMount, provide, ref, useTemplateRef, watch,} from "vue";
+import { Folder, Upload } from "@element-plus/icons-vue";
+import { noop, StorageSerializers, useLocalStorage } from "@vueuse/core";
+import type { DropdownInstance } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { isEqual } from "lodash-es";
+import {
+  computed,
+  onBeforeMount,
+  provide,
+  ref,
+  useTemplateRef,
+  watch,
+} from "vue";
 import InviteCodeDialog from "./components/user/InviteCodeDialog.vue";
 import LoginRegisterDialog from "./components/user/LoginRegisterDialog.vue";
-import type {DialogStatus} from "./components/user/LoginRegisterDialogTypes";
+import type { DialogStatus } from "./components/user/LoginRegisterDialogTypes";
 import BaseFileComponent from "./components/BaseFileComponent.vue";
 import UploadDialog from "./components/upload/UploadDialog.vue";
-import FileManagerSdk, {ROOT} from "./sdk";
-import type {RawFile, User} from "./sdk/entities";
-import {getFingerprint} from "./sdk/utils";
-import {type SortDefinition, useMobileMediaQuery} from "./utils";
+import FileManagerSdk, { ROOT } from "./sdk";
+import type { RawFile, User } from "./sdk/entities";
+import { getFingerprint } from "./sdk/utils";
+import { type SortDefinition, useMobileMediaQuery } from "./utils";
 import UserSettingsDialog from "./components/user/UserSettingsDialog.vue";
 import P2PDialog from "./components/p2p/P2PDialog.vue";
 
@@ -134,7 +141,7 @@ const openSetting = () => {
   <el-container>
     <el-header class="head">
       <h1 class="main-title">
-        <span class="english-name">FileManager·</span>文件分享站<span> - Dev</span>
+        <span class="english-name">FileManager·</span>文件分享站
       </h1>
       <div class="head-right">
         <div
