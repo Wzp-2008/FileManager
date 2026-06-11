@@ -407,7 +407,7 @@ public class FileService {
      * 清除不活动的链接，同时接续活动链接的存活时间
      */
     @Scheduled(fixedRate = 60000)
-    private void clearNonActiveDownloadLink() {
+    protected void clearNonActiveDownloadLink() {
         List<String> activeAndReset = outputStreamManager.getActiveAndReset();
         ValueOperations<String, FileVo> o = linkMapper.opsForValue();
         for (String s : activeAndReset) {
