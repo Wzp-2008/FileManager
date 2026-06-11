@@ -49,7 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -64,6 +63,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.sql.Connection;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -404,19 +405,13 @@ public class FileService {
     }
 
     /**
-     * 清除不活动的链接，同时接续活动链接的存活时间
+     * 为活动链接续期
      */
     @Scheduled(fixedRate = 60000)
-    protected void clearNonActiveDownloadLink() {
+    protected void renewActiveLink() {
         List<String> activeAndReset = outputStreamManager.getActiveAndReset();
-        ValueOperations<String, FileVo> o = linkMapper.opsForValue();
         for (String s : activeAndReset) {
-            FileVo fileVo = o.get(s);
-            if (fileVo == null) {
-                log.warn("续期链接{}时出现错误：找不到该链接对应的文件对象", s);
-                continue;
-            }
-            o.set(s, fileVo, properties.getLinkExpireMinutes(), TimeUnit.MINUTES);
+            linkMapper.expireAt(s, Instant.now().plus(properties.getLinkExpireMinutes(), ChronoUnit.MINUTES));
         }
     }
 
