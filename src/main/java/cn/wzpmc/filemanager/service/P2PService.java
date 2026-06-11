@@ -1,5 +1,6 @@
 package cn.wzpmc.filemanager.service;
 
+import cn.wzpmc.filemanager.config.FileManagerProperties;
 import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.p2p.*;
 import cn.wzpmc.filemanager.entities.vo.UserVo;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Repository;
@@ -22,12 +24,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -35,12 +39,13 @@ public class P2PService {
     private final RedisTemplate<String, RawChannelDescription> channelMapper;
     private final Map<String, ChannelUserDescription> channels = new HashMap<>();
     private final RandomUtils randomUtils;
+    private final FileManagerProperties properties;
 
     public Result<ChannelCreateResponse> createChannel(UserVo user, ChannelCreateRequest channelCreateRequest) {
         String key = randomUtils.generatorRandomString(48);
         RawChannelDescription description = new RawChannelDescription(channelCreateRequest.getFilename(), channelCreateRequest.getSize(), user.getId(), user.getName(), key);
         String id = randomUtils.generatorRandomFileName(8);
-        channelMapper.opsForValue().set(id, description);
+        channelMapper.opsForValue().set(id, description, properties.getP2pTunnelExpireMinutes(), TimeUnit.MINUTES);
         channels.put(id, new ChannelUserDescription());
         return Result.success(new ChannelCreateResponse(id, key));
     }
@@ -55,14 +60,17 @@ public class P2PService {
         @Override
         public void afterConnectionEstablished(WebSocketSession session) throws Exception {
             String id = UriComponentsBuilder.fromUri(Objects.requireNonNull(session.getUri())).build().getQueryParams().getFirst("id");
-            RawChannelDescription description = channelMapper.opsForValue().get(id);
+            ValueOperations<String, RawChannelDescription> opsForValue = channelMapper.opsForValue();
+            RawChannelDescription description = opsForValue.get(id);
             if (description == null) {
                 session.sendMessage(Result.failed("未知通道ID").wsMessage());
                 session.close(CloseStatus.NOT_ACCEPTABLE);
                 return;
             }
-            sendPing(session);
             assert id != null;
+            // 通道续期
+            channelMapper.expireAt(id, Instant.now().plus(properties.getP2pTunnelExpireMinutes(), ChronoUnit.MINUTES));
+            sendPing(session);
             Map<String, Object> attr = session.getAttributes();
             attr.put("channelId", id);
             attr.put("channelDesc", description);
@@ -144,6 +152,10 @@ public class P2PService {
             UUID uuid = new UUID(byteBuf.readLong(), byteBuf.readLong());
             ScheduledFuture<?> remove = pingScheduler.remove(uuid);
             remove.cancel(true);
+            // 通道续期
+            Map<String, Object> attr = session.getAttributes();
+            String channelId = (String) attr.get("channelId");
+            channelMapper.expireAt(channelId, Instant.now().plus(properties.getP2pTunnelExpireMinutes(), ChronoUnit.MINUTES));
             taskScheduler.schedule(() -> sendPing(session), Instant.now().plusSeconds(10));
         }
 
