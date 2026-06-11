@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onBeforeMount, type Ref, ref } from "vue";
+import { computed, inject, onBeforeMount, type Ref, ref } from "vue";
 import FileManagerSdk from "../../sdk";
 import { P2PSingingChannel, transferData } from "../../sdk/p2p.ts";
 import type { ChannelEvent } from "../../sdk/network";
@@ -108,7 +108,14 @@ const tunId = ref<string | null>();
 const fileReceive = ref<{ filename: string; size: number }>();
 const connectionMade = ref<boolean>(false);
 const receivedSize = ref<number>(-1);
+const receivedData: Blob[] = [];
+const transferDone = ref<boolean>(false);
 onBeforeMount(() => {
+  const lastError = sessionStorage.getItem("p2p-last-error");
+  if (lastError) {
+    ElMessage.error(lastError);
+    sessionStorage.removeItem("p2p-last-error");
+  }
   tunId.value = new URLSearchParams(location.search).get("tun");
   if (tunId.value) {
     const channel = new P2PSingingChannel(tunId.value);
@@ -151,22 +158,54 @@ onBeforeMount(() => {
         ev.channel.binaryType = "blob";
         ev.channel.onmessage = (ev) => {
           const d = ev.data as Blob;
+          receivedData.push(d);
           receivedSize.value += d.size;
+          if (d.size === 0) {
+            console.log("下载完成，开始保存");
+            const fullBlob = new Blob(receivedData);
+            const a = document.createElement("a");
+            a.download = fileReceive.value!.filename;
+            a.href = URL.createObjectURL(fullBlob);
+            a.click();
+            a.remove();
+          }
         };
       };
     });
   }
 });
+const shareLink = computed(() =>
+  createdChannelId.value
+    ? location.protocol +
+      "//" +
+      location.host +
+      "?tun=" +
+      createdChannelId.value
+    : "",
+);
+const copyLink = () => {
+  if (!navigator.clipboard) {
+    ElMessage.error("由于网站没有启用安全连接，无法自动复制，请手动复制链接！");
+    return;
+  }
+  navigator.clipboard.writeText(shareLink.value);
+  ElMessage.success("复制成功！");
+};
 </script>
 
 <template>
   <el-dialog
     v-model="show"
     append-to-body
+    style="--el-dialog-width: 60%"
     :title="tunId ? `P2P文件接收 - ${tunId}` : 'P2P文件发送'">
     <div v-if="!tunId">
       <input type="file" @change="onInputChange" v-if="!tunId" />
-      <div>{{ createdChannelId }}</div>
+      <div v-if="shareLink">
+        <el-link @click="copyLink"
+          >分享链接（点击以复制）：{{ shareLink }}</el-link
+        >
+      </div>
       <el-progress
         v-for="prog in progress"
         :text-inside="true"
@@ -175,7 +214,8 @@ onBeforeMount(() => {
         status="warning" />
     </div>
     <div v-else>
-      <el-text v-if="connectionMade" type="success">连接已建立</el-text>
+      <el-text v-if="transferDone" type="primary">传输已完成</el-text>
+      <el-text v-else-if="connectionMade" type="success">连接已建立</el-text>
       <el-text v-else type="warning">建立连接中...</el-text>
       <div v-if="fileReceive">
         文件名：{{ fileReceive.filename }}<br />

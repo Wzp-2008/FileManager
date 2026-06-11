@@ -18,6 +18,7 @@ export class P2PSingingChannel {
           new ErrorEvent("ServerReturnError", { error: msg, message: msg.msg }),
         );
         ElMessage.error(`P2P错误：${msg.msg}`);
+        sessionStorage.setItem("p2p-last-error", msg.msg);
         return true;
       }
     });
