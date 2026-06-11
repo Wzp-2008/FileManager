@@ -60,16 +60,14 @@ const onFileSubmit = async (file: File) => {
       const rtcDataChannel = connection.createDataChannel("test");
       rtcDataChannel.onopen = () => {
         console.log("data channel open");
-        ElMessage.info("Connection Made");
+        rtcDataChannel.bufferedAmountLowThreshold = 256 * 1024; // 缓冲区低阈值 256KB
         const newId = progress.value.length;
         transferData(file, rtcDataChannel, (p) => {
           progress.value[newId] = (p * 100).toFixed(1);
         }).then(() => {
-          ElMessage.success("Transfer done...");
           progress.value.splice(newId, 1);
         });
       };
-      ElMessage.info("create data channel");
       singingChannel.onUser(
         "candidate",
         userId,
@@ -88,7 +86,6 @@ const onFileSubmit = async (file: File) => {
           );
         },
       );
-      ElMessage.info(`user ${userId} connected, start rtc connection`);
       connection.onicecandidate = (ev) => {
         singingChannel.sendTo(userId, "candidate", ev.candidate);
       };
