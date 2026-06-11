@@ -39,6 +39,12 @@ public class FileManagerProperties {
      */
     private boolean readonly = false;
 
+    /**
+     * 链接默认过期时长（单位：分钟）<br/>
+     * 默认值：{@code 30}
+     */
+    private int linkExpireMinutes = 30;
+
     @Bean
     public File savePath() {
         if (!savePath.isDirectory()) {

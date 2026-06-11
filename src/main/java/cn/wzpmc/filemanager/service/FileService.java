@@ -23,6 +23,7 @@ import cn.wzpmc.filemanager.utils.JwtUtils;
 import cn.wzpmc.filemanager.utils.MybatisUtils;
 import cn.wzpmc.filemanager.utils.RandomUtils;
 import cn.wzpmc.filemanager.utils.stream.CopyOutputStream;
+import cn.wzpmc.filemanager.utils.stream.MonitorOutputStreamManager;
 import cn.wzpmc.filemanager.utils.stream.SerialFileInputStream;
 import cn.wzpmc.filemanager.utils.stream.SizeStatisticsDigestInputStream;
 import com.alibaba.fastjson2.JSONObject;
@@ -48,8 +49,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
@@ -96,6 +99,7 @@ public class FileService {
     private FilePathService pathService;
     private final File savePath;
     private boolean pgSQL;
+    private final MonitorOutputStreamManager outputStreamManager;
     public static final String ID_ADDR_PREFIX = "ID_ADDR_";
     public static final char PATH_SEPARATOR_CHAR = '/';
     public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
@@ -399,6 +403,23 @@ public class FileService {
         return Result.success();
     }
 
+    /**
+     * 清除不活动的链接，同时接续活动链接的存活时间
+     */
+    @Scheduled(fixedRate = 60000)
+    private void clearNonActiveDownloadLink() {
+        List<String> activeAndReset = outputStreamManager.getActiveAndReset();
+        ValueOperations<String, FileVo> o = linkMapper.opsForValue();
+        for (String s : activeAndReset) {
+            FileVo fileVo = o.get(s);
+            if (fileVo == null) {
+                log.warn("续期链接{}时出现错误：找不到该链接对应的文件对象", s);
+                continue;
+            }
+            o.set(s, fileVo, properties.getLinkExpireMinutes(), TimeUnit.MINUTES);
+        }
+    }
+
     public void downloadFile(String id, String range, HttpServletResponse response) {
         FileVo fileVo = linkMapper.opsForValue().get(id);
         if (fileVo == null) {
@@ -444,9 +465,9 @@ public class FileService {
         response.addHeader("Content-Disposition", disposition.toString());
 
         log.debug("-------Copy-{}-{}-{}-------", min, max, id);
-        try (ServletOutputStream outputStream = response.getOutputStream()) {
+        try (OutputStream os = outputStreamManager.open(response.getOutputStream(), id)) {
             try (InputStream stream = chunksVos == null ? new FileInputStream(file) : openSerialFileInputStreamByChunks(chunksVos)) {
-                StreamUtils.copyRange(stream, outputStream, min, max);
+                StreamUtils.copyRange(stream, os, min, max);
             }
         } catch (IOException e) {
             if (!response.isCommitted()) {
@@ -472,8 +493,8 @@ public class FileService {
             } else {
                 statisticsService.insertAction(Actions.DOWNLOAD, JSONObject.of("id", fileId, "address", address));
             }
-            linkMapper.opsForValue().set(link, fileVo, 30, TimeUnit.MINUTES);
-            idAddrLinkMapper.opsForValue().set(identify, link, 30, TimeUnit.MINUTES);
+            linkMapper.opsForValue().set(link, fileVo, properties.getLinkExpireMinutes(), TimeUnit.MINUTES);
+            idAddrLinkMapper.opsForValue().set(identify, link, properties.getLinkExpireMinutes(), TimeUnit.MINUTES);
         }
         return Result.success("成功", link);
     }
