@@ -118,14 +118,18 @@ public class P2PService {
             UUID uid = (UUID) attributes.get("uid");
             if (channelId == null || uid == null) return;
             sessions.remove(uid);
-            ChannelUserDescription channelUserDescription = channels.remove(channelId);
+            ChannelUserDescription channelUserDescription = channels.get(channelId);
             if (channelUserDescription == null) return;
             if (channelUserDescription.getSender().equals(uid)) {
+                channels.remove(channelId);
+                channelMapper.delete(channelId);
                 for (UUID uuid : channelUserDescription.getReceiver()) {
                     sendTo(uuid, Result.failed("主机断开连接").wsMessage());
                     close(uuid);
                 }
+                return;
             }
+            channelUserDescription.getReceiver().remove(uid);
         }
 
         @Override
