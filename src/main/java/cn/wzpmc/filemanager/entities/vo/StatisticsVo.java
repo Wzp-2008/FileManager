@@ -5,9 +5,9 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
-import org.jspecify.annotations.Nullable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Date;
 
@@ -36,6 +36,7 @@ public class StatisticsVo {
     private Date time;
     /**
      * 若为下载操作时的下载文件ID
+     *
      * @ignore
      */
     @Column(value = "download_file_id", ignore = true)

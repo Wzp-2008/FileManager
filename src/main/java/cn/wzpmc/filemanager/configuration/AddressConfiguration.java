@@ -1,8 +1,8 @@
 package cn.wzpmc.filemanager.configuration;
 
 import cn.wzpmc.filemanager.utils.AddressArgumentResolver;
-import org.jspecify.annotations.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

@@ -23,7 +23,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
@@ -76,6 +75,7 @@ public class UserService {
         this.statisticsService.insertAction(userVo, Actions.LOGIN, JSONObject.of("status", "success", "address", address));
         Result.success("登录成功", userVo).writeToResponse(response);
     }
+
     public void register(UserRegisterRequest request, HttpServletResponse response, String address) {
         if (properties.isReadonly()) {
             Result.failed(HttpStatus.LOCKED, "只读模式，不可注册").writeToResponse(response);
@@ -121,6 +121,7 @@ public class UserService {
         String s = genInviteCode(userVo, address);
         return Result.success("生成了一个有效期15分钟的邀请码", s);
     }
+
     public String genInviteCode(UserVo actor, String address) {
         ValueOperations<String, String> ops = authTemplate.opsForValue();
         String s = this.randomUtils.generatorRandomString(8);
@@ -132,7 +133,7 @@ public class UserService {
 
     public Result<UserVo> getUserInformation(Long id) {
         UserVo userVo = userMapper.selectOneById(id);
-        if (userVo == null){
+        if (userVo == null) {
             return Result.failed(HttpStatus.NOT_FOUND, "用户不存在！");
         }
         userVo.clearPassword();

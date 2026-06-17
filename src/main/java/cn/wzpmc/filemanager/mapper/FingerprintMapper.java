@@ -5,9 +5,9 @@ import com.mybatisflex.core.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * @since 2025/5/10 14:26
  * @author wzp
  * @version 1.0.0
+ * @since 2025/5/10 14:26
  */
 @Mapper
 public interface FingerprintMapper extends BaseMapper<FingerprintVo> {

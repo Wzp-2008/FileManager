@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JSONCompiled
 public class UserVo {
+    public static final UserVo CONSOLE = new UserVo(0L, "CONSOLE", Auth.admin);
     /**
      * 用户ID
      */
@@ -38,7 +39,6 @@ public class UserVo {
      */
     @Column(isLogicDelete = true, onInsertValue = "false")
     private boolean banned;
-
     /**
      * 用户偏好设置
      */
@@ -64,6 +64,4 @@ public class UserVo {
     public void clearPassword() {
         this.setPassword(null);
     }
-
-    public static final UserVo CONSOLE = new UserVo(0L, "CONSOLE", Auth.admin);
 }

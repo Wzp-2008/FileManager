@@ -4,9 +4,9 @@ import cn.wzpmc.filemanager.entities.Result;
 import org.springframework.http.HttpStatus;
 
 /**
- * @since 2025/5/19 20:01
  * @author wzp
  * @version 1.0.0
+ * @since 2025/5/19 20:01
  */
 public class TokenExpireAuthorizationException extends AuthorizationException {
     public TokenExpireAuthorizationException() {

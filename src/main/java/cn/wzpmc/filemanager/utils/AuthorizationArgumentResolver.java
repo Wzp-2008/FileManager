@@ -2,10 +2,10 @@ package cn.wzpmc.filemanager.utils;
 
 import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
 import cn.wzpmc.filemanager.exceptions.AuthorizationException;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -15,8 +15,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @Component
 public class AuthorizationArgumentResolver implements HandlerMethodArgumentResolver {
     private final AuthorizationUtils authorizationUtils;
+
     @Autowired
-    public AuthorizationArgumentResolver(AuthorizationUtils authorizationUtils){
+    public AuthorizationArgumentResolver(AuthorizationUtils authorizationUtils) {
         this.authorizationUtils = authorizationUtils;
     }
 

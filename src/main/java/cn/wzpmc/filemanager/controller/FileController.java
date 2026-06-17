@@ -158,8 +158,8 @@ public class FileController {
      * @param id 文件夹ID
      */
     @GetMapping("/download/folder/{id}")
-    public void downloadFolder(@PathVariable long id, @RequestHeader(value = "Range", defaultValue = "null") String range, HttpServletResponse response) {
-        fileService.downloadFolder(id, range, response);
+    public void downloadFolder(@PathVariable long id, HttpServletResponse response) {
+        fileService.downloadFolder(id, response);
     }
 
     /**

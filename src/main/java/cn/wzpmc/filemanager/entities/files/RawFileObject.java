@@ -59,7 +59,8 @@ public class RawFileObject {
     public static RawFileObject of(FolderVo folder) {
         return new RawFileObject(folder.getId(), folder.getName(), null, -1, folder.getCreator(), folder.getParent(), folder.getCreateTime(), FileType.FOLDER, "folder");
     }
-    public static String getRawFileName(RawFileObject object){
+
+    public static String getRawFileName(RawFileObject object) {
         return object.type.equals(FileType.FILE) ? object.getName() + '.' + object.getExt() : object.getName();
     }
 }

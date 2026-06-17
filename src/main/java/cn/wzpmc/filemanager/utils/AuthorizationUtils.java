@@ -27,11 +27,13 @@ import java.util.Optional;
 public class AuthorizationUtils {
     private final JwtUtils jwtUtils;
     private final UserMapper userMapper;
+
     @Autowired
     public AuthorizationUtils(JwtUtils jwtUtils, UserMapper userMapper) {
         this.jwtUtils = jwtUtils;
         this.userMapper = userMapper;
     }
+
     private UserVo auth(String header, AuthorizationRequired authorizationRequired) throws AuthorizationException {
         log.info("auth {} with token {}", authorizationRequired, header);
         if (header == null) {
@@ -52,7 +54,7 @@ public class AuthorizationUtils {
             if (auth.value == level.value) {
                 return userVo;
             }
-        }else {
+        } else {
             if (auth.value >= level.value) {
                 return userVo;
             }

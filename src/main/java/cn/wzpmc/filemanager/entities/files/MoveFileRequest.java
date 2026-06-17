@@ -5,9 +5,9 @@ import com.alibaba.fastjson2.annotation.JSONCompiled;
 import lombok.Data;
 
 /**
- * @since 2025/5/17 16:25
  * @author wzp
  * @version 1.0.0
+ * @since 2025/5/17 16:25
  */
 @Data
 @JSONCompiled

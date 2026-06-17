@@ -18,6 +18,10 @@ import java.util.Objects;
 public class FileManagerConfiguration {
     // 用户输入的配置
     private final FileManagerProperties properties;
+    // ffmpeg可执行文件缓存
+    private File ffmpegExecuteableFile = null;
+    // ffprobe可执行文件缓存
+    private File ffprobeExecutebleFile = null;
 
     /**
      * 文件保存文件夹<br/>
@@ -65,9 +69,6 @@ public class FileManagerConfiguration {
         return null;
     }
 
-    // ffmpeg可执行文件缓存
-    private File ffmpegExecuteableFile = null;
-
     /**
      * 根据用户配置和系统path获取ffmpeg可执行文件
      *
@@ -94,9 +95,6 @@ public class FileManagerConfiguration {
         }
         return ffmpegExecuteableFile;
     }
-
-    // ffprobe可执行文件缓存
-    private File ffprobeExecutebleFile = null;
 
     /**
      * 获取ffprobe可执行文件路径

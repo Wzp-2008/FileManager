@@ -14,6 +14,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MonitorOutputStreamManager {
     private final Map<String, Boolean> monitor = new ConcurrentHashMap<>();
 
+    public OutputStream open(OutputStream out, String monitorId) throws IOException {
+        return new Impl(out, monitorId);
+    }
+
+    public List<String> getActiveAndReset() {
+        List<String> res = this.monitor.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).toList();
+        this.monitor.clear();
+        return res;
+    }
+
     private class Impl extends FilterOutputStream {
         private final String monitorId;
 
@@ -45,15 +55,5 @@ public class MonitorOutputStreamManager {
             super.close();
             monitor.remove(monitorId);
         }
-    }
-
-    public OutputStream open(OutputStream out, String monitorId) throws IOException {
-        return new Impl(out, monitorId);
-    }
-
-    public List<String> getActiveAndReset() {
-        List<String> res = this.monitor.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).toList();
-        this.monitor.clear();
-        return res;
     }
 }

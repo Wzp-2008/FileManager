@@ -6,9 +6,9 @@ import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 /**
- * @since 2025/5/10 14:17
  * @author wzp
  * @version 1.0.0
+ * @since 2025/5/10 14:17
  */
 @Table("fingerprint")
 @JSONCompiled

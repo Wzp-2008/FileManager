@@ -20,35 +20,39 @@ public class JwtUtils {
     @Getter
     private final Algorithm hmacKey;
     private final RandomUtils randomUtils;
-    private String generatorHmacKey(){
-        return this.randomUtils.generatorRandomString(16);
-    }
+
     @Autowired
-    public JwtUtils(FileManagerProperties properties, RandomUtils randomUtils){
+    public JwtUtils(FileManagerProperties properties, RandomUtils randomUtils) {
         this.randomUtils = randomUtils;
         String hmacKey = properties.getHmacKey();
         String key;
-        if ("RANDOM".equalsIgnoreCase(hmacKey)){
+        if ("RANDOM".equalsIgnoreCase(hmacKey)) {
             key = this.generatorHmacKey();
             log.info("Using Random Hmac Key: {}", key);
-        }else{
+        } else {
             key = hmacKey;
         }
         this.hmacKey = Algorithm.HMAC512(key);
     }
-    public String createToken(long uid){
+
+    private String generatorHmacKey() {
+        return this.randomUtils.generatorRandomString(16);
+    }
+
+    public String createToken(long uid) {
         Calendar instance = Calendar.getInstance();
-        instance.add(Calendar.HOUR,24 * 5);
+        instance.add(Calendar.HOUR, 24 * 5);
         JWTCreator.Builder builder = JWT.create();
         builder.withClaim("uid", uid);
         builder.withExpiresAt(instance.getTime());
         return builder.sign(this.hmacKey);
     }
-    public Optional<Integer> getUser(String token){
+
+    public Optional<Integer> getUser(String token) {
         DecodedJWT verify;
         try {
             verify = JWT.require(this.hmacKey).build().verify(token);
-        }catch (Exception e){
+        } catch (Exception e) {
             return Optional.empty();
         }
         Claim uid = verify.getClaim("uid");

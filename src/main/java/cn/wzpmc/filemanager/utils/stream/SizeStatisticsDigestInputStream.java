@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 @Getter
 public class SizeStatisticsDigestInputStream extends DigestInputStream {
     protected long size = 0;
+
     public SizeStatisticsDigestInputStream(InputStream stream, MessageDigest digest) {
         super(stream, digest);
     }
