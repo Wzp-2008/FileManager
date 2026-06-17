@@ -763,7 +763,6 @@ public class FileService {
             zipOutputStream.putNextEntry(new ZipEntry(currentPath + '/' + fullName));
             try (FileInputStream fis = new FileInputStream(new File(savePath, hash))) {
                 StreamUtils.copy(fis, zipOutputStream);
-                zipOutputStream.flush();
                 zipOutputStream.closeEntry();
             }
         }
