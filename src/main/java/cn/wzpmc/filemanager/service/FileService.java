@@ -803,7 +803,7 @@ public class FileService {
             }
         }
         for (FolderVo childFolder : this.folderMapper.selectListByCondition(FOLDER_VO.PARENT.eq(folderId))) {
-            addEntriesToZip(childFolder, zipOutputStream, currentPath + File.separator + folderVo.getName());
+            addEntriesToZip(childFolder, zipOutputStream, currentPath + File.separator + childFolder.getName());
         }
     }
 
