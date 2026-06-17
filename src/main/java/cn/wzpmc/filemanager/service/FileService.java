@@ -22,7 +22,6 @@ import cn.wzpmc.filemanager.mapper.FolderMapper;
 import cn.wzpmc.filemanager.utils.JwtUtils;
 import cn.wzpmc.filemanager.utils.MybatisUtils;
 import cn.wzpmc.filemanager.utils.RandomUtils;
-import cn.wzpmc.filemanager.utils.stream.CopyOutputStream;
 import cn.wzpmc.filemanager.utils.stream.MonitorOutputStreamManager;
 import cn.wzpmc.filemanager.utils.stream.SerialFileInputStream;
 import cn.wzpmc.filemanager.utils.stream.SizeStatisticsDigestInputStream;
@@ -32,7 +31,6 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +85,9 @@ import static com.mybatisflex.core.query.QueryMethods.*;
 @Service
 @RequiredArgsConstructor
 public class FileService {
+    public static final String ID_ADDR_PREFIX = "ID_ADDR_";
+    public static final char PATH_SEPARATOR_CHAR = '/';
+    public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
     private final FileMapper fileMapper;
     private final FolderMapper folderMapper;
     private final RandomUtils randomUtils;
@@ -97,13 +98,29 @@ public class FileService {
     private final ChunksMapper chunksMapper;
     private final StringRedisTemplate idAddrLinkMapper;
     private final JwtUtils jwtUtils;
-    private FilePathService pathService;
     private final File savePath;
-    private boolean pgSQL;
     private final MonitorOutputStreamManager outputStreamManager;
-    public static final String ID_ADDR_PREFIX = "ID_ADDR_";
-    public static final char PATH_SEPARATOR_CHAR = '/';
-    public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
+    private FilePathService pathService;
+    private boolean pgSQL;
+
+    private static long getFolderParams(MultipartHttpServletRequest request) {
+        String params = request.getQueryString();
+        long folderParams = -1L;
+        if (params != null && !params.isEmpty()) {
+            String[] param = params.split("&");
+            for (String s : param) {
+                String[] keyValue = s.split("=");
+                if (keyValue.length == 2) {
+                    String key = keyValue[0];
+                    String value = keyValue[1];
+                    if (key.equals("folder")) {
+                        folderParams = Long.parseLong(value);
+                    }
+                }
+            }
+        }
+        return folderParams;
+    }
 
     @Autowired
     @Lazy
@@ -217,25 +234,6 @@ public class FileService {
             return Result.failed(HttpStatus.BAD_REQUEST, "未找到文件参数");
         }
         return Result.success("上传成功！", lastUploadFile);
-    }
-
-    private static long getFolderParams(MultipartHttpServletRequest request) {
-        String params = request.getQueryString();
-        long folderParams = -1L;
-        if (params != null && !params.isEmpty()) {
-            String[] param = params.split("&");
-            for (String s : param) {
-                String[] keyValue = s.split("=");
-                if (keyValue.length == 2) {
-                    String key = keyValue[0];
-                    String value = keyValue[1];
-                    if (key.equals("folder")) {
-                        folderParams = Long.parseLong(value);
-                    }
-                }
-            }
-        }
-        return folderParams;
     }
 
     private QueryWrapper getRawFileSelector() {
@@ -735,7 +733,7 @@ public class FileService {
     }
 
     @SneakyThrows
-    public void downloadFolder(long folderId, String range, HttpServletResponse response) {
+    public void downloadFolder(long folderId, HttpServletResponse response) {
         FolderVo folderVo = this.folderMapper.selectOneById(folderId);
         if (folderVo == null) {
             Result.failed(HttpStatus.NOT_FOUND, "文件夹不存在！").writeToResponse(response);
@@ -743,42 +741,9 @@ public class FileService {
         }
         ContentDisposition disposition = ContentDisposition.attachment().filename(folderVo.getName() + ".zip", StandardCharsets.UTF_8).build();
         response.addHeader("Content-Disposition", disposition.toString());
-        File zipCache = new File(getFolderZipCacheFolder(), String.valueOf(folderId));
-        File zipCacheFlag = new File(getFolderZipCacheFolder(), folderId + ".flag");
-        if (zipCache.isFile() && zipCacheFlag.isFile()) {
-            String[] unitRanges = range.split("=");
-            String[] minMax = unitRanges[1].split("-");
-            long size = zipCache.length();
-            long min = 0, max = size - 1;
-            if (minMax.length > 0) {
-                min = Long.parseLong(minMax[0]);
-            }
-            if (minMax.length > 1) {
-                max = Long.parseLong(minMax[1]);
-            }
-            response.setStatus(206);
-            response.addHeader("Content-Range", "bytes " + min + "-" + max + "/" + size);
-            response.addHeader("Accept-Ranges", "bytes");
-            response.addHeader("Content-Length", String.valueOf(max - min + 1));
-            try (ServletOutputStream outputStream = response.getOutputStream()) {
-                try (InputStream stream = new FileInputStream(zipCache)) {
-                    StreamUtils.copyRange(stream, outputStream, min, max);
-                }
-            } catch (IOException e) {
-                if (!response.isCommitted()) {
-                    response.reset();
-                }
-            }
-            return;
-        }
         response.setStatus(200);
-        FileOutputStream fos = new FileOutputStream(zipCache);
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(new CopyOutputStream(response.getOutputStream(), fos))) {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
             addEntriesToZip(folderVo, zipOutputStream);
-        }
-        fos.close();
-        if (!zipCacheFlag.createNewFile()) {
-            log.warn("Cannot create flag file for zip");
         }
     }
 
@@ -795,7 +760,7 @@ public class FileService {
             if (ext != null) {
                 fullName += '.' + ext;
             }
-            zipOutputStream.putNextEntry(new ZipEntry(currentPath + File.separator + fullName));
+            zipOutputStream.putNextEntry(new ZipEntry(currentPath + '/' + fullName));
             try (FileInputStream fis = new FileInputStream(new File(savePath, hash))) {
                 StreamUtils.copy(fis, zipOutputStream);
                 zipOutputStream.flush();
@@ -803,18 +768,8 @@ public class FileService {
             }
         }
         for (FolderVo childFolder : this.folderMapper.selectListByCondition(FOLDER_VO.PARENT.eq(folderId))) {
-            addEntriesToZip(childFolder, zipOutputStream, currentPath + File.separator + childFolder.getName());
+            addEntriesToZip(childFolder, zipOutputStream, currentPath + '/' + childFolder.getName());
         }
-    }
-
-    private File getFolderZipCacheFolder() {
-        File file = new File(this.savePath, "cache-folder");
-        if (!file.isDirectory()) {
-            if (!file.mkdir()) {
-                throw new RuntimeException("Error while create folder zip cache dir");
-            }
-        }
-        return file;
     }
 
     private record FilenameDescription(String name, String ext) {
