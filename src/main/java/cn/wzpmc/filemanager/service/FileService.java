@@ -432,6 +432,11 @@ public class FileService {
         }
         long min = 0;
         long max = size - 1;
+        // 解决Android端文件扩展名都为zip的问题
+        String mime = fileVo.getMime();
+        if (mime != null && !mime.isBlank()) {
+            response.setContentType(mime);
+        }
         if (!range.equals("null")) {
             String[] unitRanges = range.split("=");
             String[] minMax = unitRanges[1].split("-");
@@ -741,6 +746,7 @@ public class FileService {
         }
         ContentDisposition disposition = ContentDisposition.attachment().filename(folderVo.getName() + ".zip", StandardCharsets.UTF_8).build();
         response.addHeader("Content-Disposition", disposition.toString());
+        response.setContentType("application/zip");
         response.setStatus(200);
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
             addEntriesToZip(folderVo, zipOutputStream);
