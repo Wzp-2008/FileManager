@@ -14,6 +14,7 @@ import cn.wzpmc.filemanager.entities.files.enums.SortField;
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
 import cn.wzpmc.filemanager.entities.vo.*;
+import cn.wzpmc.filemanager.exceptions.ResponseException;
 import cn.wzpmc.filemanager.interfaces.FilePathService;
 import cn.wzpmc.filemanager.mapper.ChunkFileMapper;
 import cn.wzpmc.filemanager.mapper.ChunksMapper;
@@ -624,7 +625,12 @@ public class FileService {
         List<Long> chunkIds = chunks.getChunks();
         List<ChunksVo> chunksVos = chunksMapper.selectListByIds(chunkIds);
         assert chunksVos != null;
-        List<ChunksVo> sortedChunks = chunkIds.stream().map(e -> chunksVos.stream().filter(a -> a.getId() == e).findFirst().orElseThrow()).toList();
+        List<ChunksVo> sortedChunks = chunkIds.stream()
+                .map(e -> chunksVos.stream()
+                        .filter(a -> a.getId() == e)
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseException(Result.failed(HttpStatus.NOT_FOUND, "已上传的区块找不到")))
+                ).toList();
         String mime;
         String sha512;
         long size;
