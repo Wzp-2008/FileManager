@@ -19,8 +19,6 @@ public class AddressConfiguration implements WebMvcConfigurer {
 
     /**
      * 添加用于解析客户端IP地址的参数解析器
-     *
-     * @param resolvers initially an empty list
      */
     @Override
     public void addArgumentResolvers(@NonNull List<HandlerMethodArgumentResolver> resolvers) {

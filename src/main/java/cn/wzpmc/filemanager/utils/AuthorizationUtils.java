@@ -83,7 +83,7 @@ public class AuthorizationUtils {
     /**
      * 从已经过期了的token中提取用户信息
      *
-     * @param originalToken token
+     * @param originalToken 原始token值（直接从Authorization头里拿）
      * @return 对应的用户信息
      */
     private UserVo tryGetUserFromExpired(String originalToken) {

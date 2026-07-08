@@ -29,8 +29,6 @@ public class AuthorizationConfiguration implements WebMvcConfigurer {
 
     /**
      * 添加token参数解析器
-     *
-     * @param resolvers initially an empty list
      */
     @Override
     public void addArgumentResolvers(@NonNull List<HandlerMethodArgumentResolver> resolvers) {

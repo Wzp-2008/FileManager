@@ -37,14 +37,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-web") {
-        // remove jackson
+        // 移除Jackson，使用FastJSON2代替
         exclude("org.springframework.boot", "spring-boot-starter-json")
     }
     // https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-spring-boot3-starter
     implementation("com.mybatis-flex:mybatis-flex-spring-boot4-starter:${mybatisFlexVersion}")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     annotationProcessor("com.mybatis-flex:mybatis-flex-processor:${mybatisFlexVersion}")
-    // provide the autoconfigure for jdbc(datasource) in 4.x
+    // 提供JDBC数据源的自动配置
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     // https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2
     implementation("com.alibaba.fastjson2:fastjson2:${fastjsonVersion}")
@@ -65,7 +65,6 @@ dependencies {
     // Source: https://mvnrepository.com/artifact/org.postgresql/postgresql
     implementation("org.postgresql:postgresql:42.7.10")
     compileOnly("org.projectlombok:lombok")
-    /*developmentOnly("org.springframework.boot:spring-boot-devtools")*/
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")

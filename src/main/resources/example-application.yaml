@@ -1,29 +1,30 @@
 server:
-  port: 28080 #server port
-  ssl: # ssl (not required)
-    key-store: keys/key.p12 # ssl key store path
-    key-store-type: PKCS12 # ssl key store type
-    key-store-password: "" # ssl key store password
+  port: 28080 # 服务端口
+  ssl: # SSL/HTTPS配置 (不必须)
+    key-store: keys/key.p12 # SSL 密钥
+    key-store-type: PKCS12 # SSL 密钥类型
+    key-store-password: "" # SSL 密钥密码
 spring:
+  # 数据库配置
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/fsv2 # jdbc url
-    # for pg sql:
+    url: jdbc:mysql://127.0.0.1:3306/fsv2 # 数据库配置
+    # 或使用PostgreSQL（请取消下面三行注释）:
     # url: jdbc:postgresql://127.0.0.1:5432/fsv2
-    username: "fsv2" # db username
-    password: "fsv2" # db password
-    # for pg sql:
     # druid:
     #  db-type: postgresql
+    username: "change-me" # 数据库用户名
+    password: "change-me" # 数据库密码
   data:
+    # Redis配置
     redis:
-      host: "127.0.0.1" # redis host
-      database: 3 # redis database
-      password: "fsv2" # redis password
+      host: "127.0.0.1" # Redis 服务IP
+      database: 3 # Redis 数据库ID（不填写默认为1）
+      password: "change-me" # Redis 数据库密码
   servlet:
     multipart:
-      max-file-size: 100GB # max file upload size
-      max-request-size: 100GB # max file upload size
+      max-file-size: 100GB # 最大文件上传大小
+      max-request-size: 100GB # 同上（配置时和上面设置的一样即可）
 wzp:
   filemanager:
-    save-path: "./file" # file save path
-    hmac-key: "fsv2" # jwt key(can be any random string)
+    save-path: "./file" # 文件块持久化保存路径
+    hmac-key: "RANDOM" # JWT 密钥（可以写"RANDOM"让程序每次启动时随机生成，或是写其他任意字符串用作JWT密钥，注意此密钥有关于系统安全，最好是不少于六位的大小写字母+数字+符号组合!）
