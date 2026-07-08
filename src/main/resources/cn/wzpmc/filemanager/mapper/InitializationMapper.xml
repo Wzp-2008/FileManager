@@ -26,7 +26,6 @@
         KEY `pure_name` (`name`),
         KEY `file_name_ext_id_uploader_index` (`name`, `ext`, `id`, `uploader`)
         ) ENGINE = InnoDB
-        AUTO_INCREMENT = 9535
         DEFAULT CHARSET = utf8mb4
         COLLATE = utf8mb4_general_ci COMMENT ='文件';
     </insert>
@@ -84,7 +83,6 @@
         KEY `name` (`name`),
         KEY `parent` (`parent`)
         ) ENGINE = InnoDB
-        AUTO_INCREMENT = 3417
         DEFAULT CHARSET = utf8mb4
         COLLATE = utf8mb4_general_ci COMMENT ='文件夹';
     </insert>
@@ -188,7 +186,6 @@
         UNIQUE KEY `login_index` (`name`, `password`) COMMENT '用户名密码索引',
         UNIQUE KEY `id_index` (`id`) COMMENT 'ID索引'
         ) ENGINE = InnoDB
-        AUTO_INCREMENT = 43
         DEFAULT CHARSET = utf8mb4
         COLLATE = utf8mb4_general_ci COMMENT ='用户表';
     </insert>
