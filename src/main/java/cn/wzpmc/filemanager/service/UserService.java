@@ -55,7 +55,7 @@ public class UserService {
         }
     }
 
-    public void login(UserLoginRequest request, HttpServletResponse response, String address) {
+    public Result<UserVo> login(UserLoginRequest request, HttpServletResponse response, String address) {
         String username = request.getUsername();
         String password = request.getPassword();
         String sha1edPassword = DigestUtils.sha1Hex(password);
@@ -63,8 +63,7 @@ public class UserService {
         long count = this.userMapper.selectCountByCondition(findUserCondition);
         if (count <= 0) {
             this.statisticsService.insertAction(Actions.LOGIN, JSONObject.of("status", "error", "msg", "账号或密码错误", "address", address));
-            Result.failed(HttpStatus.UNAUTHORIZED, "账号或密码错误").writeToResponse(response);
-            return;
+            return Result.failed(HttpStatus.UNAUTHORIZED, "账号或密码错误");
         }
         UserVo userVo = this.userMapper.selectOneWithRelationsByCondition(findUserCondition);
         assert userVo != null;
@@ -73,26 +72,23 @@ public class UserService {
         String token = this.jwtUtils.createToken(id);
         response.addHeader("Add-Authorization", token);
         this.statisticsService.insertAction(userVo, Actions.LOGIN, JSONObject.of("status", "success", "address", address));
-        Result.success("登录成功", userVo).writeToResponse(response);
+        return Result.success("登录成功", userVo);
     }
 
-    public void register(UserRegisterRequest request, HttpServletResponse response, String address) {
+    public Result<UserVo> register(UserRegisterRequest request, HttpServletResponse response, String address) {
         if (properties.isReadonly()) {
-            Result.failed(HttpStatus.LOCKED, "只读模式，不可注册").writeToResponse(response);
-            return;
+            return Result.failed(HttpStatus.LOCKED, "只读模式，不可注册");
         }
         String username = request.getUsername();
         String password = request.getPassword();
         if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
-            Result.failed(HttpStatus.BAD_REQUEST, "用户名/密码不可为空！").writeToResponse(response);
-            return;
+            return Result.failed(HttpStatus.BAD_REQUEST, "用户名/密码不可为空！");
         }
         String sha1edPassword = DigestUtils.sha1Hex(password);
         Auth auth = request.getAuth();
         if (this.userMapper.selectCountByCondition(USER_VO.NAME.eq(username)) > 0) {
             this.statisticsService.insertAction(Actions.REGISTER, JSONObject.of("status", "error", "auth", auth, "msg", "用户名已存在", "address", address));
-            Result.failed(HttpStatus.CONFLICT).msg("用户名已存在，若需要修改密码，请联系网站管理员处理").writeToResponse(response);
-            return;
+            return Result.failed(HttpStatus.CONFLICT, "用户名已存在，若需要修改密码，请联系网站管理员处理");
         }
         JSONObject statisticsData = JSONObject.of("status", "success", "auth", auth, "address", address);
         if (auth.equals(Auth.admin)) {
@@ -101,8 +97,7 @@ public class UserService {
             String andDelete = ops.getAndDelete(inviteCode);
             if (andDelete == null) {
                 this.statisticsService.insertAction(Actions.REGISTER, JSONObject.of("status", "error", "auth", auth, "msg", "邀请码错误", "inviteCode", inviteCode, "address", address));
-                Result.failed(HttpStatus.NOT_FOUND, "过期或无效的邀请码").writeToResponse(response);
-                return;
+                return Result.failed(HttpStatus.NOT_FOUND, "过期或无效的邀请码");
             }
             statisticsData.put("inviteCode", inviteCode);
         }
@@ -113,7 +108,7 @@ public class UserService {
         String token = this.jwtUtils.createToken(id);
         response.addHeader("Add-Authorization", token);
         this.statisticsService.insertAction(userVo, Actions.REGISTER, statisticsData);
-        Result.success("注册成功！", userVo).writeToResponse(response);
+        return Result.success("注册成功！", userVo);
     }
 
     public Result<String> invite(UserVo userVo, String address) {

@@ -30,22 +30,22 @@ public class UserController {
      * 登录接口
      *
      * @param loginRequest 登录请求体
-     * @response {@link Result<UserVo>}
+     * @return 登录的用户信息
      */
     @PostMapping("/login")
-    public void login(@RequestBody UserLoginRequest loginRequest, HttpServletResponse response, @Address String address) {
-        userService.login(loginRequest, response, address);
+    public Result<UserVo> login(@RequestBody UserLoginRequest loginRequest, HttpServletResponse response, @Address String address) {
+        return userService.login(loginRequest, response, address);
     }
 
     /**
      * 注册接口
      *
      * @param registerRequest 注册请求体
-     * @response {@link Result<UserVo>}
+     * @return 注册的用户信息
      */
     @PutMapping("/register")
-    public void register(@RequestBody UserRegisterRequest registerRequest, HttpServletResponse response, @Address String address) {
-        userService.register(registerRequest, response, address);
+    public Result<UserVo> register(@RequestBody UserRegisterRequest registerRequest, HttpServletResponse response, @Address String address) {
+        return userService.register(registerRequest, response, address);
     }
 
     /**
