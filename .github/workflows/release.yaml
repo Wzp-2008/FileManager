@@ -1,0 +1,163 @@
+name: "Release"
+
+# 打 tag 时触发，自动构建并创建 GitHub/Gitea Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+# 创建 Release 需要写 contents 权限
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    env:
+      IS_GITEA: ${{ github.server_url != 'https://github.com' }}
+
+    steps:
+      # 1) 检出当前分支（后端）
+      - name: Checkout backend
+        uses: actions/checkout@v5
+
+      # 2) 额外检出前端分支 v2-web 到 frontend-src 目录
+      - name: Checkout frontend (v2-web)
+        uses: actions/checkout@v5
+        with:
+          ref: v2-web
+          path: frontend-src
+
+      - name: Set Gradle Mirror (Gitea only)
+        if: env.IS_GITEA == 'true'
+        env:
+          # 从 GitHub 配置变量或 Secret 中取出，暴露为环境变量
+          PRIVATE_MVN_REPO: ${{ vars.PRIVATE_MVN_REPO }}
+        run: |
+          mkdir -p ~/.gradle
+          cat > ~/.gradle/init.gradle << EOF
+          // 阿里云gradle插件镜像仓库地址
+          final PLUGIN_SOURCE = "https://maven.aliyun.com/repository/gradle-plugin"
+          // 阿里云maven镜像仓库地址
+          final PUBLIC_REPOSITORY = "https://maven.aliyun.com/repository/public"
+          // 阿里云google镜像仓库地址
+          final GOOGLE_REPOSITORY = "https://maven.aliyun.com/repository/google"
+          // 私有仓库地址
+          final PRIVATE_REPO = "${PRIVATE_MVN_REPO}"
+
+          gradle.settingsEvaluated { settings ->
+              settings.pluginManagement.repositories { repos ->
+                  repos.maven { url PRIVATE_REPO }
+                  repos.maven { url PLUGIN_SOURCE }
+                  repos.maven { url GOOGLE_REPOSITORY }
+                  repos.gradlePluginPortal()
+                  repos.mavenCentral()
+              }
+
+              settings.dependencyResolutionManagement { drm ->
+                  drm.repositories { repos ->
+                      repos.maven { url PRIVATE_REPO }
+                      repos.maven { url PUBLIC_REPOSITORY }
+                      repos.maven { url GOOGLE_REPOSITORY }
+                      repos.google()
+                      repos.mavenCentral()
+                  }
+              }
+          }
+          EOF
+
+      - name: Cache Gradle files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ env.IS_GITEA }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-${{ env.IS_GITEA }}-
+            ${{ runner.os }}-gradle-
+      - name: Cache Bun files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/cache
+          key: ${{ runner.os }}-bun-${{ env.IS_GITEA }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-${{ env.IS_GITEA }}-
+            ${{ runner.os }}-bun-
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set npm CN Mirror (Gitea only)
+        if: env.IS_GITEA == 'true'
+        run: npm config set registry https://registry.npmmirror.com
+
+      - name: Setup bun
+        run: npm install bun
+
+      - name: Build Frontend
+        working-directory: frontend-src
+        run: |
+          npx bun i
+          npx bun run build
+
+      # ===== 后端构建 =====
+      - name: Setup Executable Permission
+        run: chmod +x gradlew
+
+      - name: Build With Gradle
+        run: ./gradlew bootJar --no-daemon --parallel --build-cache --no-scan
+
+      # ===== 准备 Release 产物（用 tag 命名）=====
+      - name: Prepare release assets
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          # 后端 jar（注意：jar 内部版本号仍是 0.0.1-SNAPSHOT，文件名用 tag）
+          cp build/libs/FileManager-0.0.1-SNAPSHOT.jar FileManager-${TAG}.jar
+          # 前端 dist 去掉 sourcemap
+          find frontend-src/dist -type f -name '*.map' -delete
+          # 组合包：jar + 前端静态资源，打包成 zip
+          rm -rf release
+          mkdir -p release/static
+          cp build/libs/FileManager-0.0.1-SNAPSHOT.jar release/FileManager.jar
+          cp -r frontend-src/dist/* release/static/
+          (cd release && zip -r ../FileManager-with-static-${TAG}.zip .)
+          # 前端单独包（给只更新前端的场景）
+          (cd frontend-src/dist && zip -r ../../web-static-${TAG}.zip .)
+
+      # ===== 创建 Release 并上传产物（GitHub：用自动生成 release notes）=====
+      - name: Create Release and Upload Assets (GitHub)
+        if: env.IS_GITEA != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          files: |
+            FileManager-${{ github.ref_name }}.jar
+            FileManager-with-static-${{ github.ref_name }}.zip
+            web-static-${{ github.ref_name }}.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
+      # ===== 创建 Release 并上传产物（Gitea：自动 notes 接口不支持，用 body 兜底）=====
+      - name: Create Release and Upload Assets (Gitea)
+        if: env.IS_GITEA == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          files: |
+            FileManager-${{ github.ref_name }}.jar
+            FileManager-with-static-${{ github.ref_name }}.zip
+            web-static-${{ github.ref_name }}.zip
+          body: |
+            ## ${{ github.ref_name }}
+
+            详见提交历史：${{ github.server_url }}/${{ github.repository }}/commits/${{ github.ref_name }}
+          draft: false
+          prerelease: false
