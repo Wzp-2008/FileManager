@@ -25,7 +25,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -37,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class P2PService {
     private final RedisTemplate<String, RawChannelDescription> channelMapper;
-    private final Map<String, ChannelUserDescription> channels = new HashMap<>();
+    private final Map<String, ChannelUserDescription> channels = new ConcurrentHashMap<>();
     private final RandomUtils randomUtils;
     private final FileManagerProperties properties;
 
