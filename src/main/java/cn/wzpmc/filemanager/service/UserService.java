@@ -26,8 +26,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static cn.wzpmc.filemanager.entities.vo.table.FingerprintVoTableDef.FINGERPRINT_VO;
@@ -46,27 +49,48 @@ public class UserService {
     private final PrefsMapper prefsMapper;
     private final FingerprintMapper fingerprintMapper;
     private final FileManagerProperties properties;
+    private static final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
+    /**
+     * 若用户表没有用户时生成一个管理员密钥并输出，否则不生成
+     */
     public void tryGenFirstAdminKey() {
+        // 获取当前用户数量
         long count = this.userMapper.selectCountByQuery(new QueryWrapper());
         if (count == 0) {
+            // 若用户数量为0则生成管理员密钥
             String s = genInviteCode(UserVo.CONSOLE, "0.0.0.0");
             log.info("生成了管理员密钥：{}，有效期15分钟，若失效请使用控制台命令/key或重启后端重新生成！", s);
         }
     }
 
+    /**
+     * 判断一段字符串是否为MD5字符串
+     *
+     * @param text 字符串
+     * @return 是否为MD5
+     */
+    private boolean isNotMd5(String text) {
+        return text == null || !text.matches("[0-9a-fA-F]{32}");
+    }
+
     public Result<UserVo> login(UserLoginRequest request, HttpServletResponse response, String address) {
         String username = request.getUsername();
         String password = request.getPassword();
+        if (this.isNotMd5(password)) {
+            return Result.failed(HttpStatus.BAD_REQUEST, "密码需要使用MD5散列哈希");
+        }
         String sha1edPassword = DigestUtils.sha1Hex(password);
-        QueryCondition findUserCondition = USER_VO.NAME.eq(username).and(USER_VO.PASSWORD.eq(sha1edPassword));
-        long count = this.userMapper.selectCountByCondition(findUserCondition);
-        if (count <= 0) {
+        QueryCondition findUserCondition = USER_VO.NAME.eq(username);
+        UserVo userVo = this.userMapper.selectOneWithRelationsByCondition(findUserCondition);
+        if (userVo == null) {
             this.statisticsService.insertAction(Actions.LOGIN, JSONObject.of("status", "error", "msg", "账号或密码错误", "address", address));
             return Result.failed(HttpStatus.UNAUTHORIZED, "账号或密码错误");
         }
-        UserVo userVo = this.userMapper.selectOneWithRelationsByCondition(findUserCondition);
-        assert userVo != null;
+        if (!bCryptPasswordEncoder.matches(sha1edPassword, userVo.getPassword())) {
+            this.statisticsService.insertAction(Actions.LOGIN, JSONObject.of("status", "error", "msg", "账号或密码错误", "address", address));
+            return Result.failed(HttpStatus.UNAUTHORIZED, "账号或密码错误");
+        }
         userVo.clearPassword();
         long id = userVo.getId();
         String token = this.jwtUtils.createToken(id);
@@ -83,6 +107,9 @@ public class UserService {
         String password = request.getPassword();
         if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
             return Result.failed(HttpStatus.BAD_REQUEST, "用户名/密码不可为空！");
+        }
+        if (this.isNotMd5(password)) {
+            return Result.failed(HttpStatus.BAD_REQUEST, "密码需要使用MD5散列哈希");
         }
         String sha1edPassword = DigestUtils.sha1Hex(password);
         Auth auth = request.getAuth();
@@ -101,7 +128,7 @@ public class UserService {
             }
             statisticsData.put("inviteCode", inviteCode);
         }
-        UserVo userVo = new UserVo(username, sha1edPassword, auth);
+        UserVo userVo = new UserVo(username, bCryptPasswordEncoder.encode(sha1edPassword), auth);
         this.userMapper.insert(userVo);
         userVo.clearPassword();
         long id = userVo.getId();
@@ -191,16 +218,17 @@ public class UserService {
 
     public Result<Boolean> changePassword(UserChangePasswordRequest request, UserVo userVo) {
         if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可修改");
-        if (!userVo.getPassword().equals(DigestUtils.sha1Hex(request.getOldPassword()))) {
+        String oldPassword = request.getOldPassword();
+        if (this.isNotMd5(oldPassword) || this.isNotMd5(request.getNewPassword())) {
+            return Result.failed(HttpStatus.BAD_REQUEST, "新旧密码需要使用MD5散列哈希");
+        }
+        if (!bCryptPasswordEncoder.matches(DigestUtils.sha1Hex(oldPassword), userVo.getPassword())) {
             return Result.failed(HttpStatus.NOT_FOUND, "旧密码错误！");
         }
         UserVo updateEntity = new UserVo();
         updateEntity.setId(userVo.getId());
         String password = request.getNewPassword();
-        if (password == null || password.isEmpty()) {
-            return Result.failed(HttpStatus.BAD_REQUEST, "密码不可为空！");
-        }
-        updateEntity.setPassword(DigestUtils.sha1Hex(password));
+        updateEntity.setPassword(bCryptPasswordEncoder.encode(DigestUtils.sha1Hex(password)));
         userMapper.update(updateEntity);
         return Result.success(true);
     }
@@ -215,5 +243,25 @@ public class UserService {
         updateEntity.setName(newUsername);
         userMapper.update(updateEntity);
         return Result.success("修改成功", true);
+    }
+
+    @Transactional
+    public void mergePassword2Bcrypt() {
+        log.info("迁移表结构");
+        userMapper.mergeUserPassword2Bcrypt();
+        log.info("表结构修改完成，开始迁移数据");
+        List<UserVo> userVos = userMapper.selectAll();
+        if (userVos != null) {
+            log.info("共{}条数据需要迁移", userVos.size());
+            for (UserVo userVo : userVos) {
+                String password = userVo.getPassword();
+                String newPassword = bCryptPasswordEncoder.encode(password);
+                UserVo updateVo = new UserVo();
+                updateVo.setId(userVo.getId());
+                updateVo.setPassword(newPassword);
+                userMapper.update(updateVo);
+            }
+        }
+        log.info("迁移完成！");
     }
 }

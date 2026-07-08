@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzpmc.filemanager.mapper.UserMapper">
+    <update id="mergeUserPassword2Bcrypt" databaseId="postgres">
+        ALTER TABLE "user"
+        ALTER COLUMN password TYPE VARCHAR(60);
+    </update>
+    <update id="mergeUserPassword2Bcrypt" databaseId="mysql">
+        ALTER TABLE `user`
+        MODIFY COLUMN password VARCHAR(60) NOT NULL COMMENT '用户密码（MD5+SHA1+Bcrypt）';
+    </update>
+    <update id="mergeUserPasswordBack2SHA1" databaseId="mysql">
+        ALTER TABLE `user`
+        MODIFY COLUMN password VARCHAR(40) NOT NULL COMMENT '用户密码（MD5+SHA1）';
+    </update>
+    <update id="mergeUserPasswordBack2SHA1" databaseId="postgres">
+        SELECT 1; -- nop
+    </update>
+</mapper>

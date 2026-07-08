@@ -22,4 +22,6 @@ public interface InitializationMapper {
     void createChunksTable();
 
     void createChunkFileTable();
+
+    boolean checkUserPasswordIsSHA1();
 }

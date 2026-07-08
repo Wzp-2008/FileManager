@@ -6,4 +6,6 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface UserMapper extends BaseMapper<UserVo> {
+    void mergeUserPassword2Bcrypt();
+    void mergeUserPasswordBack2SHA1();
 }

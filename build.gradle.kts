@@ -37,7 +37,10 @@ dependencies {
     }
     // https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-spring-boot3-starter
     implementation("com.mybatis-flex:mybatis-flex-spring-boot4-starter:${mybatisFlexVersion}")
+    // 引入websocket依赖用于P2P信令传输
     implementation("org.springframework.boot:spring-boot-starter-websocket")
+    // 引入Bcrypt依赖
+    implementation("org.springframework.security:spring-security-crypto")
     annotationProcessor("com.mybatis-flex:mybatis-flex-processor:${mybatisFlexVersion}")
     // 提供JDBC数据源的自动配置
     implementation("org.springframework.boot:spring-boot-starter-jdbc")

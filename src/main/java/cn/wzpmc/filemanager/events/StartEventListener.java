@@ -2,6 +2,7 @@ package cn.wzpmc.filemanager.events;
 
 import cn.wzpmc.filemanager.config.FileManagerProperties;
 import cn.wzpmc.filemanager.mapper.InitializationMapper;
+import cn.wzpmc.filemanager.mapper.UserMapper;
 import cn.wzpmc.filemanager.service.UserService;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
@@ -22,6 +23,7 @@ public class StartEventListener {
     private final InitializationMapper initializationMapper;
     private final FileManagerProperties properties;
     private final UserService userService;
+    private final UserMapper userMapper;
 
     /**
      * 在启动时执行
@@ -49,6 +51,17 @@ public class StartEventListener {
         if (properties.isReadonly()) {
             log.info("当前为只读模式，不保存任何数据，也不允许上传任何数据，如需关闭请删除wzp.filemanager.readonly配置项");
             return;
+        }
+        // 检查密码是否为SHA1版本，若是则需要将密码全部改为Bcrypt
+        if (initializationMapper.checkUserPasswordIsSHA1()) {
+            log.warn("检测到SHA1版本密码，开始迁移为Bcrypt");
+            try {
+                userService.mergePassword2Bcrypt();
+            } catch (Exception e) {
+                userMapper.mergeUserPasswordBack2SHA1();
+                log.error("迁移密码时出现错误，已完成全量回滚", e);
+                throw new RuntimeException(e);
+            }
         }
         // 检查是否需要生成第一个管理员密钥并尝试生成
         userService.tryGenFirstAdminKey();
