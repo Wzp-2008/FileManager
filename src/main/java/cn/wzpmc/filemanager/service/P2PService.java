@@ -154,6 +154,9 @@ public class P2PService {
             ByteBuf byteBuf = Unpooled.copiedBuffer(message.getPayload());
             UUID uuid = new UUID(byteBuf.readLong(), byteBuf.readLong());
             ScheduledFuture<?> remove = pingScheduler.remove(uuid);
+            if (remove == null) {
+                return;
+            }
             remove.cancel(true);
             // 通道续期
             Map<String, Object> attr = session.getAttributes();
