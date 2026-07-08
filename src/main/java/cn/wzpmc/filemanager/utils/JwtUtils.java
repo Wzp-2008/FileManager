@@ -49,7 +49,7 @@ public class JwtUtils {
     /**
      * 随机生成hmac密钥
      *
-     * @return 16位随机字符
+     * @return 16个随机字符组成的字符串
      * @see RandomUtils#generatorRandomString(int)
      */
     private String generatorHmacKey() {
