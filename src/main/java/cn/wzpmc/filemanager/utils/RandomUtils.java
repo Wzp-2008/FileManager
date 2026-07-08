@@ -20,14 +20,14 @@ public class RandomUtils {
     public String generatorRandomString(int length) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            int c = new Random().nextInt(33, 126);
+            int c = new Random().nextInt(33, 127);
             builder.append((char) c);
         }
         return builder.toString();
     }
 
     /**
-     * 生成随机文件名（只有大小写字母以及部分符号（文件名安全））
+     * 生成随机文件名（只有大小写字母以及数字（文件名安全））
      *
      * @param length 对应长度
      * @return 随机字符串
@@ -36,11 +36,11 @@ public class RandomUtils {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++) {
             double random = Math.random();
-            int c = new Random().nextInt(97, 122);
+            int c = new Random().nextInt(97, 123);
             if (random < 0.3) {
-                c = new Random().nextInt(48, 57);
+                c = new Random().nextInt(48, 58);
             } else if (random < 0.6) {
-                c = new Random().nextInt(65, 90);
+                c = new Random().nextInt(65, 91);
             }
             builder.append((char) c);
         }
