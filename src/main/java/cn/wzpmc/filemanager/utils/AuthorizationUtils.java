@@ -43,11 +43,15 @@ public class AuthorizationUtils {
      * @throws AuthorizationException 当认证失败时抛出
      */
     private UserVo auth(String header, AuthorizationRequired authorizationRequired) throws AuthorizationException {
-        log.info("auth {} with token {}", authorizationRequired, header);
         // 若传入的header为空则直接抛出未找到token
         if (header == null) {
             throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "未找到token"));
         }
+        // 若token总长度小于10会导致下面代码出现错误，固做判断防止出现问题，且jwt的token长度不可能小于10字符
+        if (header.length() < 10) {
+            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "token格式错误"));
+        }
+        log.info("认证{}使用token{}", authorizationRequired, header.substring(0, 5) + "***" + header.substring(header.length() - 5));
         // 获取注解所需要的用户等级
         Auth level = authorizationRequired.level();
         // 根据token获取对应用户ID
