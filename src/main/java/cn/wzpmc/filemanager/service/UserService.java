@@ -41,6 +41,7 @@ import static cn.wzpmc.filemanager.entities.vo.table.UserVoTableDef.USER_VO;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    private static final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final UserMapper userMapper;
     private final JwtUtils jwtUtils;
     private final StringRedisTemplate authTemplate;
@@ -49,7 +50,6 @@ public class UserService {
     private final PrefsMapper prefsMapper;
     private final FingerprintMapper fingerprintMapper;
     private final FileManagerProperties properties;
-    private static final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     /**
      * 若用户表没有用户时生成一个管理员密钥并输出，否则不生成

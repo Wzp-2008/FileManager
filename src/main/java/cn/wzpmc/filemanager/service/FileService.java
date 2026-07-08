@@ -89,6 +89,10 @@ public class FileService {
     public static final String ID_ADDR_PREFIX = "ID_ADDR_";
     public static final char PATH_SEPARATOR_CHAR = '/';
     public static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
+    /**
+     * 区块最大大小
+     */
+    private static final long MAX_CHUNK_SIZE = 64 * 1024 * 1024;
     private final FileMapper fileMapper;
     private final FolderMapper folderMapper;
     private final RandomUtils randomUtils;
@@ -322,7 +326,6 @@ public class FileService {
         PageResult<FullRawFileObject> result = new PageResult<>(paginate.getTotalRow(), paginate.getRecords());
         return Result.success(result);
     }
-
 
     public Result<FolderVo> mkdir(FolderCreateRequest request, UserVo user, String address) {
         if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可创建");
@@ -563,11 +566,6 @@ public class FileService {
         List<CheckChunkResponse> list1 = hash.stream().map(e -> new CheckChunkResponse(e, hashResult.get(e))).toList();
         return Result.success(list1);
     }
-
-    /**
-     * 区块最大大小
-     */
-    private static final long MAX_CHUNK_SIZE = 64 * 1024 * 1024;
 
     @SneakyThrows
     public Result<Long> uploadChunk(MultipartFile block) {
