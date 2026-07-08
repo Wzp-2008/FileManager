@@ -10,14 +10,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 用于监控输出流的管理器<br/>可监控该输出流是否活动，用于在下载时给下载链接接续有效时间
+ */
 @Service
 public class MonitorOutputStreamManager {
     private final Map<String, Boolean> monitor = new ConcurrentHashMap<>();
 
+    /**
+     * 创建被监控的输出流
+     *
+     * @param out       原输出流
+     * @param monitorId 监控ID
+     * @return 被监控后的输出流
+     */
     public OutputStream open(OutputStream out, String monitorId) throws IOException {
         return new Impl(out, monitorId);
     }
 
+    /**
+     * 获取所有活动的输出流然后清空监控列表
+     *
+     * @return 所有活动的输出流
+     */
     public List<String> getActiveAndReset() {
         List<String> res = this.monitor.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).toList();
         this.monitor.clear();

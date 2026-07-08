@@ -5,6 +5,9 @@ import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.mybatisflex.annotation.EnumValue;
 import lombok.AllArgsConstructor;
 
+/**
+ * 用户类型
+ */
 @AllArgsConstructor
 @JSONCompiled
 @PgEnumName("user_auth")

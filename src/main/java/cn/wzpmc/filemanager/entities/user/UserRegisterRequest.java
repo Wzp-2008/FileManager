@@ -4,6 +4,9 @@ import cn.wzpmc.filemanager.entities.user.enums.Auth;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import lombok.Data;
 
+/**
+ * 用户注册请求
+ */
 @Data
 @JSONCompiled
 public class UserRegisterRequest {

@@ -2,6 +2,9 @@ package cn.wzpmc.filemanager.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 
+/**
+ * 表初始化Mapper
+ */
 @Mapper
 public interface InitializationMapper {
     void createFileTable();

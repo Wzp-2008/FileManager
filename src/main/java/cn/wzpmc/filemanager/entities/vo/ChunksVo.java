@@ -5,6 +5,9 @@ import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
+/**
+ * 区块对象
+ */
 @Table("chunks")
 @Data
 public class ChunksVo {

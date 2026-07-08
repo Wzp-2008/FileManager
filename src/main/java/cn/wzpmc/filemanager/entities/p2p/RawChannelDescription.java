@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 通道信息描述
+ */
 @AllArgsConstructor
 @Data
 public class RawChannelDescription implements Serializable {

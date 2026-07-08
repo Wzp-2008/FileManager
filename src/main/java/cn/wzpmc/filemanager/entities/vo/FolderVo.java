@@ -9,6 +9,9 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * 文件夹对象
+ */
 @Table("folder")
 @Data
 @JSONCompiled

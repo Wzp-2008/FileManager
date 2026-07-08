@@ -13,9 +13,18 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+/**
+ * Address注解参数解析器
+ */
 @Slf4j
 @Component
 public class AddressArgumentResolver implements HandlerMethodArgumentResolver {
+    /**
+     * 通过多种方式（请求对端IP -> X-Real-IP -> X-Forwarded-For）获取请求方IP地址
+     *
+     * @param request 请求
+     * @return IP地址
+     */
     public static String getAddr(HttpServletRequest request) {
         String remoteAddr = request.getRemoteAddr();
         if (remoteAddr.equals("127.0.0.1")) {
@@ -33,6 +42,13 @@ public class AddressArgumentResolver implements HandlerMethodArgumentResolver {
         return remoteAddr;
     }
 
+    /**
+     * 适用于NativeWebRequest的请求地址解析器
+     *
+     * @param nativeRequest 请求
+     * @return IP地址
+     * @see AddressArgumentResolver#getAddr(HttpServletRequest)
+     */
     public static String getAddr(NativeWebRequest nativeRequest) {
         if (nativeRequest instanceof ServletWebRequest servletWebRequest) {
             HttpServletRequest request = servletWebRequest.getRequest();

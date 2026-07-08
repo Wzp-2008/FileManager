@@ -2,6 +2,9 @@ package cn.wzpmc.filemanager.entities.files.enums;
 
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 
+/**
+ * 文件类型
+ */
 @JSONCompiled
 public enum FileType {
     /**

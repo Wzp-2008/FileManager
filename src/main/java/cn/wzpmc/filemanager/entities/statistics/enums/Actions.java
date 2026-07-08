@@ -3,6 +3,9 @@ package cn.wzpmc.filemanager.entities.statistics.enums;
 import cn.wzpmc.filemanager.mybatis.PgEnumName;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 
+/**
+ * 后台日志事件
+ */
 @JSONCompiled
 @PgEnumName("statistics_action")
 public enum Actions {

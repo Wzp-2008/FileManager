@@ -11,6 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
+/**
+ * 将JSONObject转为PostgreSQL的jsonb类型转换器
+ */
 public class JSONObjectActionHandler extends BaseJsonTypeHandler<JSONObject> {
 
     @Override

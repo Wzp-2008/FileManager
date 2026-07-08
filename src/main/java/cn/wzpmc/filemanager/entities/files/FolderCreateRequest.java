@@ -3,6 +3,9 @@ package cn.wzpmc.filemanager.entities.files;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import lombok.Data;
 
+/**
+ * 文件夹创建请求
+ */
 @Data
 @JSONCompiled
 public class FolderCreateRequest {

@@ -34,6 +34,7 @@ public abstract class SimplePathResolver implements FilePathService {
             return "/";
         }
         FolderVo folderVo = folderMapper.selectOneById(id);
+        assert folderVo != null;
         long parent = folderVo.getParent();
         String name = folderVo.getName();
         return resolvePath(parent) + name + "/";

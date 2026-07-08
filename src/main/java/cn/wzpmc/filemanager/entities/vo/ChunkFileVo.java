@@ -5,6 +5,9 @@ import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * 区块与文件对应对象
+ */
 @Table("chunk_file")
 @Data
 @AllArgsConstructor

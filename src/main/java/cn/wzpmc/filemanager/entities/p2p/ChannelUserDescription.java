@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * P2P信令用户描述
+ */
 @Data
 public class ChannelUserDescription {
     /**

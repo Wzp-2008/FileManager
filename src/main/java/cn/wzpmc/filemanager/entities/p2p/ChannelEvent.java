@@ -8,6 +8,11 @@ import org.springframework.web.socket.TextMessage;
 
 import java.util.UUID;
 
+/**
+ * P2P信令事件
+ *
+ * @param <T>
+ */
 @Data
 @AllArgsConstructor
 public class ChannelEvent<T> {

@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 
 import static com.mybatisflex.core.query.QueryMethods.column;
 
+/**
+ * 排序方式
+ */
 @RequiredArgsConstructor
 @PgEnumName("prefs_sort_field")
 public enum SortField {

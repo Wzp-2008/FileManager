@@ -6,6 +6,11 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * 通用分页响应体
+ *
+ * @param <T>
+ */
 @Data
 @AllArgsConstructor
 @JSONCompiled

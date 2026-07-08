@@ -3,6 +3,9 @@ package cn.wzpmc.filemanager.entities.p2p;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * P2P信令通道创建响应
+ */
 @Data
 @AllArgsConstructor
 public class ChannelCreateResponse {

@@ -12,6 +12,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+/**
+ * Authorization注解的参数解析器
+ */
 @Component
 public class AuthorizationArgumentResolver implements HandlerMethodArgumentResolver {
     private final AuthorizationUtils authorizationUtils;

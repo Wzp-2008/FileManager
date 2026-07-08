@@ -11,11 +11,23 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.List;
 
+/**
+ * 串联输入流<br/>用于将多个文件并为一个输入流进行读取，且确保每次只打开一个文件，并且支持skip到指定字节位置
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class SerialFileInputStream extends InputStream {
+    /**
+     * 需要被串联的文件
+     */
     private final List<File> files;
+    /**
+     * 当前正在操作的输入流
+     */
     private FileInputStream currentFileStream;
+    /**
+     * 当前被操作的文件下标指针
+     */
     private int filePointer = 0;
 
     @Override

@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * 区块保存为文件的请求
+ */
 @Data
 public class SaveChunksRequest {
     /**

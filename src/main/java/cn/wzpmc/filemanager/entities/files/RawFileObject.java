@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+/**
+ * 文件/文件夹描述对象
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -7,8 +7,14 @@ import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 
+/**
+ * 兼具大小统计以及哈希计算的输入流
+ */
 @Getter
 public class SizeStatisticsDigestInputStream extends DigestInputStream {
+    /**
+     * 文件大小，单位：字节
+     */
     protected long size = 0;
 
     public SizeStatisticsDigestInputStream(InputStream stream, MessageDigest digest) {

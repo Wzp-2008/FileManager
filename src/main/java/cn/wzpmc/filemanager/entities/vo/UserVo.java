@@ -7,6 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+/**
+ * 用户对象
+ */
 @Table("user")
 @Data
 @AllArgsConstructor

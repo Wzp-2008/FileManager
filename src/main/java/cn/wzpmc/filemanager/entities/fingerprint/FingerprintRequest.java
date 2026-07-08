@@ -6,9 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author wzp
- * @version 1.0.0
- * @since 2025/5/10 14:20
+ * 指纹登录请求
  */
 @Data
 @AllArgsConstructor

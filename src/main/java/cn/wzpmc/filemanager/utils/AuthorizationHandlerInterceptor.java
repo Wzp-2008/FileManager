@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+/**
+ * Authorization注解的请求拦截器
+ */
 @Component
 public class AuthorizationHandlerInterceptor implements HandlerInterceptor {
     private final AuthorizationUtils authorizationUtils;

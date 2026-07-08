@@ -13,6 +13,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 通用响应体
+ *
+ * @param <T> 响应内容的类型
+ */
 @Slf4j
 @Data
 @JSONCompiled

@@ -76,9 +76,11 @@ public class SimpleResolver extends SimplePathResolver {
         }
         // 否则查找当前层所在的文件夹并将其通过parentId递归传给下一层
         FolderVo folderVo = folderMapper.selectOneByCondition(FOLDER_VO.NAME.eq(currentLayerName).and(FOLDER_VO.PARENT.eq(parentId)));
+        // 若下一层没有对应文件名匹配的文件则直接返回空
         if (folderVo == null) {
             return null;
         }
+        // 递归查找下一层
         return resolveFile(path.subList(1, path.size()), folderVo.getId());
     }
 }

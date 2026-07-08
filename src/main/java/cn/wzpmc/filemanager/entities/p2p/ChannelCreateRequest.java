@@ -2,6 +2,9 @@ package cn.wzpmc.filemanager.entities.p2p;
 
 import lombok.Data;
 
+/**
+ * P2P信令通道创建请求
+ */
 @Data
 public class ChannelCreateRequest {
     /**

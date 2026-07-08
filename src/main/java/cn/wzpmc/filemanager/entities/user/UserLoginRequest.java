@@ -3,6 +3,9 @@ package cn.wzpmc.filemanager.entities.user;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import lombok.Data;
 
+/**
+ * 用户登录请求
+ */
 @Data
 @JSONCompiled
 public class UserLoginRequest {

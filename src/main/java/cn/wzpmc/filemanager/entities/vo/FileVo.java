@@ -10,6 +10,9 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 文件对象
+ */
 @Table("file")
 @Data
 @JSONCompiled

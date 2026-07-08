@@ -4,7 +4,7 @@ import cn.wzpmc.filemanager.annotation.Address;
 import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
 import cn.wzpmc.filemanager.entities.PageResult;
 import cn.wzpmc.filemanager.entities.Result;
-import cn.wzpmc.filemanager.entities.chunk.CheckChunkResult;
+import cn.wzpmc.filemanager.entities.chunk.CheckChunkResponse;
 import cn.wzpmc.filemanager.entities.chunk.SaveChunksRequest;
 import cn.wzpmc.filemanager.entities.files.FilePathDescription;
 import cn.wzpmc.filemanager.entities.files.FolderCreateRequest;
@@ -193,7 +193,7 @@ public class FileController {
      */
     @PostMapping("/chunk/check")
     @AuthorizationRequired
-    public Result<List<CheckChunkResult>> checkChunkUploaded(@RequestBody List<String> hash) {
+    public Result<List<CheckChunkResponse>> checkChunkUploaded(@RequestBody List<String> hash) {
         return fileService.checkChunkUploaded(hash);
     }
 

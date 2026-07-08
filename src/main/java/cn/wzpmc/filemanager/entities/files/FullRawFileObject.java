@@ -6,6 +6,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * 带所有者名称(ownerName)和下载次数(downCount)的文件对象描述
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor

@@ -3,7 +3,7 @@ package cn.wzpmc.filemanager.service;
 import cn.wzpmc.filemanager.config.FileManagerProperties;
 import cn.wzpmc.filemanager.entities.PageResult;
 import cn.wzpmc.filemanager.entities.Result;
-import cn.wzpmc.filemanager.entities.chunk.CheckChunkResult;
+import cn.wzpmc.filemanager.entities.chunk.CheckChunkResponse;
 import cn.wzpmc.filemanager.entities.chunk.SaveChunksRequest;
 import cn.wzpmc.filemanager.entities.files.FolderCreateRequest;
 import cn.wzpmc.filemanager.entities.files.FullRawFileObject;
@@ -546,12 +546,12 @@ public class FileService {
         return Result.success(fileVo);
     }
 
-    public Result<List<CheckChunkResult>> checkChunkUploaded(List<String> hash) {
+    public Result<List<CheckChunkResponse>> checkChunkUploaded(List<String> hash) {
         if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可上传");
         List<ChunksVo> chunksVos = chunksMapper.selectListByCondition(CHUNKS_VO.HASH.in(hash));
         Map<String, Long> hashResult = new HashMap<>();
         chunksVos.forEach(e -> hashResult.put(e.getHash(), e.getId()));
-        List<CheckChunkResult> list1 = hash.stream().map(e -> new CheckChunkResult(e, hashResult.get(e))).toList();
+        List<CheckChunkResponse> list1 = hash.stream().map(e -> new CheckChunkResponse(e, hashResult.get(e))).toList();
         return Result.success(list1);
     }
 

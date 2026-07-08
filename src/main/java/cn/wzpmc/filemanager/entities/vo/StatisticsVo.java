@@ -11,6 +11,9 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Date;
 
+/**
+ * 统计对象
+ */
 @Table("statistics")
 @Data
 @NoArgsConstructor

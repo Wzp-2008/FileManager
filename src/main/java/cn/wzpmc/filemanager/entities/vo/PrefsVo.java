@@ -10,6 +10,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 用户偏好对象
+ */
 @Table("prefs")
 @Data
 @JSONCompiled
