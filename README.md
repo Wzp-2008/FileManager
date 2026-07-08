@@ -70,9 +70,20 @@ See [`.env.example`](.env.example) for the full list.
 - Backend: Java 17 + Spring Boot, build with `./gradlew bootJar`
 - Frontend lives on the `v2-web` branch (built with [Bun](https://bun.sh))
 
+### Configuration Layout
+
+- `application.yaml` — built-in baseline config (datasource type, mybatis-flex type-handlers, multipart resolve-lazily, application name); generally no need to touch
+- `example-application.yaml` — local-dev template with user-filled values (DB credentials, Redis, hmac-key, save-path). Copy it to `application.yaml` and edit for local runs
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the local run steps.
+
 ## 🤝 Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📋 Roadmap
+
+See [TODO.md](TODO.md) for the project roadmap and future plans.
 
 ## 📄 License
 

@@ -70,9 +70,20 @@ docker compose -f docker-compose.external-db.yaml up -d
 - 后端：Java 17 + Spring Boot，`./gradlew bootJar` 构建
 - 前端位于 `v2-web` 分支（使用 [Bun](https://bun.sh) 构建）
 
+### 配置文件分层
+
+- `application.yaml` — 随镜像/产物内置的固定基础配置（数据源类型、mybatis-flex type-handlers、multipart resolve-lazily、application name），一般无需修改
+- `example-application.yaml` — 本地开发参考模板，包含需要用户填写的配置（数据库账号密码、Redis、hmac-key、save-path）。本地运行时复制为 `application.yaml` 并按需修改
+
+详见 [CONTRIBUTING_CN.md](CONTRIBUTING_CN.md) 的「本地运行」一节。
+
 ## 🤝 参与贡献
 
 欢迎提交 PR，详见 [CONTRIBUTING_CN.md](CONTRIBUTING_CN.md)。
+
+## 📋 路线图
+
+见 [TODO.md](TODO.md)。
 
 ## 📄 开源协议
 
