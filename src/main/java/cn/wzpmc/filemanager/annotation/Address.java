@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * <pre>{@code
  * @GetMapping("/api/user/ip")
  * public String getAddress(@Address String address) {
- *     return address
+ *     return address;
  * }
  * // 访问 -> 用户访问IP
  * }</pre>

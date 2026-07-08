@@ -1,5 +1,6 @@
 package cn.wzpmc.filemanager.mybatis;
 
+import cn.wzpmc.filemanager.annotation.PgEnumName;
 import cn.wzpmc.filemanager.utils.MybatisUtils;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

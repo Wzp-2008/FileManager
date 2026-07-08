@@ -1,6 +1,6 @@
 package cn.wzpmc.filemanager.entities.user.enums;
 
-import cn.wzpmc.filemanager.mybatis.PgEnumName;
+import cn.wzpmc.filemanager.annotation.PgEnumName;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.mybatisflex.annotation.EnumValue;
 import lombok.AllArgsConstructor;

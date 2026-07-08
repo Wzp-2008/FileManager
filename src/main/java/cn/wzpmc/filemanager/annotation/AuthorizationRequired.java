@@ -83,7 +83,7 @@ public @interface AuthorizationRequired {
      * }</pre>
      * </p>
      *
-     * @return 最低需要的用户等级
+     * @return 是否强制为当前用户等级
      * @see Auth
      */
     boolean force() default false;

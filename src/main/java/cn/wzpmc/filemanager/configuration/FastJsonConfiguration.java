@@ -25,8 +25,6 @@ public class FastJsonConfiguration implements WebMvcConfigurer {
 
     /**
      * 设置系统使用FastJSON进行json序列化与反序列化
-     *
-     * @param builder the builder to configure
      */
     @Override
     public void configureMessageConverters(HttpMessageConverters.@NonNull ServerBuilder builder) {

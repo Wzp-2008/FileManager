@@ -76,7 +76,7 @@ public class AuthorizationUtils {
                 return userVo;
             }
         }
-        // 如果条件不满则则抛出权限不足错误
+        // 如果条件不满则抛出权限不足错误
         throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "权限不足"));
     }
 

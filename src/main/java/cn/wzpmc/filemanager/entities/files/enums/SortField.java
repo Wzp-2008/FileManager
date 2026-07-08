@@ -1,6 +1,6 @@
 package cn.wzpmc.filemanager.entities.files.enums;
 
-import cn.wzpmc.filemanager.mybatis.PgEnumName;
+import cn.wzpmc.filemanager.annotation.PgEnumName;
 import com.mybatisflex.core.query.QueryColumn;
 import lombok.RequiredArgsConstructor;
 
