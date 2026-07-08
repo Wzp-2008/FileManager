@@ -116,14 +116,14 @@ jobs:
         env:
           TAG: ${{ github.ref_name }}
         run: |
-          # 后端 jar（注意：jar 内部版本号仍是 0.0.1-SNAPSHOT，文件名用 tag）
-          cp build/libs/FileManager-0.0.1-SNAPSHOT.jar FileManager-${TAG}.jar
+          # 后端 jar
+          cp build/libs/FileManager-2.0.0.jar FileManager-${TAG}.jar
           # 前端 dist 去掉 sourcemap
           find frontend-src/dist -type f -name '*.map' -delete
           # 组合包：jar + 前端静态资源，打包成 zip
           rm -rf release
           mkdir -p release/static
-          cp build/libs/FileManager-0.0.1-SNAPSHOT.jar release/FileManager.jar
+          cp build/libs/FileManager-2.0.0.jar release/FileManager.jar
           cp -r frontend-src/dist/* release/static/
           (cd release && zip -r ../FileManager-with-static-${TAG}.zip .)
           # 前端单独包（给只更新前端的场景）
