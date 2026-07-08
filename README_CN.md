@@ -56,7 +56,7 @@ docker compose -f docker-compose.external-db.yaml up -d
 
 | 变量           | 说明                                          | 默认值                      |
 |--------------|---------------------------------------------|--------------------------|
-| `IMAGE`      | 拉取的 Docker 镜像                               | `wzpa/file-manager:2.0.0` |
+| `IMAGE`      | 拉取的 Docker 镜像                               | `wzpa/file-manager:2.0.1` |
 | `PORT`       | 宿主机端口（容器内固定 8080）                           | `23456`                  |
 | `POSTGRES_*` | PostgreSQL 连接 / 初始化                         | 见 `.env.example`         |
 | `REDIS_*`    | Redis 连接                                    | 见 `.env.example`         |
