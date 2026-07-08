@@ -1,6 +1,6 @@
 name: "Docker Release"
 
-# 打 tag 时触发，自动构建 Docker 镜像并推送到 Docker Hub（仅 Gitea）
+# 打 tag 时触发，自动构建 Docker 镜像并推送到 Docker Hub（仅 GitHub）
 on:
   push:
     tags:
@@ -12,11 +12,8 @@ permissions:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    # 仅在 Gitea 上运行（GitHub 上不触发此流程）
-    if: ${{ github.server_url != 'https://github.com' }}
-
-    env:
-      IS_GITEA: ${{ github.server_url != 'https://github.com' }}
+    # 仅在 GitHub 上运行（Gitea 上不触发）
+    if: ${{ github.server_url == 'https://github.com' }}
 
     steps:
       # 1) 检出当前分支（后端）
@@ -30,53 +27,14 @@ jobs:
           ref: v2-web
           path: frontend-src
 
-      - name: Set Gradle Mirror (Gitea only)
-        if: env.IS_GITEA == 'true'
-        env:
-          # 从 GitHub 配置变量或 Secret 中取出，暴露为环境变量
-          PRIVATE_MVN_REPO: ${{ vars.PRIVATE_MVN_REPO }}
-        run: |
-          mkdir -p ~/.gradle
-          cat > ~/.gradle/init.gradle << EOF
-          // 阿里云gradle插件镜像仓库地址
-          final PLUGIN_SOURCE = "https://maven.aliyun.com/repository/gradle-plugin"
-          // 阿里云maven镜像仓库地址
-          final PUBLIC_REPOSITORY = "https://maven.aliyun.com/repository/public"
-          // 阿里云google镜像仓库地址
-          final GOOGLE_REPOSITORY = "https://maven.aliyun.com/repository/google"
-          // 私有仓库地址
-          final PRIVATE_REPO = "${PRIVATE_MVN_REPO}"
-
-          gradle.settingsEvaluated { settings ->
-              settings.pluginManagement.repositories { repos ->
-                  repos.maven { url PRIVATE_REPO }
-                  repos.maven { url PLUGIN_SOURCE }
-                  repos.maven { url GOOGLE_REPOSITORY }
-                  repos.gradlePluginPortal()
-                  repos.mavenCentral()
-              }
-
-              settings.dependencyResolutionManagement { drm ->
-                  drm.repositories { repos ->
-                      repos.maven { url PRIVATE_REPO }
-                      repos.maven { url PUBLIC_REPOSITORY }
-                      repos.maven { url GOOGLE_REPOSITORY }
-                      repos.google()
-                      repos.mavenCentral()
-                  }
-              }
-          }
-          EOF
-
       - name: Cache Gradle files
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ env.IS_GITEA }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-${{ env.IS_GITEA }}-
             ${{ runner.os }}-gradle-
 
       - name: Cache Bun files
@@ -84,19 +42,14 @@ jobs:
         with:
           path: |
             ~/.bun/cache
-          key: ${{ runner.os }}-bun-${{ env.IS_GITEA }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/package.json') }}
           restore-keys: |
-            ${{ runner.os }}-bun-${{ env.IS_GITEA }}-
             ${{ runner.os }}-bun-
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-
-      - name: Set npm CN Mirror (Gitea only)
-        if: env.IS_GITEA == 'true'
-        run: npm config set registry https://registry.npmmirror.com
 
       - name: Setup bun
         run: npm install bun
@@ -119,11 +72,12 @@ jobs:
         run: ./gradlew bootJar --no-daemon --parallel --build-cache --no-scan
 
       # ===== Docker 构建 & 推送 =====
-      # 需要在 Gitea 仓库 Settings -> Secrets 配置：
-      #   DOCKERHUB_USERNAME - Docker Hub 用户名
-      #   DOCKERHUB_TOKEN    - Docker Hub Access Token（非登录密码）
-      # 可选：在 Settings -> Variables 配置 DOCKERHUB_IMAGE 覆盖默认镜像名（默认 wzpa/file-manager）
-      # 注意：runner 需能访问 docker daemon（host executor 或挂载 socket 的 docker executor）
+      # 需要在 GitHub 仓库 Settings -> Secrets and variables -> Actions 配置：
+      #   Secrets:
+      #     DOCKERHUB_USERNAME - Docker Hub 用户名
+      #     DOCKERHUB_TOKEN    - Docker Hub Access Token（非登录密码）
+      #   Variables（可选）:
+      #     DOCKERHUB_IMAGE    - 覆盖默认镜像名（默认 wzpa/file-manager）
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
