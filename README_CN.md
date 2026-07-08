@@ -72,7 +72,7 @@ docker compose -f docker-compose.external-db.yaml up -d
 
 ## 🤝 参与贡献
 
-欢迎提交 PR，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+欢迎提交 PR，详见 [CONTRIBUTING_CN.md](CONTRIBUTING_CN.md)。
 
 ## 📄 开源协议
 
