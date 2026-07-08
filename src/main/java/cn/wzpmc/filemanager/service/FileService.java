@@ -438,13 +438,20 @@ public class FileService {
             response.setContentType(mime);
         }
         if (!range.equals("null")) {
-            String[] unitRanges = range.split("=");
-            String[] minMax = unitRanges[1].split("-");
-            if (minMax.length > 0) {
-                min = Long.parseLong(minMax[0]);
-            }
-            if (minMax.length > 1) {
-                max = Long.parseLong(minMax[1]);
+            try {
+                String[] unitRanges = range.split("=");
+                String[] minMax = unitRanges[1].split("-");
+                if (minMax.length > 0) {
+                    min = Long.parseLong(minMax[0]);
+                }
+                if (minMax.length > 1) {
+                    max = Long.parseLong(minMax[1]);
+                }
+            } catch (Exception e) {
+                response.setStatus(416);
+                Result.failed(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, "Range头指定错误，解析失败！").writeToResponse(response);
+                log.error("遇到无法解析的Range头：{}", range, e);
+                return;
             }
             response.setStatus(206);
             response.addHeader("Content-Range", "bytes " + min + "-" + max + "/" + size);
@@ -555,11 +562,19 @@ public class FileService {
         return Result.success(list1);
     }
 
+    /**
+     * 区块最大大小
+     */
+    private static final long MAX_CHUNK_SIZE = 64 * 1024 * 1024;
+
     @SneakyThrows
     public Result<Long> uploadChunk(MultipartFile block) {
         if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可上传");
         File savePath = properties.getSavePath();
         File blobDir = new File(savePath, "blobs");
+        if (block.getSize() > MAX_CHUNK_SIZE) {
+            return Result.failed(HttpStatus.CONTENT_TOO_LARGE, "区块大小过大，请分块后传输");
+        }
         SizeStatisticsDigestInputStream sizeStatisticsDigestInputStream = new SizeStatisticsDigestInputStream(block.getInputStream(), DigestUtils.getSha1Digest());
         byte[] bytes = sizeStatisticsDigestInputStream.readAllBytes();
         long size = sizeStatisticsDigestInputStream.getSize();
