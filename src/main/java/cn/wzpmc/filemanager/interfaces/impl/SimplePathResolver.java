@@ -1,11 +1,14 @@
 package cn.wzpmc.filemanager.interfaces.impl;
 
+import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.files.RawFileObject;
 import cn.wzpmc.filemanager.entities.vo.FolderVo;
+import cn.wzpmc.filemanager.exceptions.ResponseException;
 import cn.wzpmc.filemanager.interfaces.FilePathService;
 import cn.wzpmc.filemanager.mapper.FolderMapper;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +37,9 @@ public abstract class SimplePathResolver implements FilePathService {
             return "/";
         }
         FolderVo folderVo = folderMapper.selectOneById(id);
-        assert folderVo != null;
+        if (folderVo == null) {
+            throw new ResponseException(Result.failed(HttpStatus.INTERNAL_SERVER_ERROR, "文件夹ID为" + id + "的文件夹不存在，解析路径失败"));
+        }
         long parent = folderVo.getParent();
         String name = folderVo.getName();
         return resolvePath(parent) + name + "/";

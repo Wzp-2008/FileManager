@@ -1,7 +1,7 @@
 package cn.wzpmc.filemanager.utils;
 
 import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
-import cn.wzpmc.filemanager.exceptions.AuthorizationException;
+import cn.wzpmc.filemanager.exceptions.ResponseException;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class AuthorizationArgumentResolver implements HandlerMethodArgumentResol
 
     @Override
     @Nullable
-    public Object resolveArgument(@NonNull MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer, @NonNull NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws AuthorizationException {
+    public Object resolveArgument(@NonNull MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer, @NonNull NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws ResponseException {
         AuthorizationRequired parameterAnnotation = parameter.getParameterAnnotation(AuthorizationRequired.class);
         assert parameterAnnotation != null;
         return this.authorizationUtils.auth(webRequest, parameterAnnotation);

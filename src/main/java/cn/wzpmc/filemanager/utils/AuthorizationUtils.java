@@ -4,7 +4,7 @@ import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
 import cn.wzpmc.filemanager.entities.Result;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
 import cn.wzpmc.filemanager.entities.vo.UserVo;
-import cn.wzpmc.filemanager.exceptions.AuthorizationException;
+import cn.wzpmc.filemanager.exceptions.ResponseException;
 import cn.wzpmc.filemanager.exceptions.TokenExpireAuthorizationException;
 import cn.wzpmc.filemanager.mapper.UserMapper;
 import com.auth0.jwt.JWT;
@@ -40,16 +40,16 @@ public class AuthorizationUtils {
      * @param header                Authorization头
      * @param authorizationRequired 对应注解
      * @return 用户对象
-     * @throws AuthorizationException 当认证失败时抛出
+     * @throws ResponseException 当认证失败时抛出
      */
-    private UserVo auth(String header, AuthorizationRequired authorizationRequired) throws AuthorizationException {
+    private UserVo auth(String header, AuthorizationRequired authorizationRequired) throws ResponseException {
         // 若传入的header为空则直接抛出未找到token
         if (header == null) {
-            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "未找到token"));
+            throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "未找到token"));
         }
         // 若token总长度小于10会导致下面代码出现错误，固做判断防止出现问题，且jwt的token长度不可能小于10字符
         if (header.length() < 10) {
-            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "token格式错误"));
+            throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "token格式错误"));
         }
         log.info("认证{}使用token{}", authorizationRequired, header.substring(0, 5) + "***" + header.substring(header.length() - 5));
         // 获取注解所需要的用户等级
@@ -65,7 +65,7 @@ public class AuthorizationUtils {
         UserVo userVo = this.userMapper.selectOneWithRelationsById(i);
         // 若找不到则判断用户被删除
         if (userVo == null) {
-            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "用户不存在"));
+            throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "用户不存在"));
         }
         // 获取用户的类型
         Auth auth = userVo.getAuth();
@@ -81,7 +81,7 @@ public class AuthorizationUtils {
             }
         }
         // 如果条件不满则抛出权限不足错误
-        throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "权限不足"));
+        throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "权限不足"));
     }
 
     /**
@@ -99,7 +99,7 @@ public class AuthorizationUtils {
             JWT.require(jwtUtils.getHmacKey()).acceptExpiresAt(expiresAt.getTime()).build().verify(decode);
         } catch (JWTVerificationException e) {
             // 若签名不正确直接报错
-            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "签名不正确"));
+            throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "签名不正确"));
         }
         // 从被解码的信息中直接获取uid属性
         Claim uid = decode.getClaim("uid");
@@ -108,7 +108,7 @@ public class AuthorizationUtils {
         UserVo userVo = this.userMapper.selectOneWithRelationsById(anInt);
         // 用户为null则判断用户被删除
         if (userVo == null) {
-            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "用户不存在"));
+            throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "用户不存在"));
         }
         return userVo;
     }
@@ -119,13 +119,13 @@ public class AuthorizationUtils {
      * @param request               NativeWebRequest请求
      * @param authorizationRequired 对应注解
      * @return 用户信息
-     * @throws AuthorizationException 当认证失败时抛出
+     * @throws ResponseException 当认证失败时抛出
      * @see AuthorizationUtils#auth(String, AuthorizationRequired)
      */
-    public UserVo auth(NativeWebRequest request, AuthorizationRequired authorizationRequired) throws AuthorizationException {
+    public UserVo auth(NativeWebRequest request, AuthorizationRequired authorizationRequired) throws ResponseException {
         String authorization = request.getHeader("Authorization");
         if (authorization == null) {
-            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "未找到token"));
+            throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "未找到token"));
         }
         try {
             return auth(authorization, authorizationRequired);
@@ -145,13 +145,13 @@ public class AuthorizationUtils {
      * @param request               HttpServletRequest 请求
      * @param authorizationRequired 对应注解
      * @return 用户是否登录
-     * @throws AuthorizationException 当认证失败时抛出
+     * @throws ResponseException 当认证失败时抛出
      * @see AuthorizationUtils#auth(String, AuthorizationRequired)
      */
-    public boolean auth(HttpServletRequest request, HttpServletResponse response, AuthorizationRequired authorizationRequired) throws AuthorizationException {
+    public boolean auth(HttpServletRequest request, HttpServletResponse response, AuthorizationRequired authorizationRequired) throws ResponseException {
         String authorization = request.getHeader("Authorization");
         if (authorization == null) {
-            throw new AuthorizationException(Result.failed(HttpStatus.UNAUTHORIZED, "未找到token"));
+            throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "未找到token"));
         }
         try {
             auth(authorization, authorizationRequired);

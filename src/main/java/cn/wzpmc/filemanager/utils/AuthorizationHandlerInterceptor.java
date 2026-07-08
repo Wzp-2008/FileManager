@@ -1,7 +1,7 @@
 package cn.wzpmc.filemanager.utils;
 
 import cn.wzpmc.filemanager.annotation.AuthorizationRequired;
-import cn.wzpmc.filemanager.exceptions.AuthorizationException;
+import cn.wzpmc.filemanager.exceptions.ResponseException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
@@ -23,7 +23,7 @@ public class AuthorizationHandlerInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws AuthorizationException {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws ResponseException {
         if (handler instanceof HandlerMethod method) {
             if (!method.hasMethodAnnotation(AuthorizationRequired.class)) {
                 return true;
