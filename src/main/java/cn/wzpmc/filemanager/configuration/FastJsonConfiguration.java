@@ -32,8 +32,6 @@ public class FastJsonConfiguration implements WebMvcConfigurer {
     public void configureMessageConverters(HttpMessageConverters.@NonNull ServerBuilder builder) {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
         FastJsonConfig config = createFastjsonConfig();
-        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
-        config.setCharset(StandardCharsets.UTF_8);
         converter.setFastJsonConfig(config);
         converter.setSupportedMediaTypes(List.of(MediaType.APPLICATION_JSON));
         builder.withJsonConverter(converter);
