@@ -25,10 +25,6 @@ public class FileManagerProperties {
      */
     private String hmacKey = "RANDOM";
     /**
-     * ffmpeg配置
-     */
-    private FFmpegConfiguration ffmpeg;
-    /**
      * 是否为调试模式，调试模式下会关闭日志输出功能，且JSON响应会被格式化<br/>
      * 默认值：{@code false}
      */
@@ -51,6 +47,11 @@ public class FileManagerProperties {
      */
     private int p2pTunnelExpireMinutes = 30;
 
+    /**
+     * 文件存储使用的文件夹，在初始化时若该文件夹不存在则会创建
+     *
+     * @return 文件存储使用的文件夹
+     */
     @Bean
     public File savePath() {
         if (!savePath.isDirectory()) {
