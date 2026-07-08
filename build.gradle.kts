@@ -5,7 +5,6 @@ plugins {
     id("org.springframework.boot") version "4.0.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.graalvm.buildtools.native") version "0.11.4"
-    id("org.asciidoctor.jvm.convert") version "4.0.5"
 }
 
 group = "cn.wzpmc"
@@ -30,7 +29,6 @@ repositories {
     maven { url = URI("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
-extra["snippetsDir"] = file("build/generated-snippets")
 val fastjsonVersion = "2.0.61"
 val mybatisFlexVersion = "1.11.6"
 dependencies {
@@ -67,19 +65,9 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-tasks.test {
-    outputs.dir(project.extra["snippetsDir"]!!)
-}
-
-tasks.asciidoctor {
-    inputs.dir(project.extra["snippetsDir"]!!)
-    dependsOn(tasks.test)
 }
