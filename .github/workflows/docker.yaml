@@ -1,6 +1,6 @@
 name: "Docker Release"
 
-# 打 tag 时触发，自动构建多架构 Docker 镜像并推送到 Docker Hub（仅 Gitea）
+# 打 tag 时触发，自动构建 Docker 镜像并推送到 Docker Hub（仅 Gitea）
 on:
   push:
     tags:
@@ -118,15 +118,12 @@ jobs:
       - name: Build With Gradle
         run: ./gradlew bootJar --no-daemon --parallel --build-cache --no-scan
 
-      # ===== Docker 多架构构建 & 推送 =====
+      # ===== Docker 构建 & 推送 =====
       # 需要在 Gitea 仓库 Settings -> Secrets 配置：
       #   DOCKERHUB_USERNAME - Docker Hub 用户名
       #   DOCKERHUB_TOKEN    - Docker Hub Access Token（非登录密码）
       # 可选：在 Settings -> Variables 配置 DOCKERHUB_IMAGE 覆盖默认镜像名（默认 wzpa/file-manager）
       # 注意：runner 需能访问 docker daemon（host executor 或挂载 socket 的 docker executor）
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -150,8 +147,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          # 若 runner 不支持 QEMU 跨架构，可改为只构建 linux/amd64
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

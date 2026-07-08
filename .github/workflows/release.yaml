@@ -117,6 +117,10 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           # act 容器镜像未预装 zip，需先安装
+          if [ "$IS_GITEA" = "true" ]; then
+            # Gitea runner 在国内，切换为清华 Debian 源（bullseye）加速
+            sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g; s|security.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
+          fi
           apt-get update && apt-get install -y zip
           # 后端 jar
           cp build/libs/FileManager-2.0.1.jar FileManager-${TAG}.jar
