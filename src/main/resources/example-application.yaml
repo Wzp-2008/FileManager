@@ -5,13 +5,15 @@ server:
     key-store-type: PKCS12 # SSL 密钥类型
     key-store-password: "" # SSL 密钥密码
 spring:
-  # 数据库配置
+  # 数据库配置（默认使用 PostgreSQL，推荐）
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/fsv2 # 数据库配置
-    # 或使用PostgreSQL（请取消下面三行注释）:
-    # url: jdbc:postgresql://127.0.0.1:5432/fsv2
+    url: jdbc:postgresql://127.0.0.1:5432/fsv2 # 数据库配置
+    druid:
+      db-type: postgresql # 不要修改！此配置用于识别 PostgreSQL
+    # 仍可使用 MySQL（不推荐，后续可能不再维护）：
+    # url: jdbc:mysql://127.0.0.1:3306/fsv2
     # druid:
-    #  db-type: postgresql
+    #   db-type: mysql
     username: "change-me" # 数据库用户名
     password: "change-me" # 数据库密码
   data:

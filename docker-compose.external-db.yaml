@@ -1,0 +1,38 @@
+# ============================================================
+# 精简版：连接你已有的 PostgreSQL 和 Redis，只启动应用容器
+# ------------------------------------------------------------
+# 使用方式：
+#   1. cp .env.example .env
+#   2. 修改 .env 中的 POSTGRES_HOST / REDIS_HOST 等指向你的数据库
+#   3. docker compose -f docker-compose.external-db.yaml up -d
+# ============================================================
+services:
+  file-manager:
+    image: ${IMAGE:-wzpa/file-manager:2.0.0}
+    restart: unless-stopped
+    ports:
+      - "${PORT:-23456}:8080"
+    environment:
+      # 主数据库（PostgreSQL）
+      # 若数据库部署在宿主机上，POSTGRES_HOST 保持默认 host.docker.internal 即可
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-host.docker.internal}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-fsv2}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-filemanager}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      SPRING_DATASOURCE_DRUID_DB_TYPE: postgresql # 不要修改！此配置用于识别 PostgreSQL
+      # 仍可使用 MySQL：将上方 URL 改为 jdbc:mysql://...，并删除本行 db-type 配置（不推荐，后续可能不再维护）
+      # Redis
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST:-host.docker.internal}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT:-6379}
+      SPRING_DATA_REDIS_DATABASE: 1
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-change-me}
+      # 最大文件大小
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 100GB
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 100GB
+      # 系统配置
+      WZP_FILEMANAGER_SAVE_PATH: /file
+      WZP_FILEMANAGER_HMAC_KEY: ${HMAC_KEY:-change-this-to-a-random-secret}
+    volumes:
+      - ./file:/file # 改前面的 ./file 可更换文件存储位置
+    # 让容器内的 host.docker.internal 指向宿主机（Linux 必需，Docker Desktop 默认已存在）
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

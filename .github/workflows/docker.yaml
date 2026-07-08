@@ -1,0 +1,157 @@
+name: "Docker Release"
+
+# 打 tag 时触发，自动构建多架构 Docker 镜像并推送到 Docker Hub（仅 Gitea）
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    # 仅在 Gitea 上运行（GitHub 上不触发此流程）
+    if: ${{ github.server_url != 'https://github.com' }}
+
+    env:
+      IS_GITEA: ${{ github.server_url != 'https://github.com' }}
+
+    steps:
+      # 1) 检出当前分支（后端）
+      - name: Checkout backend
+        uses: actions/checkout@v5
+
+      # 2) 额外检出前端分支 v2-web 到 frontend-src 目录
+      - name: Checkout frontend (v2-web)
+        uses: actions/checkout@v5
+        with:
+          ref: v2-web
+          path: frontend-src
+
+      - name: Set Gradle Mirror (Gitea only)
+        if: env.IS_GITEA == 'true'
+        env:
+          # 从 GitHub 配置变量或 Secret 中取出，暴露为环境变量
+          PRIVATE_MVN_REPO: ${{ vars.PRIVATE_MVN_REPO }}
+        run: |
+          mkdir -p ~/.gradle
+          cat > ~/.gradle/init.gradle << EOF
+          // 阿里云gradle插件镜像仓库地址
+          final PLUGIN_SOURCE = "https://maven.aliyun.com/repository/gradle-plugin"
+          // 阿里云maven镜像仓库地址
+          final PUBLIC_REPOSITORY = "https://maven.aliyun.com/repository/public"
+          // 阿里云google镜像仓库地址
+          final GOOGLE_REPOSITORY = "https://maven.aliyun.com/repository/google"
+          // 私有仓库地址
+          final PRIVATE_REPO = "${PRIVATE_MVN_REPO}"
+
+          gradle.settingsEvaluated { settings ->
+              settings.pluginManagement.repositories { repos ->
+                  repos.maven { url PRIVATE_REPO }
+                  repos.maven { url PLUGIN_SOURCE }
+                  repos.maven { url GOOGLE_REPOSITORY }
+                  repos.gradlePluginPortal()
+                  repos.mavenCentral()
+              }
+
+              settings.dependencyResolutionManagement { drm ->
+                  drm.repositories { repos ->
+                      repos.maven { url PRIVATE_REPO }
+                      repos.maven { url PUBLIC_REPOSITORY }
+                      repos.maven { url GOOGLE_REPOSITORY }
+                      repos.google()
+                      repos.mavenCentral()
+                  }
+              }
+          }
+          EOF
+
+      - name: Cache Gradle files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ env.IS_GITEA }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-${{ env.IS_GITEA }}-
+            ${{ runner.os }}-gradle-
+
+      - name: Cache Bun files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/cache
+          key: ${{ runner.os }}-bun-${{ env.IS_GITEA }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-${{ env.IS_GITEA }}-
+            ${{ runner.os }}-bun-
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set npm CN Mirror (Gitea only)
+        if: env.IS_GITEA == 'true'
+        run: npm config set registry https://registry.npmmirror.com
+
+      - name: Setup bun
+        run: npm install bun
+
+      - name: Build Frontend
+        working-directory: frontend-src
+        run: |
+          npx bun i
+          npx bun run build
+
+      # 去掉 sourcemap，减小镜像体积
+      - name: Remove frontend sourcemaps
+        run: find frontend-src/dist -type f -name '*.map' -delete
+
+      # ===== 后端构建 =====
+      - name: Setup Executable Permission
+        run: chmod +x gradlew
+
+      - name: Build With Gradle
+        run: ./gradlew bootJar --no-daemon --parallel --build-cache --no-scan
+
+      # ===== Docker 多架构构建 & 推送 =====
+      # 需要在 Gitea 仓库 Settings -> Secrets 配置：
+      #   DOCKERHUB_USERNAME - Docker Hub 用户名
+      #   DOCKERHUB_TOKEN    - Docker Hub Access Token（非登录密码）
+      # 可选：在 Settings -> Variables 配置 DOCKERHUB_IMAGE 覆盖默认镜像名（默认 wzpa/file-manager）
+      # 注意：runner 需能访问 docker daemon（host executor 或挂载 socket 的 docker executor）
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.DOCKERHUB_IMAGE || 'wzpa/file-manager' }}
+          # tag v2.0.0 -> 镜像 tag 2.0.0，并打 latest
+          tags: |
+            type=match,pattern=v(.*),group=1
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          # 若 runner 不支持 QEMU 跨架构，可改为只构建 linux/amd64
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

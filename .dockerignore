@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+.github/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Gradle 缓存与构建中间产物
+# 保留 build/libs/ 下的 jar 供 Dockerfile 打包
+.gradle/
+build/
+!build/libs/
+
+# 前端依赖（dist 由 CI 构建后 COPY 进镜像）
+frontend-src/node_modules/
+node_modules/
+
+# 本地运行数据 / 日志 / 密钥（切勿进入镜像）
+file/
+*.log
+.env
+.env.*
+
+# 文档
+*.md
+LICENSE
+
+# Docker 元文件
+Dockerfile
+.dockerignore
+docker-compose*.yaml
