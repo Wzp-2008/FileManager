@@ -225,6 +225,7 @@ public class FileService {
                     }
                 } catch (Exception e) {
                     log.error("error while processing file", e);
+                    return Result.failed(HttpStatus.INTERNAL_SERVER_ERROR, "文件上传失败");
                 } finally {
                     tryDeleteOrDeleteOnExit(tmpFile);
                 }
