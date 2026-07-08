@@ -23,7 +23,7 @@
 > [!NOTE]
 > **PostgreSQL is recommended.** MySQL remains usable but will likely be deprecated in future releases. PostgreSQL is preferred for its superior performance, better compliance with standard SQL syntax, and stronger commitment to open source.
 
-## 🚀 Quick Start (Docker)
+## 🚀 Quick Start
 
 Two compose files are provided. Copy the environment template first, then pick the one that fits your setup:
 
