@@ -116,6 +116,8 @@ jobs:
         env:
           TAG: ${{ github.ref_name }}
         run: |
+          # act 容器镜像未预装 zip，需先安装
+          apt-get update && apt-get install -y zip
           # 后端 jar
           cp build/libs/FileManager-2.0.0.jar FileManager-${TAG}.jar
           # 前端 dist 去掉 sourcemap
