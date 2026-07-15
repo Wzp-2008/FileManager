@@ -92,6 +92,8 @@ public class AuthorizationUtils {
         if (userVo == null) {
             throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "用户不存在"));
         }
+        // 清除用户密码列
+        userVo.clearPassword();
         // 验证权限是否符合
         this.checkPermission(userVo, authorizationRequired);
         return userVo;

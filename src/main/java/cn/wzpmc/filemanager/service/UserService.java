@@ -201,6 +201,8 @@ public class UserService {
             statisticsService.insertAction(Actions.LOGIN, JSONObject.of("fingerprint", fingerprint, "address", address, "status", "error", "msg", "用户不存在或被封禁"));
             return Result.failed(HttpStatus.NOT_FOUND, "用户不存在或被封禁");
         }
+        // 清除用户密码
+        userVo.clearPassword();
         String token = jwtUtils.createToken(userId);
         response.addHeader("Add-Authorization", token);
         statisticsService.insertAction(userVo, Actions.LOGIN, JSONObject.of("fingerprint", fingerprint, "address", address, "status", "success"));
