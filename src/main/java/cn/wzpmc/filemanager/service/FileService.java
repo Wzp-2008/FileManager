@@ -828,7 +828,7 @@ public class FileService {
         }
 
         public <T> Optional<Result<T>> checkIllegal() {
-            if (name.length() > 120 || ext.length() > 40) {
+            if (name.length() > 80 || ext.length() > 40) {
                 return Optional.of(Result.failed(HttpStatus.CONTENT_TOO_LARGE, "文件名过长，无法上传！"));
             }
             if (name.isEmpty()) {
