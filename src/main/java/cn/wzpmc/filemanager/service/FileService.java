@@ -459,6 +459,11 @@ public class FileService {
                 log.error("遇到无法解析的Range头：{}", range, e);
                 return;
             }
+            if  (min < 0 || max > fileVo.getSize()) {
+                response.setStatus(416);
+                Result.failed(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, "Range头错误！").writeToResponse(response);
+                return;
+            }
             response.setStatus(206);
             response.addHeader("Content-Range", "bytes " + min + "-" + max + "/" + size);
             response.addHeader("Accept-Ranges", "bytes");
