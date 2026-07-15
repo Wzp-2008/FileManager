@@ -92,7 +92,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ vars.DOCKERHUB_IMAGE || 'wzpa/file-manager' }}
-          # tag v2.0.1 -> 镜像 tag 2.0.1，并打 latest
+          # tag v2.0.2 -> 镜像 tag 2.0.2，并打 latest
           tags: |
             type=match,pattern=v(.*),group=1
             type=raw,value=latest

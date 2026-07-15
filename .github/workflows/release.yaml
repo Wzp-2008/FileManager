@@ -123,13 +123,13 @@ jobs:
           fi
           apt-get update && apt-get install -y zip
           # 后端 jar
-          cp build/libs/FileManager-2.0.1.jar FileManager-${TAG}.jar
+          cp build/libs/FileManager-2.0.2.jar FileManager-${TAG}.jar
           # 前端 dist 去掉 sourcemap
           find frontend-src/dist -type f -name '*.map' -delete
           # 组合包：jar + 前端静态资源，打包成 zip
           rm -rf release
           mkdir -p release/static
-          cp build/libs/FileManager-2.0.1.jar release/FileManager.jar
+          cp build/libs/FileManager-2.0.2.jar release/FileManager.jar
           cp -r frontend-src/dist/* release/static/
           (cd release && zip -r ../FileManager-with-static-${TAG}.zip .)
           # 前端单独包（给只更新前端的场景）
