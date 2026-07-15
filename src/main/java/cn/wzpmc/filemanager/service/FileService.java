@@ -380,6 +380,7 @@ public class FileService {
     @Transactional
     public Result<Void> delete(long id, FileType type, UserVo user, String address) {
         if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可删除");
+        // TODO 删除分块文件
         long actorId = user.getId();
         if (type.equals(FileType.FILE)) {
             FileVo fileVo = fileMapper.selectOneById(id);
@@ -803,6 +804,16 @@ public class FileService {
         }
     }
 
+    /**
+     * 检查给定的字符串是否含有. \ / 三类特殊路径字符
+     *
+     * @param text 待检查文字
+     * @return 是否含有
+     */
+    private static boolean hasPathChar(String text) {
+        return text.contains(".") || text.contains("\\") || text.contains("/");
+    }
+
     private record FilenameDescription(String name, String ext) {
         private FilenameDescription(String name, String ext) {
             this.name = name;
@@ -819,6 +830,9 @@ public class FileService {
             }
             if (name.isEmpty()) {
                 return Optional.of(Result.failed(HttpStatus.BAD_REQUEST, "文件名为空，无法上传！"));
+            }
+            if (hasPathChar(name) || hasPathChar(ext)) {
+                return Optional.of(Result.failed(HttpStatus.BAD_REQUEST, "文件名不合法"));
             }
             return Optional.empty();
         }
