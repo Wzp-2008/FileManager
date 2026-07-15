@@ -35,6 +35,33 @@ public class AuthorizationUtils {
     private final UserMapper userMapper;
 
     /**
+     * 检查传入的用户是否符合注解所要求的权限，在权限不满足时抛出异常
+     *
+     * @param user       用户对象
+     * @param annotation 鉴权注解
+     * @throws ResponseException 当权限不满足时抛出
+     */
+    private void checkPermission(UserVo user, AuthorizationRequired annotation) throws ResponseException {
+        // 获取用户的类型
+        Auth auth = user.getAuth();
+        // 获取注解所需要的用户等级
+        Auth level = annotation.level();
+        // 若要求强制等级则必须一致
+        if (annotation.force()) {
+            if (auth.value == level.value) {
+                return;
+            }
+        } else {
+            // 否则比要求的等级高即可
+            if (auth.value >= level.value) {
+                return;
+            }
+        }
+        // 如果条件不满则抛出权限不足错误
+        throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "权限不足"));
+    }
+
+    /**
      * 根据Authorization头的值获取用户对象
      *
      * @param header                Authorization头
@@ -52,8 +79,6 @@ public class AuthorizationUtils {
             throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "token格式错误"));
         }
         log.info("认证{}使用token{}", authorizationRequired, header.substring(0, 5) + "***" + header.substring(header.length() - 5));
-        // 获取注解所需要的用户等级
-        Auth level = authorizationRequired.level();
         // 根据token获取对应用户ID
         Optional<Integer> user = this.jwtUtils.getUser(header);
         // 若找不到对应的用户则判断token已过期
@@ -67,21 +92,9 @@ public class AuthorizationUtils {
         if (userVo == null) {
             throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "用户不存在"));
         }
-        // 获取用户的类型
-        Auth auth = userVo.getAuth();
-        // 若要求强制等级则必须一致
-        if (authorizationRequired.force()) {
-            if (auth.value == level.value) {
-                return userVo;
-            }
-        } else {
-            // 否则比要求的等级高即可
-            if (auth.value >= level.value) {
-                return userVo;
-            }
-        }
-        // 如果条件不满则抛出权限不足错误
-        throw new ResponseException(Result.failed(HttpStatus.UNAUTHORIZED, "权限不足"));
+        // 验证权限是否符合
+        this.checkPermission(userVo, authorizationRequired);
+        return userVo;
     }
 
     /**
@@ -135,6 +148,7 @@ public class AuthorizationUtils {
             if (nativeResponse instanceof HttpServletResponse resp) {
                 resp.addHeader("Add-Authorization", jwtUtils.createToken(user.getId()));
             }
+            this.checkPermission(user, authorizationRequired);
             return user;
         }
     }
@@ -159,6 +173,7 @@ public class AuthorizationUtils {
         } catch (TokenExpireAuthorizationException ignored) {
             UserVo user = tryGetUserFromExpired(authorization);
             response.addHeader("Add-Authorization", jwtUtils.createToken(user.getId()));
+            this.checkPermission(user, authorizationRequired);
             return true;
         }
     }
