@@ -753,6 +753,9 @@ public class FileService {
         if (newParentId == null) {
             newParentId = folderVo.getParent();
         }
+        if (folderVo.getId().equals(newParentId)) {
+            return Result.failed(HttpStatus.BAD_REQUEST, "文件夹已存在！");
+        }
         if (folderMapper.selectCountByCondition(FOLDER_VO.NAME.eq(newFilename).and(FOLDER_VO.PARENT.eq(newParentId))) > 0) {
             return Result.failed(HttpStatus.CONFLICT, "文件已存在！");
         }
