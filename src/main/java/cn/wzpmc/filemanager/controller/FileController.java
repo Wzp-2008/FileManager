@@ -217,9 +217,8 @@ public class FileController {
      * @return 保存后的文件
      */
     @PutMapping("/chunk/save")
-    @AuthorizationRequired
-    public Result<FileVo> saveFile(@RequestBody SaveChunksRequest request) {
-        return fileService.saveFile(request);
+    public Result<FileVo> saveFile(@AuthorizationRequired UserVo user, @RequestBody SaveChunksRequest request) {
+        return fileService.saveFile(user, request);
     }
 
     /**

@@ -64,10 +64,7 @@ import java.security.MessageDigest;
 import java.sql.Connection;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
@@ -575,7 +572,7 @@ public class FileService {
         if (block.getSize() > MAX_CHUNK_SIZE) {
             return Result.failed(HttpStatus.CONTENT_TOO_LARGE, "区块大小过大，请分块后传输");
         }
-        SizeStatisticsDigestInputStream sizeStatisticsDigestInputStream = new SizeStatisticsDigestInputStream(block.getInputStream(), DigestUtils.getSha1Digest());
+        SizeStatisticsDigestInputStream sizeStatisticsDigestInputStream = new SizeStatisticsDigestInputStream(block.getInputStream(), DigestUtils.getMd5Digest());
         byte[] bytes = sizeStatisticsDigestInputStream.readAllBytes();
         long size = sizeStatisticsDigestInputStream.getSize();
         sizeStatisticsDigestInputStream.close();
@@ -605,7 +602,7 @@ public class FileService {
 
     @SneakyThrows
     @Transactional
-    public Result<FileVo> saveFile(SaveChunksRequest chunks) {
+    public Result<FileVo> saveFile(UserVo user, SaveChunksRequest chunks) {
         if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可上传");
         FilenameDescription filename = getFilename(chunks.getFilename());
         Optional<Result<FileVo>> illegalResult = filename.checkIllegal();
@@ -625,7 +622,7 @@ public class FileService {
         assert chunksVos != null;
         List<ChunksVo> sortedChunks = chunkIds.stream()
                 .map(e -> chunksVos.stream()
-                        .filter(a -> a.getId() == e)
+                        .filter(a -> Objects.equals(a.getId(), e))
                         .findFirst()
                         .orElseThrow(() -> new ResponseException(Result.failed(HttpStatus.NOT_FOUND, "已上传的区块找不到")))
                 ).toList();
@@ -652,7 +649,7 @@ public class FileService {
 
         fileVo.setName(name);
         fileVo.setExt(ext);
-        fileVo.setUploader(-2);
+        fileVo.setUploader(user.getId());
         fileVo.setFolder(folderId);
         fileVo.setMime(mime);
         fileVo.setHash(sha512);
@@ -717,16 +714,22 @@ public class FileService {
                 String ext = fileVo.getExt();
                 newFilename = fileVo.getName() + (ext.isEmpty() ? "" : "." + ext);
             }
+            FilenameDescription filenameDescription = getFilename(newFilename);
+            Optional<Result<Boolean>> illegal = filenameDescription.checkIllegal();
+            if (illegal.isPresent()) {
+                return illegal.get();
+            }
             Long newParentId = request.getNewParentId();
             if (newParentId == null) {
                 newParentId = fileVo.getFolder();
             }
-            if (fileMapper.selectCountByCondition(FILE_VO.NAME.eq(newFilename).and(FILE_VO.FOLDER.eq(newParentId))) > 0) {
+            if (fileMapper.selectCountByCondition(FILE_VO.NAME.eq(filenameDescription.name).and(FILE_VO.EXT.eq(filenameDescription.ext)).and(FILE_VO.FOLDER.eq(newParentId))) > 0) {
                 return Result.failed(HttpStatus.CONFLICT, "文件已存在！");
             }
             FileVo targetVo = new FileVo();
             targetVo.setId(originalFileId);
-            targetVo.setName(newFilename);
+            targetVo.setName(filenameDescription.name);
+            targetVo.setExt(filenameDescription.ext);
             targetVo.setFolder(newParentId);
             fileMapper.update(targetVo);
             return Result.success("移动成功");
