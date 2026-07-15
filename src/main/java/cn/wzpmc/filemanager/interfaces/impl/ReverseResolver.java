@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -108,7 +109,7 @@ public class ReverseResolver extends SimplePathResolver {
         // 如果parent找不到就返回空
         if (parent == null) return null;
         // 从所有找到的父级中过滤出当前层ID的文件夹
-        Optional<FolderVo> first = folderVoStream.stream().filter(e -> e.getParent() == parent.getId()).findFirst();
+        Optional<FolderVo> first = folderVoStream.stream().filter(e -> Objects.equals(e.getParent(), parent.getId())).findFirst();
         // 返回
         return first.orElse(null);
     }

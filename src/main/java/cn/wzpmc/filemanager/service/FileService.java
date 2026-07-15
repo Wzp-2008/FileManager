@@ -124,6 +124,16 @@ public class FileService {
         return folderParams;
     }
 
+    /**
+     * 检查给定的字符串是否含有. \ / 三类特殊路径字符
+     *
+     * @param text 待检查文字
+     * @return 是否含有
+     */
+    private static boolean hasPathChar(String text) {
+        return text.contains(".") || text.contains("\\") || text.contains("/");
+    }
+
     @Autowired
     @Lazy
     public void setPathService(FilePathService pathService) {
@@ -459,7 +469,7 @@ public class FileService {
                 log.error("遇到无法解析的Range头：{}", range, e);
                 return;
             }
-            if  (min < 0 || max > fileVo.getSize()) {
+            if (min < 0 || max >= fileVo.getSize() || min > max) {
                 response.setStatus(416);
                 Result.failed(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, "Range头错误！").writeToResponse(response);
                 return;
@@ -810,16 +820,6 @@ public class FileService {
         for (FolderVo childFolder : this.folderMapper.selectListByCondition(FOLDER_VO.PARENT.eq(folderId))) {
             addEntriesToZip(childFolder, zipOutputStream, currentPath + '/' + childFolder.getName());
         }
-    }
-
-    /**
-     * 检查给定的字符串是否含有. \ / 三类特殊路径字符
-     *
-     * @param text 待检查文字
-     * @return 是否含有
-     */
-    private static boolean hasPathChar(String text) {
-        return text.contains(".") || text.contains("\\") || text.contains("/");
     }
 
     private record FilenameDescription(String name, String ext) {

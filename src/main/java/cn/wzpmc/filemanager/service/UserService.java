@@ -224,7 +224,11 @@ public class UserService {
         if (this.isNotMd5(oldPassword) || this.isNotMd5(request.getNewPassword())) {
             return Result.failed(HttpStatus.BAD_REQUEST, "新旧密码需要使用MD5散列哈希");
         }
-        if (!bCryptPasswordEncoder.matches(DigestUtils.sha1Hex(oldPassword), userVo.getPassword())) {
+        UserVo fullUserVo = userMapper.selectOneById(userVo.getId());
+        if (fullUserVo == null) {
+            return Result.failed(HttpStatus.INTERNAL_SERVER_ERROR, "数据库中无法找到用户");
+        }
+        if (!bCryptPasswordEncoder.matches(DigestUtils.sha1Hex(oldPassword), fullUserVo.getPassword())) {
             return Result.failed(HttpStatus.NOT_FOUND, "旧密码错误！");
         }
         UserVo updateEntity = new UserVo();
