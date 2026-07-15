@@ -227,14 +227,14 @@ public class FileService {
                     }
                 } catch (Exception e) {
                     log.error("error while processing file", e);
-                    return Result.failed(HttpStatus.INTERNAL_SERVER_ERROR, "文件上传失败");
+                    throw new ResponseException(Result.failed(HttpStatus.INTERNAL_SERVER_ERROR, "文件上传失败"));
                 } finally {
                     tryDeleteOrDeleteOnExit(tmpFile);
                 }
             }
         }
         if (lastUploadFile == null) {
-            return Result.failed(HttpStatus.BAD_REQUEST, "未找到文件参数");
+            throw new ResponseException(Result.failed(HttpStatus.BAD_REQUEST, "未找到文件参数"));
         }
         return Result.success("上传成功！", lastUploadFile);
     }
