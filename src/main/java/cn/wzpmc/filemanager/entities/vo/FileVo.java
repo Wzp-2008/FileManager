@@ -21,7 +21,7 @@ public class FileVo implements Serializable {
      * 文件ID
      */
     @Id(keyType = KeyType.Auto)
-    private long id;
+    private Long id;
     /**
      * 文件名
      */
@@ -41,15 +41,15 @@ public class FileVo implements Serializable {
     /**
      * 文件的上传者ID
      */
-    private long uploader;
+    private Long uploader;
     /**
      * 文件的父文件夹ID
      */
-    private long folder;
+    private Long folder;
     /**
      * 文件的大小 (bytes)
      */
-    private long size;
+    private Long size;
     /**
      * 文件的上传时间
      */

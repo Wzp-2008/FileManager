@@ -15,7 +15,7 @@ public class ChunksVo {
      * 区块ID
      */
     @Id(keyType = KeyType.Auto)
-    private long id;
+    private Long id;
     /**
      * 区块哈希值
      */
@@ -23,5 +23,5 @@ public class ChunksVo {
     /**
      * 区块大小
      */
-    private long size;
+    private Long size;
 }

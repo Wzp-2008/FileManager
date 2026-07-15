@@ -20,5 +20,5 @@ public class FingerprintVo {
     /**
      * 用户ID
      */
-    private long userId;
+    private Long userId;
 }

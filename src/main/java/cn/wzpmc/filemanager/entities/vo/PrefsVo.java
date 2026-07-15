@@ -32,5 +32,5 @@ public class PrefsVo implements Serializable {
      * 反向排序
      */
     @Column("sort_reverse")
-    private boolean sortReverse;
+    private Boolean sortReverse;
 }

@@ -20,7 +20,7 @@ public class FolderVo {
      * 文件夹ID
      */
     @Id(keyType = KeyType.Auto)
-    private long id;
+    private Long id;
     /**
      * 文件夹名
      */
@@ -28,11 +28,11 @@ public class FolderVo {
     /**
      * 文件夹的父文件夹ID
      */
-    private long parent;
+    private Long parent;
     /**
      * 文件夹的创建者
      */
-    private long creator;
+    private Long creator;
     /**
      * 文件夹的创建时间
      */

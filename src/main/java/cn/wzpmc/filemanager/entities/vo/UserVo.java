@@ -22,7 +22,7 @@ public class UserVo {
      * 用户ID
      */
     @Id(keyType = KeyType.Auto)
-    private long id;
+    private Long id;
     /**
      * 用户名
      */
@@ -42,7 +42,7 @@ public class UserVo {
      * `尽管封了你也看不到就是了`
      */
     @Column(isLogicDelete = true, onInsertValue = "false")
-    private boolean banned;
+    private Boolean banned;
     /**
      * 用户偏好设置
      */
