@@ -42,8 +42,10 @@ public class SerialFileInputStream extends InputStream {
         int read = currentFileStream.read();
         if (read == -1) {
             filePointer++;
-            File file = files.get(filePointer);
-            if (file == null) {
+            File file;
+            try {
+                file = files.get(filePointer);
+            } catch (IndexOutOfBoundsException ignored) {
                 return -1;
             }
             currentFileStream.close();
@@ -93,6 +95,9 @@ public class SerialFileInputStream extends InputStream {
     @Override
     public synchronized void reset() throws IOException {
         this.filePointer = 0;
+        if (currentFileStream != null) {
+            currentFileStream.close();
+        }
         currentFileStream = null;
     }
 
