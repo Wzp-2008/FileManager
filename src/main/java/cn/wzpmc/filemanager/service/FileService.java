@@ -368,8 +368,11 @@ public class FileService {
     }
 
     public void deleteFolder(long id) {
-        fileMapper.selectListByCondition(FILE_VO.FOLDER.eq(id)).forEach(this::deleteFile);
+        List<FileVo> files = fileMapper.selectListByCondition(FILE_VO.FOLDER.eq(id));
+        // 首先删除文件夹中的文件记录
         fileMapper.deleteByCondition(FILE_VO.FOLDER.eq(id));
+        // 再尝试物理删除文件
+        files.forEach(this::deleteFile);
         folderMapper.selectListByCondition(FOLDER_VO.PARENT.eq(id)).stream().map(FolderVo::getId).forEach(this::deleteFolder);
         folderMapper.deleteById(id);
     }
