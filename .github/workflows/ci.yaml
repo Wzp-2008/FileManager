@@ -109,7 +109,7 @@ jobs:
 
       - name: Prepare backend artifact
         run: |
-          cp build/libs/FileManager-2.0.2.jar FileManager.jar
+          cp build/libs/FileManager-2.0.3.jar FileManager.jar
 
       # ===== 上传产物 =====
       - name: Upload backend jar

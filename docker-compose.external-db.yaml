@@ -8,7 +8,7 @@
 # ============================================================
 services:
   file-manager:
-    image: ${IMAGE:-wzpa/file-manager:2.0.2}
+    image: ${IMAGE:-wzpa/file-manager:2.0.3}
     restart: unless-stopped
     ports:
       - "${PORT:-23456}:8080"
