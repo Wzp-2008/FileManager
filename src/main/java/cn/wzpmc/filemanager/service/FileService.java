@@ -14,6 +14,7 @@ import cn.wzpmc.filemanager.entities.files.enums.SortField;
 import cn.wzpmc.filemanager.entities.statistics.enums.Actions;
 import cn.wzpmc.filemanager.entities.user.enums.Auth;
 import cn.wzpmc.filemanager.entities.vo.*;
+import cn.wzpmc.filemanager.entities.vo.table.FolderVoTableDef;
 import cn.wzpmc.filemanager.exceptions.ResponseException;
 import cn.wzpmc.filemanager.interfaces.FilePathService;
 import cn.wzpmc.filemanager.mapper.ChunkFileMapper;
@@ -179,11 +180,22 @@ public class FileService {
         return Optional.empty();
     }
 
+    private void checkFolderExists(long folderId) {
+        if (folderId == -1) {
+            return;
+        }
+        if (this.folderMapper.selectCountByCondition(FolderVoTableDef.FOLDER_VO.ID.eq(folderId)) == 1) {
+            return;
+        }
+        throw new ResponseException(Result.failed(HttpStatus.NOT_FOUND, "不存在的父文件夹"));
+    }
+
     @SneakyThrows
     @Transactional
     public Result<FileVo> simpleUpload(MultipartHttpServletRequest request, UserVo user, String address) {
         if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可上传");
         long folderParams = getFolderParams(request);
+        checkFolderExists(folderParams);
         ServletRequestContext servletRequestContext = new ServletRequestContext(request);
         FileUpload upload = new FileUpload();
         FileItemIteratorImpl fileItemIterator = new FileItemIteratorImpl(upload, servletRequestContext);
@@ -338,6 +350,7 @@ public class FileService {
         if (properties.isReadonly()) return Result.failed(HttpStatus.LOCKED, "只读模式，不可创建");
         String name = request.getName();
         long parent = request.getParent();
+        checkFolderExists(parent);
         if (name.isEmpty()) {
             return Result.failed(HttpStatus.BAD_REQUEST, "文件名不可为空！");
         }
