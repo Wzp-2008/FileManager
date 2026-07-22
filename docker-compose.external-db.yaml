@@ -33,6 +33,9 @@ services:
       WZP_FILEMANAGER_HMAC_KEY: ${HMAC_KEY:-change-this-to-a-random-secret}
     volumes:
       - ./file:/file # 改前面的 ./file 可更换文件存储位置
+      # 修复时区不同的问题
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     # 让容器内的 host.docker.internal 指向宿主机（Linux 必需，Docker Desktop 默认已存在）
     extra_hosts:
       - "host.docker.internal:host-gateway"
