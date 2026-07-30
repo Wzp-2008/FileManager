@@ -21,7 +21,8 @@
 - **一行命令 Docker 部署**
 
 > [!NOTE]
-> **推荐使用 PostgreSQL。** MySQL 仍可使用，但后续版本很可能不再维护。优先选择 PostgreSQL 是因其更优异的性能、对标准 SQL 语法的更好兼容，以及更坚定的开源立场。
+> **推荐使用 PostgreSQL。** MySQL 仍可使用，但后续版本很可能不再维护。优先选择 PostgreSQL 是因其更优异的性能、对标准 SQL
+语法的更好兼容，以及更坚定的开源立场。
 
 ## 🚀 快速开始
 
@@ -42,7 +43,8 @@ docker compose up -d
 
 ### 方案 B - 接入已有数据库
 
-如果你已有 PostgreSQL 和 Redis，使用精简版 compose。在 `.env` 中将 `POSTGRES_HOST` / `REDIS_HOST` 指向你的数据库（数据库在宿主机上时用 `host.docker.internal`）：
+如果你已有 PostgreSQL 和 Redis，使用精简版 compose。在 `.env` 中将 `POSTGRES_HOST` / `REDIS_HOST` 指向你的数据库（数据库在宿主机上时用
+`host.docker.internal`）：
 
 ```bash
 docker compose -f docker-compose.external-db.yaml up -d
@@ -54,13 +56,13 @@ docker compose -f docker-compose.external-db.yaml up -d
 
 所有运行时配置集中在 `.env`，关键变量：
 
-| 变量           | 说明                                          | 默认值                      |
-|--------------|---------------------------------------------|--------------------------|
-| `IMAGE`      | 拉取的 Docker 镜像                               | `wzpa/file-manager:2.0.3` |
-| `PORT`       | 宿主机端口（容器内固定 8080）                           | `23456`                  |
-| `POSTGRES_*` | PostgreSQL 连接 / 初始化                         | 见 `.env.example`         |
-| `REDIS_*`    | Redis 连接                                    | 见 `.env.example`         |
-| `HMAC_KEY`   | JWT 签名密钥 - **必须修改**，不要用 `RANDOM`（重启会导致用户掉线） | -                        |
+| 变量         | 说明                                                               | 默认值                    |
+|--------------|--------------------------------------------------------------------|---------------------------|
+| `IMAGE`      | 拉取的 Docker 镜像                                                 | `wzpa/file-manager:2.0.3` |
+| `PORT`       | 宿主机端口（容器内固定 8080）                                      | `23456`                   |
+| `POSTGRES_*` | PostgreSQL 连接 / 初始化                                           | 见 `.env.example`         |
+| `REDIS_*`    | Redis 连接                                                         | 见 `.env.example`         |
+| `HMAC_KEY`   | JWT 签名密钥 - **必须修改**，不要用 `RANDOM`（重启会导致用户掉线） | -                         |
 
 完整列表见 [`.env.example`](.env.example)。
 
@@ -72,8 +74,10 @@ docker compose -f docker-compose.external-db.yaml up -d
 
 ### 配置文件分层
 
-- `application.yaml` — 随镜像/产物内置的固定基础配置（数据源类型、mybatis-flex type-handlers、multipart resolve-lazily、application name），一般无需修改
-- `example-application.yaml` — 本地开发参考模板，包含需要用户填写的配置（数据库账号密码、Redis、hmac-key、save-path）。本地运行时复制为 `application.yaml` 并按需修改
+- `application.yaml` — 随镜像/产物内置的固定基础配置（数据源类型、mybatis-flex type-handlers、multipart
+  resolve-lazily、application name），一般无需修改
+- `example-application.yaml` — 本地开发参考模板，包含需要用户填写的配置（数据库账号密码、Redis、hmac-key、save-path）。本地运行时复制为
+  `application.yaml` 并按需修改
 
 详见 [CONTRIBUTING_CN.md](CONTRIBUTING_CN.md) 的「本地运行」一节。
 

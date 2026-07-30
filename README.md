@@ -21,7 +21,9 @@
 - **One-command Docker deployment**
 
 > [!NOTE]
-> **PostgreSQL is recommended.** MySQL remains usable but will likely be deprecated in future releases. PostgreSQL is preferred for its superior performance, better compliance with standard SQL syntax, and stronger commitment to open source.
+> **PostgreSQL is recommended.** MySQL remains usable but will likely be deprecated in future releases. PostgreSQL is
+preferred for its superior performance, better compliance with standard SQL syntax, and stronger commitment to open
+source.
 
 ## 🚀 Quick Start
 
@@ -42,7 +44,8 @@ docker compose up -d
 
 ### Option B - Use your existing database
 
-If you already have PostgreSQL and Redis running, use the slim compose file. Set `POSTGRES_HOST` / `REDIS_HOST` in `.env` to point at your databases (use `host.docker.internal` when they run on the host machine):
+If you already have PostgreSQL and Redis running, use the slim compose file. Set `POSTGRES_HOST` / `REDIS_HOST` in
+`.env` to point at your databases (use `host.docker.internal` when they run on the host machine):
 
 ```bash
 docker compose -f docker-compose.external-db.yaml up -d
@@ -54,13 +57,13 @@ The service is available at `http://localhost:${PORT:-23456}`.
 
 All runtime config lives in `.env`. Key variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `IMAGE` | Docker image to pull | `wzpa/file-manager:2.0.3` |
-| `PORT` | Host port mapped to container's 8080 | `23456` |
-| `POSTGRES_*` | PostgreSQL connection / initialization | see `.env.example` |
-| `REDIS_*` | Redis connection | see `.env.example` |
-| `HMAC_KEY` | JWT signing key - **must be changed**; do not use `RANDOM` (sessions break on restart) | - |
+| Variable     | Description                                                                            | Default                   |
+|--------------|----------------------------------------------------------------------------------------|---------------------------|
+| `IMAGE`      | Docker image to pull                                                                   | `wzpa/file-manager:2.0.3` |
+| `PORT`       | Host port mapped to container's 8080                                                   | `23456`                   |
+| `POSTGRES_*` | PostgreSQL connection / initialization                                                 | see `.env.example`        |
+| `REDIS_*`    | Redis connection                                                                       | see `.env.example`        |
+| `HMAC_KEY`   | JWT signing key - **must be changed**; do not use `RANDOM` (sessions break on restart) | -                         |
 
 See [`.env.example`](.env.example) for the full list.
 
@@ -72,8 +75,10 @@ See [`.env.example`](.env.example) for the full list.
 
 ### Configuration Layout
 
-- `application.yaml` — built-in baseline config (datasource type, mybatis-flex type-handlers, multipart resolve-lazily, application name); generally no need to touch
-- `example-application.yaml` — local-dev template with user-filled values (DB credentials, Redis, hmac-key, save-path). Copy it to `application.yaml` and edit for local runs
+- `application.yaml` — built-in baseline config (datasource type, mybatis-flex type-handlers, multipart resolve-lazily,
+  application name); generally no need to touch
+- `example-application.yaml` — local-dev template with user-filled values (DB credentials, Redis, hmac-key, save-path).
+  Copy it to `application.yaml` and edit for local runs
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the local run steps.
 
