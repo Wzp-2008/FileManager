@@ -126,13 +126,13 @@ public class FileService {
     }
 
     /**
-     * 检查给定的字符串是否含有. \ / 三类特殊路径字符
+     * 检查给定的字符串是否含有 \ / 特殊路径字符
      *
      * @param text 待检查文字
      * @return 是否含有
      */
     private static boolean hasPathChar(String text) {
-        return text.contains(".") || text.contains("\\") || text.contains("/");
+        return text.contains("\\") || text.contains("/");
     }
 
     @Autowired
