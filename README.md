@@ -59,7 +59,7 @@ All runtime config lives in `.env`. Key variables:
 
 | Variable     | Description                                                                            | Default                   |
 |--------------|----------------------------------------------------------------------------------------|---------------------------|
-| `IMAGE`      | Docker image to pull                                                                   | `wzpa/file-manager:2.0.3` |
+| `IMAGE`      | Docker image to pull                                                                   | `wzpa/file-manager:2.0.4` |
 | `PORT`       | Host port mapped to container's 8080                                                   | `23456`                   |
 | `POSTGRES_*` | PostgreSQL connection / initialization                                                 | see `.env.example`        |
 | `REDIS_*`    | Redis connection                                                                       | see `.env.example`        |
